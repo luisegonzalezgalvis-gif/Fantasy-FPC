@@ -1,0 +1,2499 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Trophy, Users, ShoppingBag, Shield, Activity, Plus, 
+  Copy, Check, Search, DollarSign, Award, 
+  AlertCircle, Sparkles, 
+  UserPlus, Zap, LogOut,
+  Shirt, TrendingUp, BarChart3, Lock, Unlock, Sun, Moon, Flame
+} from 'lucide-react';
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth, 
+  signInWithCustomToken, 
+  signInAnonymously, 
+  onAuthStateChanged 
+} from 'firebase/auth';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  onSnapshot 
+} from 'firebase/firestore';
+
+// ============================================================================
+// CONFIGURACIÓN PARA VERCEL + FIREBASE
+// Cuando despliegues en Vercel, pega tus credenciales de Firebase aquí abajo:
+// ============================================================================
+const VERCEL_FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+
+const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config)
+  ? JSON.parse(__firebase_config)
+  : VERCEL_FIREBASE_CONFIG;
+
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'fpc-fantasy-colombia';
+const isFirebaseConfigured = Boolean(firebaseConfig && firebaseConfig.apiKey);
+
+const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
+const auth = app ? getAuth(app) : null;
+const db = app ? getFirestore(app) : null;
+
+const FPC_TEAMS = [
+  { id: 'buc', name: 'Atlético Bucaramanga', short: 'BUC', primary: '#FACC15', secondary: '#15803D', text: '#064E3B' },
+  { id: 'nal', name: 'Atlético Nacional', short: 'NAL', primary: '#16A34A', secondary: '#FFFFFF', text: '#FFFFFF' },
+  { id: 'mil', name: 'Millonarios FC', short: 'MIL', primary: '#1D4ED8', secondary: '#FFFFFF', text: '#FFFFFF' },
+  { id: 'ame', name: 'América de Cali', short: 'AME', primary: '#DC2626', secondary: '#FFFFFF', text: '#FFFFFF' },
+  { id: 'jun', name: 'Junior FC', short: 'JUN', primary: '#EF4444', secondary: '#1E3A8A', text: '#FFFFFF' },
+  { id: 'med', name: 'Ind. Medellín', short: 'MED', primary: '#dc2626', secondary: '#1d4ed8', text: '#FFFFFF' },
+  { id: 'sfe', name: 'Ind. Santa Fe', short: 'SFE', primary: '#B91C1C', secondary: '#FFFFFF', text: '#FFFFFF' },
+  { id: 'cal', name: 'Deportivo Cali', short: 'CAL', primary: '#15803D', secondary: '#FFFFFF', text: '#FFFFFF' },
+  { id: 'tol', name: 'Deportes Tolima', short: 'TOL', primary: '#7F1D1D', secondary: '#FBBF24', text: '#FEF08A' },
+  { id: 'onc', name: 'Once Caldas', short: 'ONC', primary: '#F8FAFC', secondary: '#0F172A', text: '#0F172A' },
+  { id: 'per', name: 'Deportivo Pereira', short: 'PER', primary: '#EAB308', secondary: '#DC2626', text: '#7F1D1D' },
+  { id: 'equ', name: 'La Equidad', short: 'EQU', primary: '#22C55E', secondary: '#FFFFFF', text: '#FFFFFF' },
+  { id: 'agu', name: 'Águilas Doradas', short: 'AGU', primary: '#D97706', secondary: '#FEF3C7', text: '#FFFFFF' },
+  { id: 'pas', name: 'Deportivo Pasto', short: 'PAS', primary: '#1E40AF', secondary: '#DC2626', text: '#FFFFFF' },
+  { id: 'for', name: 'Fortaleza CEIF', short: 'FOR', primary: '#0284C7', secondary: '#EF4444', text: '#FFFFFF' },
+  { id: 'boy', name: 'Boyacá Chicó', short: 'BOY', primary: '#EA580C', secondary: '#1E293B', text: '#FFFFFF' },
+  { id: 'env', name: 'Envigado FC', short: 'ENV', primary: '#F97316', secondary: '#16A34A', text: '#FFFFFF' },
+  { id: 'ali', name: 'Alianza FC', short: 'ALI', primary: '#1E3A8A', secondary: '#DC2626', text: '#FFFFFF' },
+  { id: 'jag', name: 'Jaguares de Córdoba', short: 'JAG', primary: '#38BDF8', secondary: '#FACC15', text: '#0F172A' },
+  { id: 'pat', name: 'Patriotas Boyacá', short: 'PAT', primary: '#DC2626', secondary: '#15803D', text: '#FFFFFF' }
+];
+
+const INITIAL_PLAYERS = [
+  // Atlético Bucaramanga
+  { id: 'p1', name: 'Aldair Quintana', teamId: 'buc', pos: 'POR', value: 6800000, sofaRating: 7.42, points: 64, goals: 0, assists: 0, cleanSheets: 6, last5: [8, 6, 9, 4, 7] },
+  { id: 'p2', name: 'Fabián Sambueza', teamId: 'buc', pos: 'MED', value: 9200000, sofaRating: 7.65, points: 78, goals: 4, assists: 5, cleanSheets: 0, last5: [10, 6, 12, 5, 9] },
+  { id: 'p3', name: 'Jefferson Mena', teamId: 'buc', pos: 'DEF', value: 5400000, sofaRating: 7.18, points: 52, goals: 1, assists: 0, cleanSheets: 6, last5: [6, 5, 8, 4, 6] },
+  { id: 'p4', name: 'Luciano Pons', teamId: 'buc', pos: 'DEL', value: 7100000, sofaRating: 7.12, points: 56, goals: 5, assists: 1, cleanSheets: 0, last5: [9, 2, 7, 11, 4] },
+  // Millonarios FC
+  { id: 'p5', name: 'Radamel Falcao', teamId: 'mil', pos: 'DEL', value: 13500000, sofaRating: 7.45, points: 70, goals: 6, assists: 1, cleanSheets: 0, last5: [11, 5, 9, 13, 6] },
+  { id: 'p6', name: 'Leonardo Castro', teamId: 'mil', pos: 'DEL', value: 12800000, sofaRating: 7.68, points: 84, goals: 8, assists: 2, cleanSheets: 0, last5: [12, 8, 4, 14, 9] },
+  { id: 'p7', name: 'Álvaro Montero', teamId: 'mil', pos: 'POR', value: 8500000, sofaRating: 7.39, points: 62, goals: 0, assists: 0, cleanSheets: 5, last5: [6, 8, 7, 5, 6] },
+  { id: 'p8', name: 'Juan Pablo Vargas', teamId: 'mil', pos: 'DEF', value: 7900000, sofaRating: 7.41, points: 66, goals: 2, assists: 1, cleanSheets: 5, last5: [7, 6, 11, 5, 7] },
+  { id: 'p9', name: 'Mackalister Silva', teamId: 'mil', pos: 'MED', value: 8900000, sofaRating: 7.48, points: 71, goals: 3, assists: 6, cleanSheets: 0, last5: [8, 9, 5, 10, 7] },
+  // Atlético Nacional
+  { id: 'p10', name: 'Edwin Cardona', teamId: 'nal', pos: 'MED', value: 13200000, sofaRating: 7.82, points: 92, goals: 6, assists: 7, cleanSheets: 0, last5: [14, 10, 7, 12, 9] },
+  { id: 'p11', name: 'David Ospina', teamId: 'nal', pos: 'POR', value: 9100000, sofaRating: 7.35, points: 59, goals: 0, assists: 0, cleanSheets: 4, last5: [7, 6, 5, 8, 6] },
+  { id: 'p12', name: 'William Tesillo', teamId: 'nal', pos: 'DEF', value: 7200000, sofaRating: 7.25, points: 58, goals: 1, assists: 1, cleanSheets: 4, last5: [6, 7, 5, 8, 6] },
+  { id: 'p13', name: 'Alfredo Morelos', teamId: 'nal', pos: 'DEL', value: 10800000, sofaRating: 7.40, points: 74, goals: 7, assists: 2, cleanSheets: 0, last5: [9, 11, 4, 8, 10] },
+  // América de Cali
+  { id: 'p14', name: 'Duván Vergara', teamId: 'ame', pos: 'DEL', value: 12900000, sofaRating: 7.75, points: 89, goals: 8, assists: 4, cleanSheets: 0, last5: [13, 9, 11, 7, 12] },
+  { id: 'p15', name: 'Cristian Barrios', teamId: 'ame', pos: 'MED', value: 8400000, sofaRating: 7.38, points: 68, goals: 4, assists: 5, cleanSheets: 0, last5: [8, 7, 10, 5, 8] },
+  { id: 'p16', name: 'Jorge Soto', teamId: 'ame', pos: 'POR', value: 5800000, sofaRating: 7.22, points: 55, goals: 0, assists: 0, cleanSheets: 5, last5: [6, 7, 4, 8, 5] },
+  { id: 'p17', name: 'Daniel Bocanegra', teamId: 'ame', pos: 'DEF', value: 6100000, sofaRating: 7.19, points: 54, goals: 2, assists: 2, cleanSheets: 5, last5: [5, 8, 6, 4, 7] },
+  // Junior FC
+  { id: 'p18', name: 'Carlos Bacca', teamId: 'jun', pos: 'DEL', value: 13800000, sofaRating: 7.71, points: 88, goals: 9, assists: 2, cleanSheets: 0, last5: [14, 6, 11, 10, 8] },
+  { id: 'p19', name: 'Santiago Mele', teamId: 'jun', pos: 'POR', value: 8700000, sofaRating: 7.49, points: 67, goals: 0, assists: 0, cleanSheets: 5, last5: [9, 7, 6, 8, 7] },
+  { id: 'p20', name: 'Yimmi Chará', teamId: 'jun', pos: 'MED', value: 8600000, sofaRating: 7.31, points: 63, goals: 3, assists: 4, cleanSheets: 0, last5: [7, 8, 5, 9, 6] },
+  { id: 'p21', name: 'Emanuel Olivera', teamId: 'jun', pos: 'DEF', value: 6200000, sofaRating: 7.15, points: 51, goals: 1, assists: 0, cleanSheets: 4, last5: [6, 5, 7, 4, 6] },
+  // Ind. Santa Fe
+  { id: 'p22', name: 'Hugo Rodallega', teamId: 'sfe', pos: 'DEL', value: 12400000, sofaRating: 7.64, points: 85, goals: 8, assists: 3, cleanSheets: 0, last5: [11, 8, 13, 6, 9] },
+  { id: 'p23', name: 'Andrés Mosquera Marmolejo', teamId: 'sfe', pos: 'POR', value: 7800000, sofaRating: 7.52, points: 71, goals: 0, assists: 0, cleanSheets: 7, last5: [8, 9, 7, 8, 6] },
+  { id: 'p24', name: 'Daniel Torres', teamId: 'sfe', pos: 'MED', value: 6900000, sofaRating: 7.24, points: 58, goals: 1, assists: 3, cleanSheets: 0, last5: [6, 7, 6, 5, 7] },
+  { id: 'p25', name: 'Julián Millán', teamId: 'sfe', pos: 'DEF', value: 6500000, sofaRating: 7.30, points: 61, goals: 3, assists: 0, cleanSheets: 6, last5: [9, 6, 7, 5, 8] },
+  // Once Caldas
+  { id: 'p26', name: 'Dayro Moreno', teamId: 'onc', pos: 'DEL', value: 13100000, sofaRating: 7.60, points: 86, goals: 9, assists: 1, cleanSheets: 0, last5: [12, 4, 15, 7, 10] },
+  { id: 'p27', name: 'James Aguirre', teamId: 'onc', pos: 'POR', value: 5200000, sofaRating: 7.21, points: 54, goals: 0, assists: 0, cleanSheets: 5, last5: [7, 5, 6, 8, 4] },
+  { id: 'p28', name: 'Michael Barrios', teamId: 'onc', pos: 'MED', value: 7300000, sofaRating: 7.28, points: 60, goals: 4, assists: 3, cleanSheets: 0, last5: [8, 5, 9, 6, 7] },
+  // Deportes Tolima
+  { id: 'p29', name: 'Yeison Guzmán', teamId: 'tol', pos: 'MED', value: 13400000, sofaRating: 7.89, points: 96, goals: 8, assists: 6, cleanSheets: 0, last5: [15, 11, 8, 13, 10] },
+  { id: 'p30', name: 'Marlon Torres', teamId: 'tol', pos: 'DEF', value: 6700000, sofaRating: 7.26, points: 57, goals: 1, assists: 0, cleanSheets: 5, last5: [7, 6, 6, 5, 8] },
+  { id: 'p31', name: 'Brayan Gil', teamId: 'tol', pos: 'DEL', value: 7800000, sofaRating: 7.29, points: 62, goals: 5, assists: 2, cleanSheets: 0, last5: [9, 6, 8, 4, 11] },
+  // Ind. Medellín
+  { id: 'p32', name: 'Brayan León', teamId: 'med', pos: 'DEL', value: 8100000, sofaRating: 7.23, points: 61, goals: 5, assists: 2, cleanSheets: 0, last5: [10, 5, 7, 8, 6] },
+  { id: 'p33', name: 'Baldomero Perlaza', teamId: 'med', pos: 'MED', value: 6800000, sofaRating: 7.19, points: 55, goals: 2, assists: 2, cleanSheets: 0, last5: [6, 7, 5, 8, 6] },
+  { id: 'p34', name: 'Leyser Chaverra', teamId: 'med', pos: 'DEF', value: 6400000, sofaRating: 7.27, points: 59, goals: 3, assists: 1, cleanSheets: 4, last5: [8, 6, 9, 4, 7] },
+  // Deportivo Cali
+  { id: 'p35', name: 'Jarlan Barrera', teamId: 'cal', pos: 'MED', value: 7600000, sofaRating: 7.32, points: 61, goals: 3, assists: 4, cleanSheets: 0, last5: [9, 6, 7, 8, 5] },
+  { id: 'p36', name: 'Fredy Montero', teamId: 'cal', pos: 'DEL', value: 7900000, sofaRating: 7.20, points: 58, goals: 5, assists: 1, cleanSheets: 0, last5: [8, 4, 10, 5, 7] },
+  // Deportivo Pereira
+  { id: 'p37', name: 'Carlos Darwin Quintero', teamId: 'per', pos: 'DEL', value: 12700000, sofaRating: 7.78, points: 90, goals: 7, assists: 6, cleanSheets: 0, last5: [13, 10, 8, 11, 9] },
+  { id: 'p38', name: 'Salvador Ichazo', teamId: 'per', pos: 'POR', value: 5600000, sofaRating: 7.18, points: 52, goals: 0, assists: 0, cleanSheets: 4, last5: [6, 7, 5, 6, 6] },
+  // Resto de clubes FPC
+  { id: 'p39', name: 'Élan Ricardo', teamId: 'equ', pos: 'MED', value: 5900000, sofaRating: 7.25, points: 57, goals: 4, assists: 2, cleanSheets: 0, last5: [7, 8, 5, 9, 6] },
+  { id: 'p40', name: 'Washington Ortega', teamId: 'equ', pos: 'POR', value: 5500000, sofaRating: 7.24, points: 56, goals: 0, assists: 0, cleanSheets: 5, last5: [6, 8, 5, 7, 6] },
+  { id: 'p41', name: 'Jeison Quiñones', teamId: 'agu', pos: 'DEF', value: 6600000, sofaRating: 7.33, points: 63, goals: 4, assists: 0, cleanSheets: 4, last5: [10, 6, 7, 5, 8] },
+  { id: 'p42', name: 'Guillermo Celis', teamId: 'agu', pos: 'MED', value: 5100000, sofaRating: 7.08, points: 48, goals: 0, assists: 2, cleanSheets: 0, last5: [5, 6, 5, 6, 5] },
+  { id: 'p43', name: 'Daniel Moreno', teamId: 'pas', pos: 'DEL', value: 8800000, sofaRating: 7.55, points: 81, goals: 8, assists: 2, cleanSheets: 0, last5: [12, 9, 11, 6, 10] },
+  { id: 'p44', name: 'Diego Martínez', teamId: 'pas', pos: 'POR', value: 4900000, sofaRating: 7.14, points: 50, goals: 0, assists: 0, cleanSheets: 4, last5: [6, 5, 7, 5, 6] },
+  { id: 'p45', name: 'Nicolás Rodríguez', teamId: 'for', pos: 'MED', value: 6400000, sofaRating: 7.36, points: 64, goals: 4, assists: 4, cleanSheets: 0, last5: [9, 7, 8, 6, 7] },
+  { id: 'p46', name: 'Daniel Rivera', teamId: 'for', pos: 'DEF', value: 5300000, sofaRating: 7.17, points: 53, goals: 2, assists: 0, cleanSheets: 4, last5: [7, 5, 6, 6, 7] },
+  { id: 'p47', name: 'Henry Plazas', teamId: 'boy', pos: 'DEF', value: 5800000, sofaRating: 7.22, points: 56, goals: 4, assists: 1, cleanSheets: 3, last5: [10, 4, 8, 5, 6] },
+  { id: 'p48', name: 'Dorlan Pabón', teamId: 'env', pos: 'MED', value: 8200000, sofaRating: 7.31, points: 62, goals: 4, assists: 3, cleanSheets: 0, last5: [9, 6, 8, 5, 7] },
+  { id: 'p49', name: 'Andrés Rentería', teamId: 'ali', pos: 'DEL', value: 6500000, sofaRating: 7.16, points: 54, goals: 5, assists: 1, cleanSheets: 0, last5: [8, 4, 9, 5, 6] },
+  { id: 'p50', name: 'Pedro Franco', teamId: 'ali', pos: 'DEF', value: 4800000, sofaRating: 7.09, points: 49, goals: 1, assists: 0, cleanSheets: 4, last5: [6, 5, 6, 5, 6] },
+  { id: 'p51', name: 'Wilson Morelo', teamId: 'jag', pos: 'DEL', value: 6300000, sofaRating: 7.15, points: 53, goals: 5, assists: 1, cleanSheets: 0, last5: [9, 3, 8, 5, 6] },
+  { id: 'p52', name: 'Cristian Martínez Borja', teamId: 'pat', pos: 'DEL', value: 5700000, sofaRating: 7.11, points: 50, goals: 4, assists: 1, cleanSheets: 0, last5: [8, 4, 7, 5, 5] }
+];
+
+const formatCOP = (num) => {
+  if (num >= 1000000) {
+    return `$${(num / 1000000).toFixed(1)}M`;
+  }
+  return `$${(num / 1000).toFixed(0)}K`;
+};
+
+const getTeamById = (id) => FPC_TEAMS.find(t => t.id === id) || FPC_TEAMS[0];
+
+const getPosColor = (pos) => {
+  switch (pos) {
+    case 'POR': return 'bg-amber-500 text-slate-950 border-amber-400';
+    case 'DEF': return 'bg-sky-500 text-slate-950 border-sky-400';
+    case 'MED': return 'bg-emerald-500 text-slate-950 border-emerald-400';
+    case 'DEL': return 'bg-rose-500 text-white border-rose-400';
+    default: return 'bg-slate-600 text-white';
+  }
+};
+
+// Algoritmo oficial estilo Biwenger + Sofascore
+const calculateSofascoreFantasyPoints = (rating, pos, goals = 0, assists = 0, cleanSheet = false) => {
+  let basePoints = 0;
+  if (rating >= 8.5) basePoints = 10;
+  else if (rating >= 8.0) basePoints = 8;
+  else if (rating >= 7.5) basePoints = 6;
+  else if (rating >= 7.0) basePoints = 4;
+  else if (rating >= 6.5) basePoints = 2;
+  else if (rating >= 6.0) basePoints = 1;
+  else basePoints = -1;
+
+  const goalMultipliers = { POR: 6, DEF: 5, MED: 4, DEL: 3 };
+  const goalPts = goals * (goalMultipliers[pos] || 3);
+  const assistPts = assists * 3;
+  const csPts = (cleanSheet && (pos === 'POR' || pos === 'DEF')) ? 4 : (cleanSheet && pos === 'MED' ? 1 : 0);
+
+  return basePoints + goalPts + assistPts + csPts;
+};
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [managerName, setManagerName] = useState('DT Colombiano');
+  const [activeTab, setActiveTab] = useState('squad'); // squad, market, standings, database, sofascore
+  const [theme, setTheme] = useState('dark'); // 'dark' | 'light'
+  const isLight = theme === 'light';
+  
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  // Multiplayer Account & Lobby Portal State
+  const [accounts, setAccounts] = useState([]);
+  const [activeAccount, setActiveAccount] = useState(null); // The logged-in Manager Profile synced in cloud
+  const [authMode, setAuthMode] = useState('register'); // 'register' | 'login'
+  const [authForm, setAuthForm] = useState({
+    managerName: '',
+    clubName: '',
+    email: '',
+    pin: '',
+    favTeam: 'buc',
+    inviteCode: ''
+  });
+  const [inspectingMember, setInspectingMember] = useState(null);
+
+  // Multi-user Leagues State
+  const [leagues, setLeagues] = useState([]);
+  const [currentLeagueId, setCurrentLeagueId] = useState(null);
+  const [members, setMembers] = useState([]);
+  
+  // UI Modals & Notifications
+  const [toast, setToast] = useState(null);
+  const [selectedPlayerModal, setSelectedPlayerModal] = useState(null);
+  const [showCreateLeagueModal, setShowCreateLeagueModal] = useState(false);
+  const [showJoinLeagueModal, setShowJoinLeagueModal] = useState(false);
+  const [newLeagueName, setNewLeagueName] = useState('');
+  const [joinCodeInput, setJoinCodeInput] = useState('');
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [simulatingMatchday, setSimulatingMatchday] = useState(false);
+
+  // Filters for Database
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState('ALL');
+  const [selectedPosFilter, setSelectedPosFilter] = useState('ALL');
+  const [sortBy, setSortBy] = useState('value'); // value, points, sofaRating
+
+  // Bidding state
+  const [bidAmounts, setBidAmounts] = useState({});
+
+  const showNotification = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  useEffect(() => {
+    if (!auth) return;
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error('Error initializing auth:', err);
+      }
+    };
+    initAuth();
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Listen to registered Manager Accounts in cloud so any of the 10 players can log in from any device
+  useEffect(() => {
+    if (!user || !db) return;
+    const accountsRef = collection(db, 'artifacts', appId, 'public', 'data', 'fpc_accounts');
+    const unsubscribe = onSnapshot(accountsRef, (snapshot) => {
+      const loadedAccounts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      setAccounts(loadedAccounts);
+      // Keep activeAccount fresh if already logged in
+      if (activeAccount) {
+        const updatedMe = loadedAccounts.find(a => a.id === activeAccount.id);
+        if (updatedMe) setActiveAccount(updatedMe);
+      }
+    }, (err) => {
+      console.error('Error loading accounts:', err);
+    });
+    return () => unsubscribe();
+  }, [user, activeAccount?.id]);
+
+  // Listen to public leagues in Firestore
+  useEffect(() => {
+    if (!user || !db) return;
+    const leaguesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues');
+    
+    const unsubscribe = onSnapshot(leaguesRef, async (snapshot) => {
+      const loadedLeagues = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      
+      // If no leagues exist yet, create a default "Liga Oficial Dimayor"
+      if (loadedLeagues.length === 0) {
+        const defaultLeagueId = 'liga-dimayor-oficial';
+        const initialMarketIds = ['p2', 'p5', 'p10', 'p14', 'p18', 'p22', 'p26', 'p29', 'p37', 'p1'];
+        const defaultLeague = {
+          name: 'Liga BetPlay Oficial #1',
+          code: 'FPC2026',
+          createdBy: user.uid,
+          matchday: 14,
+          marketPlayerIds: initialMarketIds,
+          lastLogs: [
+            'Jornada 14 sincronizada con notas de Sofascore.',
+            'Yeison Guzmán (7.89) y Edwin Cardona (7.82) lideran el ranking Sofascore.'
+          ],
+          createdAt: Date.now()
+        };
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', defaultLeagueId), defaultLeague);
+      } else {
+        setLeagues(loadedLeagues);
+        if (!currentLeagueId && loadedLeagues.length > 0) {
+          setCurrentLeagueId(loadedLeagues[0].id);
+        }
+      }
+    }, (err) => {
+      console.error('Error loading leagues:', err);
+    });
+
+    return () => unsubscribe();
+  }, [user, currentLeagueId]);
+
+  // Listen to members of the active league
+  useEffect(() => {
+    if (!user || !db || !currentLeagueId) return;
+    const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'fpc_members');
+
+    const unsubscribe = onSnapshot(membersRef, async (snapshot) => {
+      const allMembers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const leagueMembers = allMembers.filter(m => m.leagueId === currentLeagueId);
+      setMembers(leagueMembers);
+    }, (err) => {
+      console.error('Error loading members:', err);
+    });
+
+    return () => unsubscribe();
+  }, [user, currentLeagueId]);
+
+  // Helper to enroll a registered manager into a specific league with a unique random 11-player starter squad
+  const enrollManagerInLeague = async (account, targetLeagueId) => {
+    if (!account || !targetLeagueId || !db) return;
+    const memberDocId = `${targetLeagueId}_${account.id}`;
+    const existingRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_members', memberDocId);
+    const existingSnap = await getDoc(existingRef);
+
+    if (!existingSnap.exists()) {
+      // Pick balanced starter squad (1 POR, 4 DEF, 4 MED, 2 DEL) from lower/mid-tier so stars remain on market
+      const pickRandom = (pos, count) => {
+        const pool = INITIAL_PLAYERS.filter(p => p.pos === pos && p.value <= 8800000);
+        const shuffled = [...pool].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count).map(p => p.id);
+      };
+      const randomSquad = [
+        ...pickRandom('POR', 1),
+        ...pickRandom('DEF', 4),
+        ...pickRandom('MED', 4),
+        ...pickRandom('DEL', 2)
+      ];
+
+      const newMember = {
+        leagueId: targetLeagueId,
+        userId: account.id,
+        authUid: user?.uid || '',
+        managerName: account.managerName,
+        clubName: account.clubName || `${account.managerName} FC`,
+        favTeam: account.favTeam || 'buc',
+        budget: 45000000,
+        points: 0,
+        lastMatchdayPoints: 0,
+        squad: randomSquad,
+        lineup: randomSquad,
+        formation: '4-4-2',
+        joinedAt: Date.now()
+      };
+      await setDoc(existingRef, newMember);
+
+      // Log arrival in the league board
+      const targetLeague = leagues.find(l => l.id === targetLeagueId);
+      if (targetLeague) {
+        const leagueRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', targetLeagueId);
+        const joinLog = `👋 ¡Nuevo DT registrado! ${account.managerName} (${newMember.clubName}) se unió a la liga.`;
+        await updateDoc(leagueRef, {
+          lastLogs: [joinLog, ...(targetLeague.lastLogs || []).slice(0, 9)]
+        });
+      }
+    }
+  };
+
+  // Handle Registration or Login from Multiplayer Welcome Portal
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    if (!user || !db) return;
+
+    const cleanEmail = authForm.email.trim().toLowerCase();
+    const cleanPin = authForm.pin.trim();
+
+    if (!cleanEmail || !cleanPin) {
+      showNotification('Ingresa tu correo/usuario y tu PIN de seguridad', 'error');
+      return;
+    }
+
+    // Check if inviteCode was entered and validate it
+    let targetLeague = leagues[0];
+    if (authForm.inviteCode.trim()) {
+      const foundLeague = leagues.find(
+        l => l.code?.toUpperCase() === authForm.inviteCode.trim().toUpperCase()
+      );
+      if (!foundLeague) {
+        showNotification(`El código de liga "${authForm.inviteCode}" no existe. Verifica con el creador de la liga.`, 'error');
+        return;
+      }
+      targetLeague = foundLeague;
+    }
+
+    if (authMode === 'register') {
+      if (!authForm.managerName.trim() || !authForm.clubName.trim()) {
+        showNotification('Completa tu nombre de Director Técnico y el nombre de tu Club', 'error');
+        return;
+      }
+
+      const existingAccount = accounts.find(a => a.email === cleanEmail);
+      if (existingAccount) {
+        showNotification('Ese correo/usuario ya está registrado. Cambia a "Iniciar Sesión".', 'error');
+        return;
+      }
+
+      const accountId = `dt_${cleanEmail.replace(/[^a-z0-9]/g, '_')}`;
+      const newAccount = {
+        id: accountId,
+        email: cleanEmail,
+        pin: cleanPin,
+        managerName: authForm.managerName.trim(),
+        clubName: authForm.clubName.trim(),
+        favTeam: authForm.favTeam || 'buc',
+        createdAt: Date.now()
+      };
+
+      try {
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fpc_accounts', accountId), newAccount);
+        if (targetLeague) {
+          await enrollManagerInLeague(newAccount, targetLeague.id);
+          setCurrentLeagueId(targetLeague.id);
+        }
+        setActiveAccount(newAccount);
+        setManagerName(newAccount.managerName);
+        showNotification(`¡Bienvenido DT ${newAccount.managerName}! Tu cuenta quedó sincronizada en la nube.`);
+      } catch (err) {
+        console.error('Error registering account:', err);
+        showNotification('Error al registrar tu cuenta en la nube', 'error');
+      }
+    } else {
+      // Login existing manager from any device
+      const foundAccount = accounts.find(a => a.email === cleanEmail && a.pin === cleanPin);
+      if (!foundAccount) {
+        showNotification('Usuario o PIN incorrecto. Verifica tus datos o regístrate.', 'error');
+        return;
+      }
+
+      try {
+        if (targetLeague) {
+          await enrollManagerInLeague(foundAccount, targetLeague.id);
+          setCurrentLeagueId(targetLeague.id);
+        }
+        setActiveAccount(foundAccount);
+        setManagerName(foundAccount.managerName);
+        showNotification(`¡Bienvenido de vuelta, DT ${foundAccount.managerName}! Datos sincronizados.`);
+      } catch (err) {
+        showNotification('Error al iniciar sesión', 'error');
+      }
+    }
+  };
+
+  const currentLeague = useMemo(() => {
+    return leagues.find(l => l.id === currentLeagueId) || null;
+  }, [leagues, currentLeagueId]);
+
+  const myMemberProfile = useMemo(() => {
+    if (!activeAccount) return null;
+    return members.find(m => m.userId === activeAccount.id) || null;
+  }, [members, activeAccount]);
+
+  // Compute player ownership in the current league
+  const playerOwnerMap = useMemo(() => {
+    const map = {};
+    members.forEach(member => {
+      (member.squad || []).forEach(pId => {
+        map[pId] = member;
+      });
+    });
+    return map;
+  }, [members]);
+
+  // Enrich players with dynamic points if simulated in league
+  const enrichedPlayers = useMemo(() => {
+    const customStats = currentLeague?.customPlayerStats || {};
+    return INITIAL_PLAYERS.map(p => {
+      const override = customStats[p.id] || {};
+      return {
+        ...p,
+        points: override.points !== undefined ? override.points : p.points,
+        sofaRating: override.sofaRating !== undefined ? override.sofaRating : p.sofaRating,
+        value: override.value !== undefined ? override.value : p.value,
+        last5: override.last5 || p.last5
+      };
+    });
+  }, [currentLeague]);
+
+  const mySquadPlayers = useMemo(() => {
+    if (!myMemberProfile) return [];
+    return (myMemberProfile.squad || [])
+      .map(id => enrichedPlayers.find(p => p.id === id))
+      .filter(Boolean);
+  }, [myMemberProfile, enrichedPlayers]);
+
+  const teamValue = useMemo(() => {
+    return mySquadPlayers.reduce((sum, p) => sum + p.value, 0);
+  }, [mySquadPlayers]);
+
+  const handleCreateLeague = async (e) => {
+    e.preventDefault();
+    if (!user || !db || !activeAccount || !newLeagueName.trim()) return;
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const leagueId = `liga-${Date.now()}`;
+    const shuffled = [...INITIAL_PLAYERS].sort(() => 0.5 - Math.random());
+    const marketIds = shuffled.slice(0, 10).map(p => p.id);
+
+    const leagueData = {
+      name: newLeagueName.trim(),
+      code,
+      createdBy: activeAccount.id,
+      creatorName: activeAccount.managerName,
+      maxMembers: 15,
+      matchday: 1,
+      marketPlayerIds: marketIds,
+      lastLogs: [`🏆 Liga "${newLeagueName.trim()}" fundada por ${activeAccount.managerName}. Código de invitación: #${code}`],
+      createdAt: Date.now()
+    };
+
+    try {
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', leagueId), leagueData);
+      await enrollManagerInLeague(activeAccount, leagueId);
+      setCurrentLeagueId(leagueId);
+      setNewLeagueName('');
+      setShowCreateLeagueModal(false);
+      showNotification(`¡Liga "${leagueData.name}" creada! Comparte el código: ${code}`);
+    } catch (err) {
+      showNotification('Error al crear la liga', 'error');
+    }
+  };
+
+  const handleJoinLeagueByCode = async (e) => {
+    e.preventDefault();
+    if (!user || !activeAccount || !joinCodeInput.trim()) return;
+    const target = leagues.find(l => l.code?.toUpperCase() === joinCodeInput.trim().toUpperCase());
+    if (!target) {
+      showNotification('No se encontró ninguna liga con ese código', 'error');
+      return;
+    }
+    await enrollManagerInLeague(activeAccount, target.id);
+    setCurrentLeagueId(target.id);
+    setJoinCodeInput('');
+    setShowJoinLeagueModal(false);
+    showNotification(`¡Te has unido a ${target.name}! Tu plantilla inicial fue asignada.`);
+  };
+
+  const handleUpdateManagerName = async (newName) => {
+    setManagerName(newName);
+    if (!user || !db || !activeAccount || !currentLeagueId || !myMemberProfile) return;
+    const myDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_members', `${currentLeagueId}_${activeAccount.id}`);
+    await updateDoc(myDocRef, { managerName: newName });
+    const accRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_accounts', activeAccount.id);
+    await updateDoc(accRef, { managerName: newName });
+    showNotification('Nombre de Director Técnico actualizado en la nube');
+  };
+
+  // Sign player from Market or Clause
+  const handleSignPlayer = async (player, customBid) => {
+    if (!user || !db || !activeAccount || !myMemberProfile || !currentLeagueId) return;
+    const price = customBid ? Number(customBid) : player.value;
+
+    if (price < player.value) {
+      showNotification('La oferta no puede ser inferior al valor de mercado del jugador', 'error');
+      return;
+    }
+    if (myMemberProfile.budget < price) {
+      showNotification('Presupuesto insuficiente para realizar este fichaje', 'error');
+      return;
+    }
+    if ((myMemberProfile.squad || []).includes(player.id)) {
+      showNotification('Este jugador ya pertenece a tu plantilla', 'error');
+      return;
+    }
+
+    const currentOwner = playerOwnerMap[player.id];
+    const myDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_members', `${currentLeagueId}_${activeAccount.id}`);
+
+    try {
+      // If owned by another manager in the league, pay them the transfer fee
+      if (currentOwner && currentOwner.userId !== activeAccount.id) {
+        const ownerDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_members', currentOwner.id);
+        const updatedOwnerSquad = (currentOwner.squad || []).filter(id => id !== player.id);
+        const updatedOwnerLineup = (currentOwner.lineup || []).filter(id => id !== player.id);
+        await updateDoc(ownerDocRef, {
+          budget: (currentOwner.budget || 0) + price,
+          squad: updatedOwnerSquad,
+          lineup: updatedOwnerLineup
+        });
+      }
+
+      const updatedMySquad = [...(myMemberProfile.squad || []), player.id];
+      const updatedMyLineup = (myMemberProfile.lineup || []).length < 11 
+        ? [...(myMemberProfile.lineup || []), player.id]
+        : myMemberProfile.lineup;
+
+      await updateDoc(myDocRef, {
+        budget: myMemberProfile.budget - price,
+        squad: updatedMySquad,
+        lineup: updatedMyLineup
+      });
+
+      // Add transfer log to league
+      const leagueRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', currentLeagueId);
+      const newLog = `💰 ${myMemberProfile.managerName} fichó a ${player.name} (${getTeamById(player.teamId).short}) por ${formatCOP(price)}.`;
+      const prevLogs = currentLeague?.lastLogs || [];
+      await updateDoc(leagueRef, {
+        lastLogs: [newLog, ...prevLogs.slice(0, 7)]
+      });
+
+      showNotification(`¡Fichaje exitoso! ${player.name} se une a tu club por ${formatCOP(price)}`);
+    } catch (err) {
+      console.error('Error signing player:', err);
+      showNotification('Error al procesar el fichaje', 'error');
+    }
+  };
+
+  // Sell player to the Liga BetPlay Market
+  const handleSellPlayer = async (player) => {
+    if (!user || !db || !activeAccount || !myMemberProfile || !currentLeagueId) return;
+    if (!(myMemberProfile.squad || []).includes(player.id)) return;
+
+    const sellValue = player.value;
+    const myDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_members', `${currentLeagueId}_${activeAccount.id}`);
+
+    try {
+      const updatedSquad = myMemberProfile.squad.filter(id => id !== player.id);
+      const updatedLineup = (myMemberProfile.lineup || []).filter(id => id !== player.id);
+
+      await updateDoc(myDocRef, {
+        budget: myMemberProfile.budget + sellValue,
+        squad: updatedSquad,
+        lineup: updatedLineup
+      });
+
+      const leagueRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', currentLeagueId);
+      const newLog = `📤 ${myMemberProfile.managerName} vendió a ${player.name} al mercado por ${formatCOP(sellValue)}.`;
+      const prevLogs = currentLeague?.lastLogs || [];
+      await updateDoc(leagueRef, {
+        lastLogs: [newLog, ...prevLogs.slice(0, 7)]
+      });
+
+      showNotification(`Vendiste a ${player.name} por ${formatCOP(sellValue)}`);
+      if (selectedPlayerModal?.id === player.id) setSelectedPlayerModal(null);
+    } catch (err) {
+      showNotification('Error al vender el jugador', 'error');
+    }
+  };
+
+  // Toggle Starter / Bench status in User's Lineup
+  const handleToggleLineup = async (playerId) => {
+    if (!user || !db || !activeAccount || !myMemberProfile || !currentLeagueId) return;
+    const currentLineup = myMemberProfile.lineup || [];
+    const isStarter = currentLineup.includes(playerId);
+
+    let newLineup;
+    if (isStarter) {
+      newLineup = currentLineup.filter(id => id !== playerId);
+    } else {
+      if (currentLineup.length >= 11) {
+        showNotification('Ya tienes 11 titulares en cancha. Saca a un titular primero.', 'error');
+        return;
+      }
+      newLineup = [...currentLineup, playerId];
+    }
+
+    const myDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_members', `${currentLeagueId}_${activeAccount.id}`);
+    await updateDoc(myDocRef, { lineup: newLineup });
+  };
+
+  // Simulate Matchday using Sofascore Rating Algorithm for all managers in the league
+  const handleSimulateSofascoreMatchday = async () => {
+    if (!user || !db || !currentLeague || simulatingMatchday) return;
+    setSimulatingMatchday(true);
+
+    try {
+      const nextMatchday = (currentLeague.matchday || 1) + 1;
+      const customPlayerStats = { ...(currentLeague.customPlayerStats || {}) };
+      const matchdayPlayerPoints = {};
+
+      let mvpPlayer = null;
+      let mvpPoints = -99;
+
+      // 1. Generate realistic Sofascore rating & points for every FPC player
+      enrichedPlayers.forEach(p => {
+        const randomDelta = (Math.random() * 1.8) - 0.7; // slight variation around player's talent
+        const rawRating = Math.min(9.8, Math.max(5.4, p.sofaRating + randomDelta));
+        const rating = Number(rawRating.toFixed(2));
+
+        // Goal and assist probabilities based on position
+        const goalRoll = Math.random();
+        let goals = 0;
+        if (p.pos === 'DEL' && goalRoll > 0.62) goals = goalRoll > 0.88 ? 2 : 1;
+        else if (p.pos === 'MED' && goalRoll > 0.76) goals = 1;
+        else if (p.pos === 'DEF' && goalRoll > 0.90) goals = 1;
+
+        const assistRoll = Math.random();
+        const assists = (p.pos === 'MED' && assistRoll > 0.72) || (p.pos === 'DEL' && assistRoll > 0.78) ? 1 : 0;
+        const cleanSheet = Math.random() > 0.65;
+
+        const earnedPts = calculateSofascoreFantasyPoints(rating, p.pos, goals, assists, cleanSheet);
+        matchdayPlayerPoints[p.id] = earnedPts;
+
+        if (earnedPts > mvpPoints) {
+          mvpPoints = earnedPts;
+          mvpPlayer = { ...p, earnedPts, rating };
+        }
+
+        // Adjust market value based on performance (+300K if great, -150K if poor)
+        const valueChange = earnedPts >= 8 ? 350000 : earnedPts <= 2 ? -150000 : 100000;
+        const updatedLast5 = [...(p.last5 || []).slice(1), earnedPts];
+
+        customPlayerStats[p.id] = {
+          points: p.points + earnedPts,
+          sofaRating: Number(((p.sofaRating * 0.8) + (rating * 0.2)).toFixed(2)),
+          value: Math.max(1500000, p.value + valueChange),
+          last5: updatedLast5
+        };
+      });
+
+      // 2. Calculate points & financial bonuses for every manager in the league
+      for (const member of members) {
+        const starters = member.lineup || [];
+        let managerMatchdayPts = 0;
+        starters.forEach(pId => {
+          managerMatchdayPts += (matchdayPlayerPoints[pId] || 0);
+        });
+
+        // Biwenger-style financial reward: $100,000 COP per point earned
+        const rewardBonus = Math.max(0, managerMatchdayPts * 100000);
+        const memberRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_members', member.id);
+        await updateDoc(memberRef, {
+          points: (member.points || 0) + managerMatchdayPts,
+          lastMatchdayPoints: managerMatchdayPts,
+          budget: (member.budget || 0) + rewardBonus
+        });
+      }
+
+      // 3. Rotate Daily Market (10 random players)
+      const shuffled = [...INITIAL_PLAYERS].sort(() => 0.5 - Math.random());
+      const newMarketIds = shuffled.slice(0, 10).map(p => p.id);
+
+      const mvpLog = mvpPlayer 
+        ? `⭐ Fecha ${nextMatchday} calculada con Sofascore. MVP: ${mvpPlayer.name} (${mvpPlayer.rating} ★ / +${mvpPlayer.earnedPts} pts).`
+        : `⭐ Fecha ${nextMatchday} sincronizada con Sofascore.`;
+
+      const leagueRef = doc(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', currentLeagueId);
+      await updateDoc(leagueRef, {
+        matchday: nextMatchday,
+        customPlayerStats,
+        marketPlayerIds: newMarketIds,
+        lastLogs: [mvpLog, ...(currentLeague.lastLogs || []).slice(0, 7)]
+      });
+
+      showNotification(`¡Fecha ${nextMatchday} simulada con éxito! Puntos y abonos acreditados.`);
+    } catch (err) {
+      console.error('Error simulating matchday:', err);
+      showNotification('Error al simular la fecha', 'error');
+    } finally {
+      setSimulatingMatchday(false);
+    }
+  };
+
+  const copyLeagueCode = () => {
+    if (!currentLeague?.code) return;
+    const textArea = document.createElement('textarea');
+    textArea.value = currentLeague.code;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+    showNotification(`Código ${currentLeague.code} copiado al portapapeles`);
+  };
+
+  const filteredDatabasePlayers = useMemo(() => {
+    return enrichedPlayers
+      .filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesTeam = selectedTeamFilter === 'ALL' || p.teamId === selectedTeamFilter;
+        const matchesPos = selectedPosFilter === 'ALL' || p.pos === selectedPosFilter;
+        return matchesSearch && matchesTeam && matchesPos;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'value') return b.value - a.value;
+        if (sortBy === 'points') return b.points - a.points;
+        if (sortBy === 'sofaRating') return b.sofaRating - a.sofaRating;
+        return 0;
+      });
+  }, [enrichedPlayers, searchQuery, selectedTeamFilter, selectedPosFilter, sortBy]);
+
+  const marketPlayers = useMemo(() => {
+    const ids = currentLeague?.marketPlayerIds || ['p2', 'p5', 'p10', 'p14', 'p18', 'p22', 'p26', 'p29'];
+    return ids.map(id => enrichedPlayers.find(p => p.id === id)).filter(Boolean);
+  }, [currentLeague, enrichedPlayers]);
+
+  // Separate user squad into pitch lines (POR, DEF, MED, DEL) and Bench
+  const lineupByPos = useMemo(() => {
+    const startersIds = myMemberProfile?.lineup || [];
+    const starters = mySquadPlayers.filter(p => startersIds.includes(p.id));
+    const bench = mySquadPlayers.filter(p => !startersIds.includes(p.id));
+
+    return {
+      POR: starters.filter(p => p.pos === 'POR'),
+      DEF: starters.filter(p => p.pos === 'DEF'),
+      MED: starters.filter(p => p.pos === 'MED'),
+      DEL: starters.filter(p => p.pos === 'DEL'),
+      bench,
+      totalStarters: starters.length
+    };
+  }, [mySquadPlayers, myMemberProfile]);
+
+  const themeStyles = `
+    .theme-light {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+    .theme-light .bg-slate-950,
+    .theme-light .bg-slate-950\\/90,
+    .theme-light .bg-slate-950\\/80 {
+      background-color: #f8fafc !important;
+    }
+    .theme-light .bg-slate-900,
+    .theme-light .bg-slate-900\\/90,
+    .theme-light .bg-slate-900\\/60 {
+      background-color: #ffffff !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+    .theme-light .bg-slate-800,
+    .theme-light .bg-slate-800\\/90,
+    .theme-light .bg-slate-800\\/70 {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+    .theme-light .border-slate-800,
+    .theme-light .border-slate-800\\/90,
+    .theme-light .border-slate-800\\/80,
+    .theme-light .border-slate-700 {
+      border-color: #cbd5e1 !important;
+    }
+    .theme-light .text-white,
+    .theme-light .text-slate-100,
+    .theme-light .text-slate-200 {
+      color: #0f172a !important;
+    }
+    .theme-light .text-slate-300,
+    .theme-light .text-slate-400 {
+      color: #475569 !important;
+    }
+    .theme-light .text-emerald-400,
+    .theme-light .text-emerald-300 {
+      color: #059669 !important;
+    }
+    .theme-light .text-amber-400,
+    .theme-light .text-amber-300 {
+      color: #d97706 !important;
+    }
+    .theme-light .text-sky-400,
+    .theme-light .text-sky-300 {
+      color: #0284c7 !important;
+    }
+    .theme-light .bg-emerald-950,
+    .theme-light .bg-emerald-950\\/80,
+    .theme-light .bg-emerald-950\\/30 {
+      background-color: #d1fae5 !important;
+    }
+    .theme-light .pitch-card-label p {
+      color: #ffffff !important;
+    }
+    .theme-light .vivid-tab-active span,
+    .theme-light .vivid-tab-active svg {
+      color: #ffffff !important;
+    }
+  `;
+
+  if (!isFirebaseConfigured) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6 font-sans">
+        <div className="max-w-xl w-full bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-white">FPC Fantasy • Listo para Vercel</h1>
+              <p className="text-xs text-slate-400">Falta conectar las credenciales de tu proyecto Firebase</p>
+            </div>
+          </div>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Para que tus 10 amigos se sincronicen en tiempo real en tu dominio de <strong>Vercel</strong>, pega las credenciales de tu Firebase en el objeto <code className="text-emerald-400 font-mono">VERCEL_FIREBASE_CONFIG</code> al inicio del código.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // If the user has not logged into their Manager Account yet, show the Multiplayer Access & Registration Portal
+  if (!activeAccount) {
+    return (
+      <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between font-sans selection:bg-emerald-500 selection:text-slate-950 transition-colors duration-300 ${isLight ? 'theme-light' : ''}`}>
+        <style>{themeStyles}</style>
+        {toast && (
+          <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border transition-all ${
+            toast.type === 'error' 
+              ? 'bg-rose-950/95 border-rose-500 text-rose-100' 
+              : 'bg-emerald-950/95 border-emerald-500 text-emerald-100'
+          }`}>
+            <Sparkles className="w-5 h-5 shrink-0 text-emerald-400" />
+            <span className="text-sm font-medium">{toast.msg}</span>
+          </div>
+        )}
+
+        {/* Colombian Flag Accent Bar + Floating Theme Switcher */}
+        <div className="relative">
+          <div className="h-2 w-full flex shadow-md">
+            <div className="w-2/4 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400"></div>
+            <div className="w-1/4 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+            <div className="w-1/4 bg-gradient-to-r from-red-600 to-rose-600"></div>
+          </div>
+          <div className="max-w-5xl mx-auto px-4 pt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-xs border shadow-lg transition-all transform hover:scale-105 cursor-pointer ${
+                isLight
+                  ? 'bg-white border-amber-300 text-slate-900 shadow-amber-500/10'
+                  : 'bg-slate-900 border-indigo-500/40 text-indigo-200 shadow-indigo-500/20'
+              }`}
+            >
+              {isLight ? (
+                <>
+                  <Moon className="w-4 h-4 text-indigo-600 fill-indigo-600" />
+                  <span>Modo Oscuro Nocturno</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400 fill-amber-400" />
+                  <span>Modo Claro Estadio</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-4 py-6">
+          <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Left Info Column: Multiplayer Cloud Explanation */}
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-extrabold shadow-sm">
+                <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span>Servidor Multijugador en la Nube Activo • Hasta 15 DTs por Liga</span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 flex items-center justify-center shadow-2xl shadow-emerald-500/30 border-2 border-white/20">
+                  <Trophy className="w-9 h-9 text-slate-950" />
+                </div>
+                <div>
+                  <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+                    FPC <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-400 bg-clip-text text-transparent">FANTASY</span>
+                  </h1>
+                  <p className="text-sm font-medium text-slate-400 mt-0.5">Liga BetPlay Dimayor • Estilo Biwenger + Sofascore</p>
+                </div>
+              </div>
+
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                Crea tu perfil de Director Técnico o inicia sesión desde cualquier celular o computador. Todos los fichajes, cláusulas, alineaciones y puntos de tus amigos se sincronizan en tiempo real en la nube.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+                  <div className="text-emerald-400 font-black text-sm mb-1 flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    <span>Invita a tus 10 Amigos</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Comparte el código de tu liga (ej. <span className="text-amber-400 font-mono font-bold">#FPC2026</span>) para que cada uno se registre y reciba $45M COP + 11 jugadores.
+                  </p>
+                </div>
+
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+                  <div className="text-amber-400 font-black text-sm mb-1 flex items-center gap-2">
+                    <Activity className="w-4 h-4" />
+                    <span>Sincronización Nube 24/7</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Con tu usuario y PIN puedes conectarte desde cualquier lugar sin perder tu equipo ni tu presupuesto.
+                  </p>
+                </div>
+              </div>
+
+              {/* Active Cloud Leagues Preview */}
+              <div className="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                    Ligas Activas en la Nube ({leagues.length})
+                  </span>
+                  <span className="text-xs text-emerald-400 font-bold">
+                    {accounts.length} DTs Registrados
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {leagues.map(l => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => setAuthForm({ ...authForm, inviteCode: l.code })}
+                      className="text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl px-3 py-1.5 flex items-center gap-2 transition"
+                    >
+                      <span className="font-bold text-white">{l.name}</span>
+                      <span className="font-mono text-amber-400 font-bold">#{l.code}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Registration & Login Card */}
+            <div className="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+              {/* Decorative top glow */}
+              <div className="absolute -top-20 -right-20 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+              {/* Vivid Mode Switch Tabs */}
+              <div className="grid grid-cols-2 gap-2.5 bg-slate-950 p-2 rounded-2xl border border-slate-800 mb-6 relative z-10">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode('register')}
+                  className={`vivid-tab-active py-3 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
+                    authMode === 'register'
+                      ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30 scale-[1.02]'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>Crear Cuenta / Unirse</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMode('login')}
+                  className={`vivid-tab-active py-3 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
+                    authMode === 'login'
+                      ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-lg shadow-orange-500/30 scale-[1.02]'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Zap className="w-4 h-4" />
+                  <span>Ya tengo Cuenta</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleAuthSubmit} className="space-y-4">
+                {authMode === 'register' && (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">
+                          Nombre de Director Técnico *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={authForm.managerName}
+                          onChange={(e) => setAuthForm({ ...authForm, managerName: e.target.value })}
+                          placeholder="Ej. Camilo DT"
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">
+                          Nombre de tu Equipo Fantasy *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={authForm.clubName}
+                          onChange={(e) => setAuthForm({ ...authForm, clubName: e.target.value })}
+                          placeholder="Ej. Los Leopardos FC"
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Club Favorito de la Liga BetPlay (Escudo)
+                      </label>
+                      <select
+                        value={authForm.favTeam}
+                        onChange={(e) => setAuthForm({ ...authForm, favTeam: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                      >
+                        {FPC_TEAMS.map(t => (
+                          <option key={t.id} value={t.id}>{t.name} ({t.short})</option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                      Correo o Usuario Único *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={authForm.email}
+                      onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
+                      placeholder="ej. camilo@fpc.com"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                      PIN de Seguridad (4+ dígitos) *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={authForm.pin}
+                      onChange={(e) => setAuthForm({ ...authForm, pin: e.target.value })}
+                      placeholder="••••"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Invite Code Field */}
+                <div className="bg-slate-950/90 border border-amber-500/30 rounded-2xl p-3.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-black text-amber-400 flex items-center gap-1.5">
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Código de Liga para Unirse (Opcional)</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400">Por defecto: #FPC2026</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={authForm.inviteCode}
+                    onChange={(e) => setAuthForm({ ...authForm, inviteCode: e.target.value.toUpperCase() })}
+                    placeholder="Ingresa el código que te dio tu amigo (ej. FPC2026)"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono uppercase text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-sm shadow-lg shadow-emerald-500/20 transition cursor-pointer"
+                >
+                  {authMode === 'register'
+                    ? 'Registrarme y Entrar a la Liga'
+                    : 'Sincronizar Cuenta y Entrar'}
+                </button>
+              </form>
+
+              {/* Quick Switch for Already Registered Managers on this Cloud */}
+              {accounts.length > 0 && (
+                <div className="mt-6 pt-5 border-t border-slate-800">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                    DTs Registrados en la Nube ({accounts.length}) • Clic para rellenar usuario:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                    {accounts.map(acc => (
+                      <button
+                        key={acc.id}
+                        type="button"
+                        onClick={() => {
+                          setAuthMode('login');
+                          setAuthForm({ ...authForm, email: acc.email, pin: '' });
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 flex items-center gap-1.5 transition"
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: getTeamById(acc.favTeam).primary }}
+                        ></span>
+                        <span className="font-bold text-white">{acc.managerName}</span>
+                        <span className="text-[10px] text-slate-500">({acc.email})</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <footer className="text-center py-4 text-xs text-slate-500 border-t border-slate-900">
+          FPC Fantasy Multijugador • Sincronización en tiempo real en la nube para ligas de amigos
+        </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950 transition-colors duration-300 ${isLight ? 'theme-light' : ''}`}>
+      <style>{themeStyles}</style>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border transition-all ${
+          toast.type === 'error' 
+            ? 'bg-rose-950/95 border-rose-500 text-rose-100' 
+            : 'bg-emerald-950/95 border-emerald-500 text-emerald-100'
+        }`}>
+          <Sparkles className="w-5 h-5 shrink-0 text-emerald-400" />
+          <span className="text-sm font-medium">{toast.msg}</span>
+        </div>
+      )}
+
+      {/* Top Colombian Tricolor Accent Bar */}
+      <div className="h-2 w-full flex shadow-sm">
+        <div className="w-2/4 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400"></div>
+        <div className="w-1/4 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+        <div className="w-1/4 bg-gradient-to-r from-red-600 to-rose-600"></div>
+      </div>
+
+      {/* Main Navigation Header */}
+      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+          {/* Brand Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 border-2 border-white/20">
+              <Trophy className="w-6 h-6 text-slate-950" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg md:text-2xl font-black tracking-tight text-white">
+                  FPC <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-amber-400 bg-clip-text text-transparent">FANTASY</span>
+                </h1>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/40">
+                  Cloud Sync ({members.length} DTs)
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Sesión: <span className="text-white font-bold">{activeAccount.managerName}</span> ({activeAccount.clubName})
+              </p>
+            </div>
+          </div>
+
+          {/* Multi-user League Selector, Theme Toggle & Controls */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Dark / Light Mode Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              title="Alternar entre Modo Claro y Modo Oscuro"
+              className={`px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-2 border transition-all transform hover:scale-105 cursor-pointer shadow-md ${
+                isLight
+                  ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100'
+                  : 'bg-slate-800 border-indigo-500/40 text-amber-300 hover:bg-slate-700'
+              }`}
+            >
+              {isLight ? (
+                <>
+                  <Moon className="w-4 h-4 text-indigo-600 fill-indigo-600" />
+                  <span>Modo Oscuro</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400 fill-amber-400" />
+                  <span>Modo Claro</span>
+                </>
+              )}
+            </button>
+
+            <div className="flex items-center bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-1.5">
+              <Users className="w-4 h-4 text-emerald-400 mr-2 shrink-0" />
+              <select
+                value={currentLeagueId || ''}
+                onChange={async (e) => {
+                  const newId = e.target.value;
+                  await enrollManagerInLeague(activeAccount, newId);
+                  setCurrentLeagueId(newId);
+                }}
+                className="bg-transparent text-sm font-semibold text-white focus:outline-none pr-2 cursor-pointer"
+              >
+                {leagues.map(l => (
+                  <option key={l.id} value={l.id} className="bg-slate-900 text-white">
+                    {l.name} (Fecha {l.matchday || 1})
+                  </option>
+                ))}
+              </select>
+              {currentLeague?.code && (
+                <button
+                  onClick={copyLeagueCode}
+                  title="Copiar código de invitación para tus amigos"
+                  className="ml-2 pl-2 border-l border-slate-700 flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono"
+                >
+                  <span>#{currentLeague.code}</span>
+                  {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowCreateLeagueModal(true)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition shadow-md shadow-emerald-500/20 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Crear Liga</span>
+            </button>
+
+            <button
+              onClick={() => setShowJoinLeagueModal(true)}
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <UserPlus className="w-4 h-4 text-sky-400" />
+              <span>Unirse con Código</span>
+            </button>
+
+            <button
+              onClick={() => setActiveAccount(null)}
+              title="Cambiar de cuenta o cerrar sesión"
+              className="px-3 py-2 rounded-xl bg-slate-950 hover:bg-rose-950/60 text-slate-300 hover:text-rose-300 border border-slate-800 font-semibold text-xs flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Cambiar DT</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Sub-bar: Vivid High-Contrast Navigation Tabs & Financial Summary */}
+        <div className="bg-slate-900/60 border-t border-slate-800/80">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            {/* Vivid Navigation Tabs */}
+            <nav className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
+              {[
+                { 
+                  id: 'squad', 
+                  label: 'Mi Equipo & Cancha', 
+                  badge: `${lineupByPos.totalStarters}/11`,
+                  icon: Shirt,
+                  activeGradient: 'from-emerald-500 via-green-500 to-teal-600 shadow-emerald-500/40 border-emerald-300/60',
+                  idleAccent: 'hover:border-emerald-500/50 text-emerald-400',
+                  iconBg: 'bg-emerald-500/20 text-emerald-400'
+                },
+                { 
+                  id: 'market', 
+                  label: 'Mercado de Fichajes', 
+                  badge: `${marketPlayers.length} Hoy`,
+                  icon: ShoppingBag,
+                  activeGradient: 'from-amber-500 via-orange-500 to-rose-500 shadow-orange-500/40 border-amber-300/60',
+                  idleAccent: 'hover:border-amber-500/50 text-amber-400',
+                  iconBg: 'bg-amber-500/20 text-amber-400'
+                },
+                { 
+                  id: 'standings', 
+                  label: 'Clasificación & Liga', 
+                  badge: `${members.length} DTs`,
+                  icon: Trophy,
+                  activeGradient: 'from-violet-600 via-purple-600 to-fuchsia-600 shadow-purple-500/40 border-purple-300/60',
+                  idleAccent: 'hover:border-purple-500/50 text-purple-400',
+                  iconBg: 'bg-purple-500/20 text-purple-400'
+                },
+                { 
+                  id: 'database', 
+                  label: '20 Clubes y Jugadores', 
+                  badge: 'FPC',
+                  icon: Shield,
+                  activeGradient: 'from-sky-500 via-blue-600 to-indigo-600 shadow-blue-500/40 border-sky-300/60',
+                  idleAccent: 'hover:border-sky-500/50 text-sky-400',
+                  iconBg: 'bg-sky-500/20 text-sky-400'
+                },
+                { 
+                  id: 'sofascore', 
+                  label: 'Centro Sofascore', 
+                  badge: 'LIVE ★',
+                  icon: Activity,
+                  activeGradient: 'from-rose-500 via-pink-600 to-fuchsia-600 shadow-rose-500/40 border-rose-300/60',
+                  idleAccent: 'hover:border-rose-500/50 text-rose-400',
+                  iconBg: 'bg-rose-500/20 text-rose-400'
+                }
+              ].map(tab => {
+                const Icon = tab.icon;
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`vivid-tab-active group relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs md:text-sm font-black transition-all duration-200 whitespace-nowrap cursor-pointer border ${
+                      active 
+                        ? `bg-gradient-to-r ${tab.activeGradient} text-white shadow-xl scale-[1.03] -translate-y-0.5` 
+                        : `bg-slate-950/90 border-slate-800 text-slate-300 hover:bg-slate-800/80 hover:-translate-y-0.5 ${tab.idleAccent}`
+                    }`}
+                  >
+                    <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
+                      active ? 'bg-white/25 text-white' : tab.iconBg
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span>{tab.label}</span>
+                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full transition ${
+                      active 
+                        ? 'bg-black/25 text-white border border-white/30' 
+                        : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {tab.badge}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Financial & Points Summary */}
+            {myMemberProfile && (
+              <div className="flex items-center gap-3 ml-auto">
+                <div className="flex items-center gap-2.5 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 border border-emerald-500/40 px-3.5 py-1.5 rounded-2xl shadow-sm">
+                  <div className="w-7 h-7 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <DollarSign className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Presupuesto</div>
+                    <div className="text-sm font-black text-emerald-400">{formatCOP(myMemberProfile.budget)}</div>
+                  </div>
+                </div>
+
+                <div className="hidden sm:flex items-center gap-2.5 bg-gradient-to-r from-sky-500/15 to-blue-500/10 border border-sky-500/40 px-3.5 py-1.5 rounded-2xl shadow-sm">
+                  <div className="w-7 h-7 rounded-xl bg-sky-500/20 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-sky-400" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Valor Plantilla</div>
+                    <div className="text-sm font-black text-white">{formatCOP(teamValue)}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 bg-gradient-to-r from-amber-500/15 to-orange-500/10 border border-amber-500/40 px-3.5 py-1.5 rounded-2xl shadow-sm">
+                  <div className="w-7 h-7 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                    <Award className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mis Puntos</div>
+                    <div className="text-sm font-black text-amber-400">{myMemberProfile.points} pts</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+        
+        {/* TAB 1: MI EQUIPO & ALINEACIÓN EN CANCHA */}
+        {activeTab === 'squad' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Column: Interactive Football Pitch */}
+            <div className="lg:col-span-7 flex flex-col gap-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
+                    <span>Once Titular</span>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
+                      lineupByPos.totalStarters === 11 
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    }`}>
+                      {lineupByPos.totalStarters}/11 Titulares
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Haz clic en cualquier jugador para ver sus estadísticas Sofascore o moverlo entre cancha y suplentes.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleSimulateSofascoreMatchday}
+                  disabled={simulatingMatchday}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition cursor-pointer"
+                >
+                  <Zap className={`w-4 h-4 ${simulatingMatchday ? 'animate-spin' : ''}`} />
+                  <span>{simulatingMatchday ? 'Calculando Notas...' : `Simular Fecha ${(currentLeague?.matchday || 1) + 1} (Sofascore)`}</span>
+                </button>
+              </div>
+
+              {/* Stylized Colombian Stadium Pitch */}
+              <div className="relative rounded-3xl overflow-hidden border-2 border-emerald-700/70 bg-gradient-to-b from-emerald-800 via-emerald-700 to-emerald-800 p-4 md:p-6 min-h-[540px] flex flex-col justify-between shadow-2xl">
+                {/* Pitch Lines Overlay */}
+                <div className="absolute inset-4 border-2 border-white/25 rounded-xl pointer-events-none"></div>
+                <div className="absolute left-4 right-4 top-1/2 h-0.5 bg-white/25 pointer-events-none"></div>
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border-2 border-white/25 pointer-events-none"></div>
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-44 h-16 border-2 border-t-0 border-white/25 pointer-events-none"></div>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-44 h-16 border-2 border-b-0 border-white/25 pointer-events-none"></div>
+
+                {/* Forwards Row (DEL) */}
+                <div className="relative z-10 flex justify-around items-center gap-2 py-2">
+                  {lineupByPos.DEL.length > 0 ? lineupByPos.DEL.map(player => (
+                    <PitchPlayerCard 
+                      key={player.id} 
+                      player={player} 
+                      onSelect={() => setSelectedPlayerModal(player)} 
+                    />
+                  )) : (
+                    <div className="text-xs text-emerald-200/70 bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-400/20">
+                      Sin delanteros titulares
+                    </div>
+                  )}
+                </div>
+
+                {/* Midfielders Row (MED) */}
+                <div className="relative z-10 flex justify-around items-center gap-2 py-2 flex-wrap">
+                  {lineupByPos.MED.length > 0 ? lineupByPos.MED.map(player => (
+                    <PitchPlayerCard 
+                      key={player.id} 
+                      player={player} 
+                      onSelect={() => setSelectedPlayerModal(player)} 
+                    />
+                  )) : (
+                    <div className="text-xs text-emerald-200/70 bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-400/20">
+                      Sin mediocampistas titulares
+                    </div>
+                  )}
+                </div>
+
+                {/* Defenders Row (DEF) */}
+                <div className="relative z-10 flex justify-around items-center gap-2 py-2 flex-wrap">
+                  {lineupByPos.DEF.length > 0 ? lineupByPos.DEF.map(player => (
+                    <PitchPlayerCard 
+                      key={player.id} 
+                      player={player} 
+                      onSelect={() => setSelectedPlayerModal(player)} 
+                    />
+                  )) : (
+                    <div className="text-xs text-emerald-200/70 bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-400/20">
+                      Sin defensas titulares
+                    </div>
+                  )}
+                </div>
+
+                {/* Goalkeeper Row (POR) */}
+                <div className="relative z-10 flex justify-center items-center py-2">
+                  {lineupByPos.POR.length > 0 ? lineupByPos.POR.map(player => (
+                    <PitchPlayerCard 
+                      key={player.id} 
+                      player={player} 
+                      onSelect={() => setSelectedPlayerModal(player)} 
+                    />
+                  )) : (
+                    <div className="text-xs text-emerald-200/70 bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-400/20">
+                      Sin portero titular
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bench Players Bar */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                  Banquillo de Suplentes ({lineupByPos.bench.length})
+                </h3>
+                {lineupByPos.bench.length === 0 ? (
+                  <p className="text-xs text-slate-500">
+                    Todos tus jugadores están en el 11 titular. Ve al Mercado para fichar más fondo de armario.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                    {lineupByPos.bench.map(p => {
+                      const team = getTeamById(p.teamId);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => setSelectedPlayerModal(p)}
+                          className="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 rounded-xl p-2.5 cursor-pointer transition flex items-center justify-between"
+                        >
+                          <div className="truncate pr-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${getPosColor(p.pos)}`}>
+                                {p.pos}
+                              </span>
+                              <span className="text-xs font-bold text-white truncate">{p.name}</span>
+                            </div>
+                            <div className="text-[11px] text-slate-400 mt-1">
+                              {team.short} • {formatCOP(p.value)}
+                            </div>
+                          </div>
+                          <span className="text-xs font-black text-emerald-400 bg-emerald-950/80 px-2 py-1 rounded-lg border border-emerald-700/40">
+                            {p.sofaRating}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: Detailed Squad List & Manager Profile */}
+            <div className="lg:col-span-5 flex flex-col gap-4">
+              {/* Manager Customization Card */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Director Técnico</span>
+                    <h3 className="text-base font-black text-white">{myMemberProfile?.managerName || managerName}</h3>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400">Última Fecha</span>
+                    <div className="text-sm font-black text-amber-400">+{myMemberProfile?.lastMatchdayPoints || 0} pts</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={managerName}
+                    onChange={(e) => setManagerName(e.target.value)}
+                    placeholder="Cambiar nombre de tu club / DT..."
+                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  />
+                  <button
+                    onClick={() => handleUpdateManagerName(managerName)}
+                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-emerald-400 border border-slate-700 transition"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
+
+              {/* Full Squad Breakdown */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex-1">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-extrabold text-white">Plantilla Completa ({mySquadPlayers.length} Jugadores)</h3>
+                  <span className="text-xs text-slate-400">Valor: {formatCOP(teamValue)}</span>
+                </div>
+
+                <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+                  {mySquadPlayers.map(player => {
+                    const team = getTeamById(player.teamId);
+                    const isStarter = (myMemberProfile?.lineup || []).includes(player.id);
+                    return (
+                      <div
+                        key={player.id}
+                        className="bg-slate-950/90 border border-slate-800/90 hover:border-slate-700 rounded-xl p-3 flex items-center justify-between gap-2 transition"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${getPosColor(player.pos)}`}>
+                            {player.pos}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p 
+                                onClick={() => setSelectedPlayerModal(player)}
+                                className="text-sm font-bold text-white truncate hover:text-emerald-400 cursor-pointer"
+                              >
+                                {player.name}
+                              </p>
+                              <span 
+                                className="text-[10px] px-1.5 py-0.5 rounded font-bold"
+                                style={{ backgroundColor: team.primary, color: team.text }}
+                              >
+                                {team.short}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
+                              <span>{formatCOP(player.value)}</span>
+                              <span>•</span>
+                              <span className="text-emerald-400 font-semibold">Sofa: {player.sofaRating}</span>
+                              <span>•</span>
+                              <span className="text-amber-400 font-bold">{player.points} pts</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => handleToggleLineup(player.id)}
+                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                              isStarter 
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30' 
+                                : 'bg-slate-800 text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            {isStarter ? 'Titular' : 'Suplente'}
+                          </button>
+                          <button
+                            onClick={() => handleSellPlayer(player)}
+                            title="Vender jugador al mercado"
+                            className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition"
+                          >
+                            Vender
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: MERCADO DE FICHAJES */}
+        {activeTab === 'market' && (
+          <div className="space-y-6">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-emerald-400" />
+                  <h2 className="text-xl font-black text-white">Mercado Diario de Fichajes</h2>
+                </div>
+                <p className="text-xs md:text-sm text-slate-400 mt-1">
+                  Puja por jugadores libres de la Liga BetPlay o paga la cláusula a otros mánagers de tu liga. El mercado rota en cada simulación de fecha.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="bg-slate-950 border border-slate-800 px-4 py-2 rounded-xl text-right">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 block">Saldo Disponible</span>
+                  <span className="text-base font-black text-emerald-400">{formatCOP(myMemberProfile?.budget || 0)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {marketPlayers.map(player => {
+                const team = getTeamById(player.teamId);
+                const owner = playerOwnerMap[player.id];
+                const isMine = owner?.userId === activeAccount?.id;
+                const currentBid = bidAmounts[player.id] !== undefined ? bidAmounts[player.id] : player.value;
+
+                return (
+                  <div key={player.id} className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col justify-between transition shadow-lg">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`text-xs font-black px-2.5 py-1 rounded-lg ${getPosColor(player.pos)}`}>
+                            {player.pos}
+                          </span>
+                          <div>
+                            <h3 
+                              onClick={() => setSelectedPlayerModal(player)}
+                              className="text-base font-extrabold text-white hover:text-emerald-400 cursor-pointer"
+                            >
+                              {player.name}
+                            </h3>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span 
+                                className="text-[10px] px-2 py-0.5 rounded font-bold"
+                                style={{ backgroundColor: team.primary, color: team.text }}
+                              >
+                                {team.name}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-[10px] uppercase text-slate-400 block">Sofascore</span>
+                          <span className="text-sm font-black text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">
+                            ★ {player.sofaRating}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Recent Form Pills */}
+                      <div className="mt-4 flex items-center justify-between bg-slate-950/80 rounded-xl p-2.5 border border-slate-800/80">
+                        <div>
+                          <span className="text-[10px] uppercase text-slate-400 block">Últimas 5 Fechas</span>
+                          <div className="flex items-center gap-1 mt-1">
+                            {(player.last5 || []).map((pts, i) => (
+                              <span
+                                key={i}
+                                className={`w-6 h-6 rounded-md text-[11px] font-extrabold flex items-center justify-center ${
+                                  pts >= 9 ? 'bg-emerald-500 text-slate-950' : pts >= 5 ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' : 'bg-slate-800 text-slate-400'
+                                }`}
+                              >
+                                {pts}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-[10px] uppercase text-slate-400 block">Puntos Totales</span>
+                          <span className="text-lg font-black text-amber-400">{player.points} pts</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between text-xs">
+                        <span className="text-slate-400">Propietario en Liga:</span>
+                        {owner ? (
+                          <span className="font-bold text-amber-400 flex items-center gap-1">
+                            <Lock className="w-3 h-3" />
+                            {isMine ? 'En tu club' : owner.managerName}
+                          </span>
+                        ) : (
+                          <span className="font-bold text-emerald-400 flex items-center gap-1">
+                            <Unlock className="w-3 h-3" />
+                            Agente Libre
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bidding / Signing Section */}
+                    <div className="mt-4 pt-3 border-t border-slate-800">
+                      <div className="flex items-center justify-between text-xs mb-2">
+                        <span className="text-slate-400">Valor de Mercado:</span>
+                        <span className="text-sm font-black text-white">{formatCOP(player.value)}</span>
+                      </div>
+
+                      {isMine ? (
+                        <button
+                          onClick={() => handleSellPlayer(player)}
+                          className="w-full py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs transition"
+                        >
+                          Vender al Mercado ({formatCOP(player.value)})
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            step="100000"
+                            min={player.value}
+                            value={currentBid}
+                            onChange={(e) => setBidAmounts({ ...bidAmounts, [player.id]: Number(e.target.value) })}
+                            className="w-1/2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
+                          />
+                          <button
+                            onClick={() => handleSignPlayer(player, currentBid)}
+                            className="w-1/2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-md"
+                          >
+                            {owner ? 'Pagar Cláusula' : 'Fichar Ahora'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: CLASIFICACIÓN & LIGA */}
+        {activeTab === 'standings' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Standings Table */}
+            <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+                <div>
+                  <h2 className="text-xl font-black text-white flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-amber-400" />
+                    <span>Tabla de Posiciones • {currentLeague?.name}</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Participantes sincronizados: <span className="text-emerald-400 font-bold">{members.length} DTs</span> • Código de invitación: <span className="text-amber-400 font-mono font-bold">#{currentLeague?.code}</span>
+                  </p>
+                </div>
+                <button
+                  onClick={copyLeagueCode}
+                  className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-2 transition"
+                >
+                  <Copy className="w-4 h-4" />
+                  <span>Invitar Amigos (#{currentLeague?.code})</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400">
+                      <th className="py-3 px-3">Pos</th>
+                      <th className="py-3 px-3">Mánager / Club</th>
+                      <th className="py-3 px-3">Plantilla & Valor</th>
+                      <th className="py-3 px-3">Última Fecha</th>
+                      <th className="py-3 px-3 text-right">Puntos Totales</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/70 text-sm">
+                    {[...members]
+                      .sort((a, b) => (b.points || 0) - (a.points || 0))
+                      .map((member, index) => {
+                        const isMe = member.userId === activeAccount?.id;
+                        const memberSquadValue = (member.squad || []).reduce((acc, id) => {
+                          const pl = enrichedPlayers.find(p => p.id === id);
+                          return acc + (pl?.value || 0);
+                        }, 0);
+                        const favClub = getTeamById(member.favTeam || 'buc');
+
+                        return (
+                          <tr key={member.id} className={`${isMe ? 'bg-emerald-950/30' : 'hover:bg-slate-800/40'} transition`}>
+                            <td className="py-3.5 px-3 font-black">
+                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs ${
+                                index === 0 ? 'bg-amber-400 text-slate-950' : index === 1 ? 'bg-slate-300 text-slate-950' : index === 2 ? 'bg-amber-700 text-white' : 'bg-slate-800 text-slate-400'
+                              }`}>
+                                {index + 1}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-3">
+                              <div className="font-bold text-white flex items-center gap-2">
+                                <span
+                                  className="px-1.5 py-0.5 rounded text-[10px] font-black"
+                                  style={{ backgroundColor: favClub.primary, color: favClub.text }}
+                                >
+                                  {favClub.short}
+                                </span>
+                                <span>{member.managerName}</span>
+                                {isMe && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    Tú
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                {member.clubName || 'Club FPC'} • Saldo: {formatCOP(member.budget || 0)}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-3 text-xs text-slate-300">
+                              <div className="font-semibold text-white">{formatCOP(memberSquadValue)}</div>
+                              <button
+                                onClick={() => setInspectingMember(member)}
+                                className="text-[11px] text-emerald-400 hover:underline font-bold"
+                              >
+                                Ver {(member.squad || []).length} jugadores →
+                              </button>
+                            </td>
+                            <td className="py-3.5 px-3">
+                              <span className="text-xs font-bold text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                                +{member.lastMatchdayPoints || 0} pts
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-3 text-right font-black text-base text-amber-400">
+                              {member.points || 0} pts
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* League News & Transfer Logs */}
+            <div className="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <h3 className="text-base font-black text-white flex items-center gap-2 mb-4">
+                  <Activity className="w-4 h-4 text-emerald-400" />
+                  <span>Tablón de Noticias y Fichajes</span>
+                </h3>
+                <div className="space-y-3">
+                  {(currentLeague?.lastLogs || []).map((log, idx) => (
+                    <div key={idx} className="bg-slate-950 border border-slate-800/90 rounded-xl p-3 text-xs text-slate-200 leading-relaxed">
+                      {log}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400">
+                <p className="font-bold text-slate-300 mb-1">Reglas de Bonificación Biwenger FPC:</p>
+                <p>• Cada punto conseguido en la fecha otorga $100,000 COP de abono automático al presupuesto de tu club.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: 20 CLUBES Y JUGADORES */}
+        {activeTab === 'database' && (
+          <div className="space-y-6">
+            {/* 20 Teams Horizontal Selector */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                  Los 20 Clubes de la Liga BetPlay Dimayor
+                </h2>
+                {selectedTeamFilter !== 'ALL' && (
+                  <button
+                    onClick={() => setSelectedTeamFilter('ALL')}
+                    className="text-xs text-emerald-400 hover:underline font-bold"
+                  >
+                    Ver todos los 20 equipos
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                <button
+                  onClick={() => setSelectedTeamFilter('ALL')}
+                  className={`px-3 py-2 rounded-xl text-xs font-black shrink-0 border transition ${
+                    selectedTeamFilter === 'ALL'
+                      ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                      : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  TODOS (20)
+                </button>
+                {FPC_TEAMS.map(team => {
+                  const active = selectedTeamFilter === team.id;
+                  return (
+                    <button
+                      key={team.id}
+                      onClick={() => setSelectedTeamFilter(team.id)}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 border flex items-center gap-2 transition ${
+                        active
+                          ? 'ring-2 ring-emerald-400 bg-slate-800 text-white border-emerald-400'
+                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0 border border-white/30"
+                        style={{ backgroundColor: team.primary }}
+                      ></span>
+                      <span>{team.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Search & Position Filters */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+              <div className="relative flex-1 min-w-[240px]">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar jugador (ej. Falcao, Cardona, Sambueza, Bacca, Dayro)..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {['ALL', 'POR', 'DEF', 'MED', 'DEL'].map(pos => (
+                  <button
+                    key={pos}
+                    onClick={() => setSelectedPosFilter(pos)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition ${
+                      selectedPosFilter === pos
+                        ? 'bg-emerald-500 text-slate-950'
+                        : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {pos === 'ALL' ? 'Todas las Posiciones' : pos}
+                  </button>
+                ))}
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-200 focus:outline-none"
+                >
+                  <option value="value">Ordenar por Valor ($)</option>
+                  <option value="points">Ordenar por Puntos Fantasy</option>
+                  <option value="sofaRating">Ordenar por Nota Sofascore</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Players Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredDatabasePlayers.map(player => {
+                const team = getTeamById(player.teamId);
+                const owner = playerOwnerMap[player.id];
+                const isMine = owner?.userId === activeAccount?.id;
+
+                return (
+                  <div
+                    key={player.id}
+                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col justify-between transition"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`text-xs font-black px-2.5 py-1 rounded-lg ${getPosColor(player.pos)}`}>
+                            {player.pos}
+                          </span>
+                          <div>
+                            <h3
+                              onClick={() => setSelectedPlayerModal(player)}
+                              className="text-base font-extrabold text-white hover:text-emerald-400 cursor-pointer"
+                            >
+                              {player.name}
+                            </h3>
+                            <span
+                              className="text-[10px] px-2 py-0.5 rounded font-bold inline-block mt-0.5"
+                              style={{ backgroundColor: team.primary, color: team.text }}
+                            >
+                              {team.name}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-xs font-black text-emerald-400 bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-500/30">
+                            ★ {player.sofaRating}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 mt-4 bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 text-center">
+                        <div>
+                          <span className="text-[10px] text-slate-400 uppercase block">Valor</span>
+                          <span className="text-xs font-black text-white">{formatCOP(player.value)}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 uppercase block">Puntos</span>
+                          <span className="text-xs font-black text-amber-400">{player.points} pts</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 uppercase block">Goles / Asist</span>
+                          <span className="text-xs font-bold text-slate-200">{player.goals}G / {player.assists}A</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                      <span className="text-xs text-slate-400 truncate">
+                        {owner ? `Club: ${owner.managerName}` : 'Libre en la Liga'}
+                      </span>
+                      {!isMine ? (
+                        <button
+                          onClick={() => handleSignPlayer(player, player.value)}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shrink-0"
+                        >
+                          {owner ? `Cláusula ${formatCOP(player.value)}` : `Fichar ${formatCOP(player.value)}`}
+                        </button>
+                      ) : (
+                        <span className="text-xs font-bold text-emerald-400">En tu plantilla</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: CENTRO SOFASCORE */}
+        {activeTab === 'sofascore' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-white">Algoritmo de Puntuación Sofascore</h2>
+                  <p className="text-xs text-slate-400">Conversión oficial de calificación estadística (0.0 - 10.0) a puntos Fantasy</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {[
+                  { range: '8.5 o más', pts: '+10 pts', color: 'border-emerald-500/50 bg-emerald-950/30 text-emerald-300' },
+                  { range: '8.0 - 8.49', pts: '+8 pts', color: 'border-emerald-500/30 bg-slate-950 text-emerald-400' },
+                  { range: '7.5 - 7.99', pts: '+6 pts', color: 'border-sky-500/30 bg-slate-950 text-sky-400' },
+                  { range: '7.0 - 7.49', pts: '+4 pts', color: 'border-sky-500/30 bg-slate-950 text-sky-300' },
+                  { range: '6.5 - 6.99', pts: '+2 pts', color: 'border-slate-700 bg-slate-950 text-slate-200' },
+                  { range: 'Menos de 6.0', pts: '-1 pt', color: 'border-rose-500/30 bg-rose-950/20 text-rose-400' }
+                ].map((tier, idx) => (
+                  <div key={idx} className={`border rounded-xl p-3 ${tier.color}`}>
+                    <div className="text-xs text-slate-400">Nota Sofascore</div>
+                    <div className="text-sm font-bold mt-0.5">{tier.range}</div>
+                    <div className="text-lg font-black mt-1">{tier.pts}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 text-xs text-slate-300">
+                <h4 className="font-black text-white text-sm mb-2">Bonificaciones Adicionales por Estadística en Partido:</h4>
+                <div className="flex justify-between py-1 border-b border-slate-800">
+                  <span>⚽ Gol de Delantero (DEL)</span>
+                  <span className="font-bold text-emerald-400">+3 puntos</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-800">
+                  <span>⚽ Gol de Mediocampista (MED)</span>
+                  <span className="font-bold text-emerald-400">+4 puntos</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-800">
+                  <span>⚽ Gol de Defensa (DEF) o Portero (POR)</span>
+                  <span className="font-bold text-emerald-400">+5 / +6 puntos</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-800">
+                  <span>👟 Asistencia de Gol</span>
+                  <span className="font-bold text-sky-400">+3 puntos</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span>🧤 Arco en Cero (Portero y Defensas)</span>
+                  <span className="font-bold text-amber-400">+4 puntos</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Top 5 Highest Rated Sofascore Players in Liga BetPlay */}
+            <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <h3 className="text-base font-black text-white mb-4 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>Top Ratings Sofascore • Liga BetPlay</span>
+              </h3>
+              <div className="space-y-3">
+                {[...enrichedPlayers]
+                  .sort((a, b) => b.sofaRating - a.sofaRating)
+                  .slice(0, 7)
+                  .map((p, index) => {
+                    const team = getTeamById(p.teamId);
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => setSelectedPlayerModal(p)}
+                        className="bg-slate-950 border border-slate-800 hover:border-emerald-500/40 rounded-xl p-3 flex items-center justify-between cursor-pointer transition"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-black text-slate-500 w-4">#{index + 1}</span>
+                          <div>
+                            <div className="text-sm font-bold text-white">{p.name}</div>
+                            <div className="text-xs text-slate-400">{team.name} • {formatCOP(p.value)}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-amber-400">{p.points} pts</span>
+                          <span className="text-sm font-black bg-emerald-500 text-slate-950 px-2.5 py-1 rounded-lg">
+                            {p.sofaRating}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Player Detail Modal */}
+      {selectedPlayerModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <span className={`text-xs font-black px-2.5 py-1 rounded-lg ${getPosColor(selectedPlayerModal.pos)}`}>
+                  {selectedPlayerModal.pos}
+                </span>
+                <div>
+                  <h3 className="text-xl font-black text-white">{selectedPlayerModal.name}</h3>
+                  <p className="text-xs text-slate-400">{getTeamById(selectedPlayerModal.teamId).name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedPlayerModal(null)}
+                className="text-slate-400 hover:text-white text-sm font-bold px-2 py-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 my-5 bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-center">
+              <div>
+                <span className="text-[10px] uppercase text-slate-400 block">Nota Media</span>
+                <span className="text-lg font-black text-emerald-400">★ {selectedPlayerModal.sofaRating}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase text-slate-400 block">Puntos Fantasy</span>
+                <span className="text-lg font-black text-amber-400">{selectedPlayerModal.points}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase text-slate-400 block">Valor Mercado</span>
+                <span className="text-sm font-black text-white">{formatCOP(selectedPlayerModal.value)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-xs text-slate-300 mb-5">
+              <div className="flex justify-between py-1.5 border-b border-slate-800">
+                <span>Goles en Liga BetPlay:</span>
+                <span className="font-bold text-white">{selectedPlayerModal.goals}</span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-slate-800">
+                <span>Asistencias:</span>
+                <span className="font-bold text-white">{selectedPlayerModal.assists}</span>
+              </div>
+              <div className="flex justify-between py-1.5">
+                <span>Racha últimas 5 fechas:</span>
+                <span className="font-bold text-emerald-400">{(selectedPlayerModal.last5 || []).join(' - ')} pts</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              {(myMemberProfile?.squad || []).includes(selectedPlayerModal.id) ? (
+                <>
+                  <button
+                    onClick={() => {
+                      handleToggleLineup(selectedPlayerModal.id);
+                      setSelectedPlayerModal(null);
+                    }}
+                    className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition"
+                  >
+                    {(myMemberProfile?.lineup || []).includes(selectedPlayerModal.id) ? 'Enviar al Banquillo' : 'Poner en el 11 Titular'}
+                  </button>
+                  <button
+                    onClick={() => handleSellPlayer(selectedPlayerModal)}
+                    className="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs transition"
+                  >
+                    Vender
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    handleSignPlayer(selectedPlayerModal, selectedPlayerModal.value);
+                    setSelectedPlayerModal(null);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition"
+                >
+                  Fichar por {formatCOP(selectedPlayerModal.value)}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create League Modal */}
+      {showCreateLeagueModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleCreateLeague} className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 className="text-lg font-black text-white">Crear Nueva Liga Fantasy FPC</h3>
+            <p className="text-xs text-slate-400">
+              Se generará un código único para que invites a tus amigos a competir por el título de la Liga BetPlay.
+            </p>
+            <input
+              type="text"
+              required
+              value={newLeagueName}
+              onChange={(e) => setNewLeagueName(e.target.value)}
+              placeholder="Ej. Liga Amigos Bucaramanga 2026..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCreateLeagueModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-black"
+              >
+                Crear Liga
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Join League Modal */}
+      {showJoinLeagueModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleJoinLeagueByCode} className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 className="text-lg font-black text-white">Unirse a una Liga con Código</h3>
+            <p className="text-xs text-slate-400">
+              Ingresa el código de invitación que te compartió el creador de la liga. Tu cuenta (<span className="text-white font-bold">{activeAccount.managerName}</span>) quedará inscrita y sincronizada inmediatamente.
+            </p>
+            <input
+              type="text"
+              required
+              value={joinCodeInput}
+              onChange={(e) => setJoinCodeInput(e.target.value)}
+              placeholder="Código de Liga (ej. FPC2026)"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white uppercase font-mono focus:outline-none focus:border-emerald-500"
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowJoinLeagueModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-black"
+              >
+                Unirse Ahora
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Inspect Rival Squad Modal */}
+      {inspectingMember && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                  Inspeccionando Plantilla Rival
+                </span>
+                <h3 className="text-xl font-black text-white">
+                  {inspectingMember.managerName} • {inspectingMember.clubName}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Presupuesto: {formatCOP(inspectingMember.budget || 0)} • Puntos: {inspectingMember.points || 0} pts
+                </p>
+              </div>
+              <button
+                onClick={() => setInspectingMember(null)}
+                className="text-slate-400 hover:text-white text-sm font-bold px-2 py-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2 overflow-y-auto pr-1 flex-1">
+              {(inspectingMember.squad || []).map(pId => {
+                const pl = enrichedPlayers.find(p => p.id === pId);
+                if (!pl) return null;
+                const team = getTeamById(pl.teamId);
+                const isStarter = (inspectingMember.lineup || []).includes(pl.id);
+                return (
+                  <div key={pl.id} className="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded ${getPosColor(pl.pos)}`}>
+                        {pl.pos}
+                      </span>
+                      <div>
+                        <div className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>{pl.name}</span>
+                          {isStarter && (
+                            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">
+                              11 Titular
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          {team.name} • Valor: {formatCOP(pl.value)} • Sofa: ★ {pl.sofaRating}
+                        </div>
+                      </div>
+                    </div>
+
+                    {inspectingMember.userId !== activeAccount?.id && (
+                      <button
+                        onClick={() => {
+                          handleSignPlayer(pl, pl.value);
+                          setInspectingMember(null);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shrink-0 transition"
+                      >
+                        Cláusula {formatCOP(pl.value)}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PitchPlayerCard({ player, onSelect }) {
+  const team = getTeamById(player.teamId);
+  const lastMatchPts = player.last5?.[player.last5.length - 1] ?? 6;
+
+  return (
+    <div
+      onClick={onSelect}
+      className="group flex flex-col items-center cursor-pointer transition-transform hover:scale-105 w-20 sm:w-24"
+    >
+      <div className="relative">
+        {/* Club Jersey Badge */}
+        <div
+          className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex flex-col items-center justify-center shadow-lg border-2 border-white/80 font-black text-xs"
+          style={{ backgroundColor: team.primary, color: team.text }}
+        >
+          <span>{team.short}</span>
+          <span className="text-[9px] opacity-90">{player.pos}</span>
+        </div>
+
+        {/* Sofascore Rating Pill */}
+        <span className="absolute -top-1.5 -right-2 bg-slate-950 text-emerald-400 border border-emerald-500/60 text-[10px] font-black px-1.5 py-0.5 rounded-full shadow">
+          {player.sofaRating}
+        </span>
+
+        {/* Last Matchday Points Pill */}
+        <span className="absolute -bottom-1.5 -left-2 bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-full shadow">
+          +{lastMatchPts}
+        </span>
+      </div>
+
+      <div className="pitch-card-label mt-2 bg-slate-950/90 backdrop-blur-sm border border-slate-800 px-2 py-0.5 rounded-md max-w-full">
+        <p className="text-[11px] font-bold text-white truncate text-center">
+          {player.name.split(' ').slice(-1)[0]}
+        </p>
+      </div>
+    </div>
+  );
+}
