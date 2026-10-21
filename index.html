@@ -66,27 +66,126 @@
     const MAX_CHANGES_PER_MATCHDAY = 3;
 
     const FPC_TEAMS = [
-      { id: 'ame', pos: 1, name: 'América de Cali', short: 'AME', primary: '#E11D48', secondary: '#9F1239', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 8, d: 4, l: 2, goalsStr: '26:10', gd: '16', pts2026: 28, form: ['E', 'P', 'G', 'G', 'E'], dt: 'David González', logo: 'https://api.sofascore.app/api/v1/team/6106/image' },
-      { id: 'nal', pos: 2, name: 'Atl. Nacional', short: 'NAL', primary: '#059669', secondary: '#FFFFFF', accent: '#047857', text: '#FFFFFF', pj: 13, w: 8, d: 2, l: 3, goalsStr: '25:12', gd: '13', pts2026: 26, form: ['P', 'G', 'E', 'G', 'E'], dt: 'Lucas González', logo: 'https://api.sofascore.app/api/v1/team/6105/image' },
-      { id: 'cal', pos: 3, name: 'Deportivo Cali', short: 'CAL', primary: '#166534', secondary: '#FFFFFF', accent: '#14532D', text: '#FFFFFF', pj: 14, w: 7, d: 5, l: 2, goalsStr: '20:9', gd: '11', pts2026: 26, form: ['E', 'E', 'G', 'G', 'G'], dt: 'Rafael Dudamel', logo: 'https://api.sofascore.app/api/v1/team/6110/image' },
-      { id: 'mil', pos: 4, name: 'Millonarios', short: 'MIL', primary: '#1E40AF', secondary: '#FFFFFF', accent: '#93C5FD', text: '#FFFFFF', pj: 16, w: 6, d: 8, l: 2, goalsStr: '24:14', gd: '10', pts2026: 26, form: ['E', 'G', 'E', 'E', 'E'], dt: 'Alberto Gamero', logo: 'https://api.sofascore.app/api/v1/team/6117/image' },
-      { id: 'buc', pos: 5, name: 'Atl. Bucaramanga', short: 'BUC', primary: '#FACC15', secondary: '#15803D', accent: '#166534', text: '#064E3B', pj: 13, w: 6, d: 7, l: 0, goalsStr: '22:12', gd: '10', pts2026: 25, form: ['E', 'E', 'G', 'G', 'G'], dt: 'Pablo Peirano', logo: 'https://api.sofascore.app/api/v1/team/6103/image' },
-      { id: 'med', pos: 6, name: 'Ind. Medellín', short: 'MED', primary: '#DC2626', secondary: '#1D4ED8', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 7, d: 2, l: 5, goalsStr: '21:19', gd: '2', pts2026: 23, form: ['P', 'G', 'P', 'E', 'P'], dt: 'Luis Amaranto Perea', logo: 'https://api.sofascore.app/api/v1/team/6115/image' },
-      { id: 'sfe', pos: 7, name: 'Ind. Santa Fe', short: 'SFE', primary: '#DC2626', secondary: '#FFFFFF', accent: '#FACC15', text: '#FFFFFF', pj: 13, w: 6, d: 4, l: 3, goalsStr: '19:13', gd: '6', pts2026: 22, form: ['P', 'G', 'G', 'P', 'G'], dt: 'Pablo Repetto', logo: 'https://api.sofascore.app/api/v1/team/6116/image' },
-      { id: 'cuc', pos: 8, name: 'Cúcuta Deportivo', short: 'CUC', primary: '#DC2626', secondary: '#111827', accent: '#FBBF24', text: '#FFFFFF', pj: 14, w: 6, d: 3, l: 5, goalsStr: '17:19', gd: '-2', pts2026: 21, form: ['G', 'G', 'G', 'G', 'P'], dt: 'Bernardo Redín', logo: 'https://api.sofascore.app/api/v1/team/6109/image' },
-      { id: 'onc', pos: 9, name: 'Once Caldas', short: 'ONC', primary: '#F8FAFC', secondary: '#16A34A', accent: '#DC2626', text: '#0F172A', pj: 15, w: 5, d: 5, l: 5, goalsStr: '19:17', gd: '2', pts2026: 20, form: ['E', 'G', 'G', 'E', 'P'], dt: 'Hernán Darío Herrera', logo: 'https://api.sofascore.app/api/v1/team/6118/image' },
-      { id: 'tol', pos: 10, name: 'Tolima', short: 'TOL', primary: '#6B1426', secondary: '#FBBF24', accent: '#FDE047', text: '#FEF08A', pj: 15, w: 5, d: 5, l: 5, goalsStr: '18:18', gd: '0', pts2026: 20, form: ['P', 'P', 'E', 'E', 'E'], dt: 'Luis Fernando Suárez', logo: 'https://api.sofascore.app/api/v1/team/6111/image' },
-      { id: 'agu', pos: 11, name: 'Águilas Doradas', short: 'AGU', primary: '#D97706', secondary: '#78350F', accent: '#FDE68A', text: '#FFFFFF', pj: 14, w: 4, d: 7, l: 3, goalsStr: '19:19', gd: '0', pts2026: 19, form: ['G', 'E', 'E', 'G', 'P'], dt: 'Flavio Robatto', logo: 'https://api.sofascore.app/api/v1/team/48244/image' },
-      { id: 'lla', pos: 12, name: 'Llaneros', short: 'LLA', primary: '#F59E0B', secondary: '#111827', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 5, d: 2, l: 7, goalsStr: '16:17', gd: '-1', pts2026: 17, form: ['G', 'P', 'P', 'P', 'G'], dt: 'Wílmer Sandoval', logo: 'https://api.sofascore.app/api/v1/team/89368/image' },
-      { id: 'int', pos: 13, name: 'Inter Bogotá', short: 'INT', primary: '#0D9488', secondary: '#0F172A', accent: '#5EEAD4', text: '#FFFFFF', pj: 15, w: 3, d: 8, l: 4, goalsStr: '18:21', gd: '-3', pts2026: 17, form: ['G', 'E', 'E', 'E', 'P'], dt: 'Ricardo Valiño', logo: 'https://api.sofascore.app/api/v1/team/6114/image' },
-      { id: 'ali', pos: 14, name: 'Alianza', short: 'ALI', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 4, d: 3, l: 7, goalsStr: '15:26', gd: '-11', pts2026: 15, form: ['G', 'E', 'P', 'G', 'P'], dt: 'Hubert Bodhert', logo: 'https://api.sofascore.app/api/v1/team/89362/image' },
-      { id: 'per', pos: 15, name: 'Pereira', short: 'PER', primary: '#FACC15', secondary: '#DC2626', accent: '#7F1D1D', text: '#FFFFFF', pj: 14, w: 2, d: 7, l: 5, goalsStr: '10:18', gd: '-8', pts2026: 13, form: ['G', 'E', 'E', 'P', 'P'], dt: 'Alexis Márquez', logo: 'https://api.sofascore.app/api/v1/team/6112/image' },
-      { id: 'jun', pos: 16, name: 'Junior', short: 'JUN', primary: '#DC2626', secondary: '#FFFFFF', accent: '#1E3A8A', text: '#FFFFFF', pj: 14, w: 2, d: 6, l: 6, goalsStr: '19:23', gd: '-4', pts2026: 12, form: ['E', 'E', 'E', 'P', 'P'], dt: 'Sebastián Viera', logo: 'https://api.sofascore.app/api/v1/team/6107/image' },
-      { id: 'boy', pos: 17, name: 'Boyacá Chicó', short: 'BOY', primary: '#0F172A', secondary: '#EA580C', accent: '#22C55E', text: '#FFFFFF', pj: 14, w: 3, d: 3, l: 8, goalsStr: '11:25', gd: '-14', pts2026: 12, form: ['P', 'P', 'P', 'E', 'G'], dt: 'Jhon Jaime Gómez', logo: 'https://api.sofascore.app/api/v1/team/6108/image' },
-      { id: 'for', pos: 18, name: 'Fortaleza', short: 'FOR', primary: '#0369A1', secondary: '#DC2626', accent: '#38BDF8', text: '#FFFFFF', pj: 14, w: 1, d: 8, l: 5, goalsStr: '15:21', gd: '-6', pts2026: 11, form: ['P', 'E', 'E', 'E', 'P'], dt: 'Diego Arias', logo: 'https://api.sofascore.app/api/v1/team/48242/image' },
-      { id: 'jag', pos: 19, name: 'Jaguares', short: 'JAG', primary: '#0284C7', secondary: '#FACC15', accent: '#0F172A', text: '#FFFFFF', pj: 13, w: 2, d: 4, l: 7, goalsStr: '15:26', gd: '-11', pts2026: 10, form: ['P', 'G', 'P', 'P', 'P'], dt: 'Édgar Carvajal', logo: 'https://api.sofascore.app/api/v1/team/89370/image' },
-      { id: 'pas', pos: 20, name: 'Dep. Pasto', short: 'PAS', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FACC15', text: '#FFFFFF', pj: 13, w: 2, d: 3, l: 8, goalsStr: '9:19', gd: '-10', pts2026: 9, form: ['P', 'E', 'P', 'G', 'G'], dt: 'Gustavo Florentín', logo: 'https://api.sofascore.app/api/v1/team/6113/image' }
+      { id: 'ame', pos: 1, name: 'América de Cali', short: 'AME', primary: '#E11D48', secondary: '#9F1239', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 8, d: 4, l: 2, goalsStr: '26:10', gd: '16', pts2026: 28, form: ['E', 'P', 'G', 'G', 'E'], dt: 'David González', logo: 'https://tmssl.akamaized.net/images/wappen/head/2359.png', altLogo: 'https://api.sofascore.app/api/v1/team/6106/image' },
+      { id: 'nal', pos: 2, name: 'Atl. Nacional', short: 'NAL', primary: '#059669', secondary: '#FFFFFF', accent: '#047857', text: '#FFFFFF', pj: 13, w: 8, d: 2, l: 3, goalsStr: '25:12', gd: '13', pts2026: 26, form: ['P', 'G', 'E', 'G', 'E'], dt: 'Lucas González', logo: 'https://tmssl.akamaized.net/images/wappen/head/837.png', altLogo: 'https://api.sofascore.app/api/v1/team/6105/image' },
+      { id: 'cal', pos: 3, name: 'Deportivo Cali', short: 'CAL', primary: '#166534', secondary: '#FFFFFF', accent: '#14532D', text: '#FFFFFF', pj: 14, w: 7, d: 5, l: 2, goalsStr: '20:9', gd: '11', pts2026: 26, form: ['E', 'E', 'G', 'G', 'G'], dt: 'Rafael Dudamel', logo: 'https://tmssl.akamaized.net/images/wappen/head/1164.png', altLogo: 'https://api.sofascore.app/api/v1/team/6110/image' },
+      { id: 'mil', pos: 4, name: 'Millonarios', short: 'MIL', primary: '#1E40AF', secondary: '#FFFFFF', accent: '#93C5FD', text: '#FFFFFF', pj: 16, w: 6, d: 8, l: 2, goalsStr: '24:14', gd: '10', pts2026: 26, form: ['E', 'G', 'E', 'E', 'E'], dt: 'Alberto Gamero', logo: 'https://tmssl.akamaized.net/images/wappen/head/2350.png', altLogo: 'https://api.sofascore.app/api/v1/team/6117/image' },
+      { id: 'buc', pos: 5, name: 'Atl. Bucaramanga', short: 'BUC', primary: '#FACC15', secondary: '#15803D', accent: '#166534', text: '#064E3B', pj: 13, w: 6, d: 7, l: 0, goalsStr: '22:12', gd: '10', pts2026: 25, form: ['E', 'E', 'G', 'G', 'G'], dt: 'Pablo Peirano', logo: 'https://tmssl.akamaized.net/images/wappen/head/11932.png', altLogo: 'https://api.sofascore.app/api/v1/team/6103/image' },
+      { id: 'med', pos: 6, name: 'Ind. Medellín', short: 'MED', primary: '#DC2626', secondary: '#1D4ED8', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 7, d: 2, l: 5, goalsStr: '21:19', gd: '2', pts2026: 23, form: ['P', 'G', 'P', 'E', 'P'], dt: 'Luis Amaranto Perea', logo: 'https://tmssl.akamaized.net/images/wappen/head/2416.png', altLogo: 'https://api.sofascore.app/api/v1/team/6115/image' },
+      { id: 'sfe', pos: 7, name: 'Ind. Santa Fe', short: 'SFE', primary: '#DC2626', secondary: '#FFFFFF', accent: '#FACC15', text: '#FFFFFF', pj: 13, w: 6, d: 4, l: 3, goalsStr: '19:13', gd: '6', pts2026: 22, form: ['P', 'G', 'G', 'P', 'G'], dt: 'Pablo Repetto', logo: 'https://tmssl.akamaized.net/images/wappen/head/4570.png', altLogo: 'https://api.sofascore.app/api/v1/team/6116/image' },
+      { id: 'cuc', pos: 8, name: 'Cúcuta Deportivo', short: 'CUC', primary: '#DC2626', secondary: '#111827', accent: '#FBBF24', text: '#FFFFFF', pj: 14, w: 6, d: 3, l: 5, goalsStr: '17:19', gd: '-2', pts2026: 21, form: ['G', 'G', 'G', 'G', 'P'], dt: 'Bernardo Redín', logo: 'https://tmssl.akamaized.net/images/wappen/head/10900.png', altLogo: 'https://api.sofascore.app/api/v1/team/6109/image' },
+      { id: 'onc', pos: 9, name: 'Once Caldas', short: 'ONC', primary: '#F8FAFC', secondary: '#16A34A', accent: '#DC2626', text: '#0F172A', pj: 15, w: 5, d: 5, l: 5, goalsStr: '19:17', gd: '2', pts2026: 20, form: ['E', 'G', 'G', 'E', 'P'], dt: 'Hernán Darío Herrera', logo: 'https://tmssl.akamaized.net/images/wappen/head/2588.png', altLogo: 'https://api.sofascore.app/api/v1/team/6118/image' },
+      { id: 'tol', pos: 10, name: 'Tolima', short: 'TOL', primary: '#6B1426', secondary: '#FBBF24', accent: '#FDE047', text: '#FEF08A', pj: 15, w: 5, d: 5, l: 5, goalsStr: '18:18', gd: '0', pts2026: 20, form: ['P', 'P', 'E', 'E', 'E'], dt: 'Luis Fernando Suárez', logo: 'https://tmssl.akamaized.net/images/wappen/head/10599.png', altLogo: 'https://api.sofascore.app/api/v1/team/6111/image' },
+      { id: 'agu', pos: 11, name: 'Águilas Doradas', short: 'AGU', primary: '#D97706', secondary: '#78350F', accent: '#FDE68A', text: '#FFFFFF', pj: 14, w: 4, d: 7, l: 3, goalsStr: '19:19', gd: '0', pts2026: 19, form: ['G', 'E', 'E', 'G', 'P'], dt: 'Flavio Robatto', logo: 'https://tmssl.akamaized.net/images/wappen/head/29140.png', altLogo: 'https://api.sofascore.app/api/v1/team/48244/image' },
+      { id: 'lla', pos: 12, name: 'Llaneros', short: 'LLA', primary: '#F59E0B', secondary: '#111827', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 5, d: 2, l: 7, goalsStr: '16:17', gd: '-1', pts2026: 17, form: ['G', 'P', 'P', 'P', 'G'], dt: 'Wílmer Sandoval', logo: 'https://tmssl.akamaized.net/images/wappen/head/36687.png', altLogo: 'https://api.sofascore.app/api/v1/team/89368/image' },
+      { id: 'int', pos: 13, name: 'Inter Bogotá', short: 'INT', primary: '#0D9488', secondary: '#0F172A', accent: '#5EEAD4', text: '#FFFFFF', pj: 15, w: 3, d: 8, l: 4, goalsStr: '18:21', gd: '-3', pts2026: 17, form: ['G', 'E', 'E', 'E', 'P'], dt: 'Ricardo Valiño', logo: 'https://tmssl.akamaized.net/images/wappen/head/17449.png', altLogo: 'https://api.sofascore.app/api/v1/team/6114/image' },
+      { id: 'ali', pos: 14, name: 'Alianza', short: 'ALI', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 4, d: 3, l: 7, goalsStr: '15:26', gd: '-11', pts2026: 15, form: ['G', 'E', 'P', 'G', 'P'], dt: 'Hubert Bodhert', logo: 'https://tmssl.akamaized.net/images/wappen/head/35562.png', altLogo: 'https://api.sofascore.app/api/v1/team/89362/image' },
+      { id: 'per', pos: 15, name: 'Pereira', short: 'PER', primary: '#FACC15', secondary: '#DC2626', accent: '#7F1D1D', text: '#FFFFFF', pj: 14, w: 2, d: 7, l: 5, goalsStr: '10:18', gd: '-8', pts2026: 13, form: ['G', 'E', 'E', 'P', 'P'], dt: 'Alexis Márquez', logo: 'https://tmssl.akamaized.net/images/wappen/head/9266.png', altLogo: 'https://api.sofascore.app/api/v1/team/6112/image' },
+      { id: 'jun', pos: 16, name: 'Junior', short: 'JUN', primary: '#DC2626', secondary: '#FFFFFF', accent: '#1E3A8A', text: '#FFFFFF', pj: 14, w: 2, d: 6, l: 6, goalsStr: '19:23', gd: '-4', pts2026: 12, form: ['E', 'E', 'E', 'P', 'P'], dt: 'Sebastián Viera', logo: 'https://tmssl.akamaized.net/images/wappen/head/1193.png', altLogo: 'https://api.sofascore.app/api/v1/team/6107/image' },
+      { id: 'boy', pos: 17, name: 'Boyacá Chicó', short: 'BOY', primary: '#0F172A', secondary: '#EA580C', accent: '#22C55E', text: '#FFFFFF', pj: 14, w: 3, d: 3, l: 8, goalsStr: '11:25', gd: '-14', pts2026: 12, form: ['P', 'P', 'P', 'E', 'G'], dt: 'Jhon Jaime Gómez', logo: 'https://tmssl.akamaized.net/images/wappen/head/11933.png', altLogo: 'https://api.sofascore.app/api/v1/team/6108/image' },
+      { id: 'for', pos: 18, name: 'Fortaleza', short: 'FOR', primary: '#0369A1', secondary: '#DC2626', accent: '#38BDF8', text: '#FFFFFF', pj: 14, w: 1, d: 8, l: 5, goalsStr: '15:21', gd: '-6', pts2026: 11, form: ['P', 'E', 'E', 'E', 'P'], dt: 'Diego Arias', logo: 'https://tmssl.akamaized.net/images/wappen/head/32263.png', altLogo: 'https://api.sofascore.app/api/v1/team/48242/image' },
+      { id: 'jag', pos: 19, name: 'Jaguares', short: 'JAG', primary: '#0284C7', secondary: '#FACC15', accent: '#0F172A', text: '#FFFFFF', pj: 13, w: 2, d: 4, l: 7, goalsStr: '15:26', gd: '-11', pts2026: 10, form: ['P', 'G', 'P', 'P', 'P'], dt: 'Édgar Carvajal', logo: 'https://tmssl.akamaized.net/images/wappen/head/36688.png', altLogo: 'https://api.sofascore.app/api/v1/team/89370/image' },
+      { id: 'pas', pos: 20, name: 'Dep. Pasto', short: 'PAS', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FACC15', text: '#FFFFFF', pj: 13, w: 2, d: 3, l: 8, goalsStr: '9:19', gd: '-10', pts2026: 9, form: ['P', 'E', 'P', 'G', 'G'], dt: 'Gustavo Florentín', logo: 'https://tmssl.akamaized.net/images/wappen/head/10901.png', altLogo: 'https://api.sofascore.app/api/v1/team/6113/image' }
     ];
+
+    const DIRECT_PLAYER_PHOTOS = {
+      'James Rodríguez': 'https://img.a.transfermarkt.technology/portrait/header/88103-1719344758.jpg',
+      'Juan Guillermo Cuadrado': 'https://img.a.transfermarkt.technology/portrait/header/91970-1724667275.jpg',
+      'David Ospina': 'https://img.a.transfermarkt.technology/portrait/header/73396-1686666470.jpg',
+      'Franco Armani': 'https://img.a.transfermarkt.technology/portrait/header/119634-1719327503.jpg',
+      'Juan Fernando Quintero': 'https://img.a.transfermarkt.technology/portrait/header/122582-1719344845.jpg',
+      'Carlos Bacca': 'https://img.a.transfermarkt.technology/portrait/header/119235-1695823731.jpg',
+      'Luis Muriel': 'https://img.a.transfermarkt.technology/portrait/header/119228-1708462479.jpg',
+      'Dayro Moreno': 'https://img.a.transfermarkt.technology/portrait/header/38114-1695825061.jpg',
+      'Hugo Rodallega': 'https://img.a.transfermarkt.technology/portrait/header/37933-1695757977.jpg',
+      'Edwin Cardona': 'https://img.a.transfermarkt.technology/portrait/header/119342-1721853411.jpg',
+      'Matheus Uribe': 'https://img.a.transfermarkt.technology/portrait/header/214536-1686666634.jpg',
+      'Pedro Gallese': 'https://img.a.transfermarkt.technology/portrait/header/94847-1719175534.jpg',
+      'Leonardo Castro': 'https://img.a.transfermarkt.technology/portrait/header/332297-1695756665.jpg',
+      'Carlos Darwin Quintero': 'https://img.a.transfermarkt.technology/portrait/header/73651-1695758240.jpg',
+      'Fabián Sambueza': 'https://img.a.transfermarkt.technology/portrait/header/238343-1695757761.jpg',
+      'Luciano Pons': 'https://img.a.transfermarkt.technology/portrait/header/440380-1695757545.jpg',
+      'Yeison Guzmán': 'https://img.a.transfermarkt.technology/portrait/header/526430-1695824916.jpg',
+      'Cristian Chicho Arango': 'https://img.a.transfermarkt.technology/portrait/header/262987-1709066596.jpg',
+      'Alfredo Morelos': 'https://img.a.transfermarkt.technology/portrait/header/338962-1721853543.jpg',
+      'Andrés Román': 'https://img.a.transfermarkt.technology/portrait/header/490488-1721853190.jpg',
+      'William Tesillo': 'https://img.a.transfermarkt.technology/portrait/header/119246-1721853121.jpg',
+      'Jorman Campuzano': 'https://img.a.transfermarkt.technology/portrait/header/459467-1721853345.jpg',
+      'Andrés Llinás': 'https://img.a.transfermarkt.technology/portrait/header/599193-1695756396.jpg',
+      'Daniel Ruiz': 'https://img.a.transfermarkt.technology/portrait/header/627559-1695756578.jpg',
+      'David Mackalister Silva': 'https://img.a.transfermarkt.technology/portrait/header/74506-1695756522.jpg',
+      'Wuilker Faríñez': 'https://img.a.transfermarkt.technology/portrait/header/377382-1695756338.jpg',
+      'Juan Ignacio Dinenno': 'https://img.a.transfermarkt.technology/portrait/header/283635-1705609172.jpg',
+      'Yimmi Chará': 'https://img.a.transfermarkt.technology/portrait/header/131094-1708462600.jpg',
+      'Teófilo Gutiérrez': 'https://img.a.transfermarkt.technology/portrait/header/67140-1695823989.jpg',
+      'Adrián Ramos': 'https://img.a.transfermarkt.technology/portrait/header/73782-1695823112.jpg',
+      'Yojan Garcés': 'https://api.sofascore.app/api/v1/player/1614424/image',
+      'Dylan Borrero': 'https://img.a.transfermarkt.technology/portrait/header/661142-1650643515.jpg',
+      'Luis Quiñones': 'https://img.a.transfermarkt.technology/portrait/header/264301-1690226384.jpg',
+      'Víctor Cantillo': 'https://img.a.transfermarkt.technology/portrait/header/332296-1708462535.jpg',
+      'Cristopher Fiermarin': 'https://img.a.transfermarkt.technology/portrait/header/465824-1695757420.jpg',
+      'Jean Paulo Fernandes': 'https://img.a.transfermarkt.technology/portrait/header/370252-1695822850.jpg',
+      'Javier Burrai': 'https://img.a.transfermarkt.technology/portrait/header/266589-1695756280.jpg'
+    };
+
+    const PHOTO_MEMORY_CACHE = (() => {
+      try {
+        return JSON.parse(localStorage.getItem('fpc_player_photos_v2') || '{}');
+      } catch {
+        return {};
+      }
+    })();
+
+    const savePhotoToCache = (playerName, url) => {
+      PHOTO_MEMORY_CACHE[playerName] = url;
+      try {
+        localStorage.setItem('fpc_player_photos_v2', JSON.stringify(PHOTO_MEMORY_CACHE));
+      } catch {}
+    };
+
+    const PENDING_PHOTO_REQUESTS = {};
+
+    const fetchPlayerPhotoOnline = async (playerName) => {
+      if (DIRECT_PLAYER_PHOTOS[playerName]) return DIRECT_PLAYER_PHOTOS[playerName];
+      if (PHOTO_MEMORY_CACHE[playerName]) return PHOTO_MEMORY_CACHE[playerName];
+      if (PENDING_PHOTO_REQUESTS[playerName]) return PENDING_PHOTO_REQUESTS[playerName];
+
+      PENDING_PHOTO_REQUESTS[playerName] = (async () => {
+        try {
+          const query = encodeURIComponent(playerName);
+          const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${query}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.player) && data.player.length > 0) {
+              const soccerPlayer = data.player.find(p => p.strSport === 'Soccer' && (p.strCutout || p.strThumb)) || data.player[0];
+              const foundImg = soccerPlayer.strCutout || soccerPlayer.strThumb || soccerPlayer.strRender;
+              if (foundImg) {
+                savePhotoToCache(playerName, foundImg);
+                return foundImg;
+              }
+            }
+          }
+        } catch {}
+
+        try {
+          const wikiQuery = encodeURIComponent(playerName);
+          const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&titles=${wikiQuery}&prop=pageimages&format=json&pithumbsize=250&origin=*`);
+          if (wikiRes.ok) {
+            const wikiData = await wikiRes.json();
+            const pages = wikiData?.query?.pages || {};
+            const firstPage = Object.values(pages)[0];
+            if (firstPage?.thumbnail?.source) {
+              savePhotoToCache(playerName, firstPage.thumbnail.source);
+              return firstPage.thumbnail.source;
+            }
+          }
+        } catch {}
+
+        return null;
+      })();
+
+      return PENDING_PHOTO_REQUESTS[playerName];
+    };
 
     const FULL_ROSTERS_2026 = {
       buc: [
@@ -626,15 +725,27 @@
 
     const TeamCrest = ({ teamId, size = 'md' }) => {
       const team = getTeamById(teamId);
-      const [imgFailed, setImgFailed] = useState(false);
-      const dims = size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-14 h-14' : 'w-11 h-11';
+      const [srcIndex, setSrcIndex] = useState(0);
+      const dims = size === 'xs' ? 'w-5 h-5' : size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-14 h-14' : 'w-11 h-11';
       const uid = `${team.id}_${size}`;
+
+      const sources = [team.logo, team.altLogo].filter(Boolean);
+
+      useEffect(() => {
+        setSrcIndex(0);
+      }, [teamId]);
 
       return (
         <div className={`relative inline-flex items-center justify-center shrink-0 select-none ${dims}`} title={team.name}>
-          {!imgFailed && team.logo ? (
-            <div className="w-full h-full rounded-xl bg-white/95 p-1 shadow-md border border-slate-300/80 flex items-center justify-center overflow-hidden">
-              <img src={team.logo} alt={team.name} onError={() => setImgFailed(true)} className="w-full h-full object-contain" />
+          {srcIndex < sources.length ? (
+            <div className="w-full h-full rounded-full bg-white p-0.5 shadow-md border border-slate-300/90 flex items-center justify-center overflow-hidden">
+              <img
+                src={sources[srcIndex]}
+                alt={team.name}
+                referrerPolicy="no-referrer"
+                onError={() => setSrcIndex(prev => prev + 1)}
+                className="w-full h-full object-contain"
+              />
             </div>
           ) : (
             <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow-md">
@@ -651,6 +762,52 @@
               <path d="M50 4 L94 18 L94 58 C94 86 74 103 50 112 C26 103 6 86 6 58 L6 18 Z" fill="none" stroke={team.accent || '#FFFFFF'} strokeWidth="5" />
               <text x="50" y="59" textAnchor="middle" fill="#FFFFFF" fontSize="24" fontWeight="900" fontFamily="Inter, sans-serif">{team.short}</text>
             </svg>
+          )}
+        </div>
+      );
+    };
+
+    const PlayerAvatar = ({ player, size = 'md', showBadge = true }) => {
+      const team = getTeamById(player.teamId);
+      const [photoUrl, setPhotoUrl] = useState(() => DIRECT_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name] || null);
+      const [imgError, setImgError] = useState(false);
+
+      useEffect(() => {
+        let active = true;
+        setImgError(false);
+        const cached = DIRECT_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name];
+        if (cached) {
+          setPhotoUrl(cached);
+          return;
+        }
+        fetchPlayerPhotoOnline(player.name).then(found => {
+          if (active && found) setPhotoUrl(found);
+        });
+        return () => { active = false; };
+      }, [player.name]);
+
+      const dims = size === 'sm' ? 'w-9 h-9' : size === 'lg' ? 'w-16 h-16' : 'w-12 h-12';
+      const badgeSize = size === 'sm' ? 'xs' : size === 'lg' ? 'sm' : 'xs';
+      const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=${team.primary.replace('#', '')}&color=ffffff&bold=true&size=128`;
+
+      return (
+        <div className={`relative inline-flex items-center justify-center shrink-0 select-none ${dims}`}>
+          <div
+            className="w-full h-full rounded-full overflow-hidden border-2 shadow-lg bg-slate-900 flex items-center justify-center"
+            style={{ borderColor: team.primary }}
+          >
+            <img
+              src={!imgError && photoUrl ? photoUrl : fallbackAvatarUrl}
+              alt={player.name}
+              referrerPolicy="no-referrer"
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover object-top"
+            />
+          </div>
+          {showBadge && (
+            <div className="absolute -bottom-1 -right-1 z-10">
+              <TeamCrest teamId={player.teamId} size={badgeSize} />
+            </div>
           )}
         </div>
       );
@@ -683,7 +840,7 @@
             <span className="bg-slate-950/95 text-emerald-400 border border-emerald-500/60 text-[10px] font-black px-1.5 py-0.5 rounded shadow">★{player.sofaRating}</span>
             <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded shadow">+{lastMatchPts}</span>
           </div>
-          <TeamCrest teamId={player.teamId} size="md" />
+          <PlayerAvatar player={player} size="md" showBadge={true} />
           <div className="mt-1.5 bg-slate-950/95 border border-slate-700 px-2 py-0.5 rounded-lg max-w-full shadow flex items-center gap-1.5">
             <span className={`text-[9px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${getPosColor(player.pos)}`}>{player.pos}</span>
             <p className="text-[11px] font-extrabold text-white truncate text-center">{player.name.split(' ').slice(-1)[0]}</p>
@@ -1697,8 +1854,8 @@
                         ) : (
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                             {lineupByPos.bench.map(p => (
-                              <div key={p.id} onClick={() => setSelectedPlayerModal(p)} className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer">
-                                <TeamCrest teamId={p.teamId} size="sm" />
+                              <div key={p.id} onClick={() => setSelectedPlayerModal(p)} className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer hover:border-emerald-500/40 transition">
+                                <PlayerAvatar player={p} size="sm" showBadge={true} />
                                 <div className="min-w-0 flex-1">
                                   <div className="text-xs font-bold text-white truncate">{p.name}</div>
                                   <div className="text-[10px] text-slate-400">{p.pos} • {formatCOP(p.value)}</div>
@@ -1740,7 +1897,7 @@
                             return (
                               <div key={player.id} className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                  <TeamCrest teamId={player.teamId} size="sm" />
+                                  <PlayerAvatar player={player} size="sm" showBadge={true} />
                                   <div className="min-w-0">
                                     <div className="flex items-center gap-1.5">
                                       <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${getPosColor(player.pos)}`}>{player.pos}</span>
@@ -1798,7 +1955,7 @@
                             <div>
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
-                                  <TeamCrest teamId={player.teamId} size="md" />
+                                  <PlayerAvatar player={player} size="md" showBadge={true} />
                                   <div>
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${getPosColor(player.pos)}`}>{player.pos}</span>
@@ -2007,7 +2164,7 @@
                           <div key={player.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-2.5">
-                                <TeamCrest teamId={player.teamId} size="md" />
+                                <PlayerAvatar player={player} size="md" showBadge={true} />
                                 <div>
                                   <div className="flex items-center gap-1.5">
                                     <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${getPosColor(player.pos)}`}>{player.pos}</span>
@@ -2171,8 +2328,8 @@
                     const isStarter = (inspectingMember.lineup || []).includes(p.id);
                     return (
                       <div key={p.id} className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <TeamCrest teamId={p.teamId} size="sm" />
+                        <div className="flex items-center gap-2.5">
+                          <PlayerAvatar player={p} size="sm" showBadge={true} />
                           <div>
                             <div className="flex items-center gap-1.5">
                               <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${getPosColor(p.pos)}`}>{p.pos}</span>
@@ -2243,16 +2400,20 @@
           {/* Modal Detalle Jugador */}
           {selectedPlayerModal && (
             <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <TeamCrest teamId={selectedPlayerModal.teamId} size="md" />
+                  <div className="flex items-center gap-3.5">
+                    <PlayerAvatar player={selectedPlayerModal} size="lg" showBadge={true} />
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${getPosColor(selectedPlayerModal.pos)}`}>{selectedPlayerModal.pos}</span>
                         <h3 className="text-xl font-black text-white">{selectedPlayerModal.name}</h3>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">{getTeamById(selectedPlayerModal.teamId).name}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <TeamCrest teamId={selectedPlayerModal.teamId} size="xs" />
+                        <p className="text-xs font-semibold text-slate-300">{getTeamById(selectedPlayerModal.teamId).name}</p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-emerald-400 font-bold">{selectedPlayerModal.role || 'Titular'}</span>
+                      </div>
                     </div>
                   </div>
                   <button onClick={() => setSelectedPlayerModal(null)} className="text-slate-400 hover:text-white text-sm font-bold cursor-pointer">✕</button>
@@ -2261,6 +2422,11 @@
                   <div><span className="text-[10px] text-slate-400 block">Sofascore</span><span className="text-lg font-black text-emerald-400">★{selectedPlayerModal.sofaRating}</span></div>
                   <div><span className="text-[10px] text-slate-400 block">Puntos</span><span className="text-lg font-black text-amber-400">{selectedPlayerModal.points}</span></div>
                   <div><span className="text-[10px] text-slate-400 block">Valor</span><span className="text-sm font-black text-white">{formatCOP(selectedPlayerModal.value)}</span></div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mb-4 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-center text-xs">
+                  <div><span className="text-[10px] text-slate-400 block">Goles</span><span className="font-black text-white">⚽ {selectedPlayerModal.goals}</span></div>
+                  <div><span className="text-[10px] text-slate-400 block">Asistencias</span><span className="font-black text-white">👟 {selectedPlayerModal.assists}</span></div>
+                  <div><span className="text-[10px] text-slate-400 block">Valla Invicta</span><span className="font-black text-white">🧤 {selectedPlayerModal.cleanSheets}</span></div>
                 </div>
                 <div className="flex gap-2">
                   {(myMemberProfile?.squad || []).includes(selectedPlayerModal.id) ? (
