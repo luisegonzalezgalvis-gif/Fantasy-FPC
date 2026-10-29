@@ -832,7 +832,7 @@
       return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">{paths[name] || paths.trophy}</svg>;
     };
 
-    function PitchPlayerCard({ player, owner, onSelect }) {
+    <comment-tag id="1">function PitchPlayerCard({ player, owner, onSelect }) {
       const lastMatchPts = player.last5?.[player.last5.length - 1] ?? 6;
       return (
         <div onClick={onSelect} className="group flex flex-col items-center cursor-pointer transition-transform hover:scale-105 w-24 sm:w-28">
@@ -848,9 +848,26 @@
           {owner && <span className="text-[9px] font-bold text-amber-300 bg-slate-950/90 px-1.5 py-0.5 rounded mt-0.5 truncate max-w-full">👤 {owner.managerName}</span>}
         </div>
       );
+    }</comment-tag id="1" text="Hacer las tarjetas de los jugadores más compactas y limpias, estilo Biwenger (avatar circular grande, puntos superpuestos y nombre en una caja sencilla)." type="suggestion">function PitchPlayerCard({ player, owner, onSelect }) {
+      const lastMatchPts = player.last5?.[player.last5.length - 1] ?? 6;
+      const getPointsColor = (pts) => pts >= 10 ? 'bg-emerald-500 text-white' : pts >= 5 ? 'bg-amber-500 text-white' : pts < 0 ? 'bg-rose-500 text-white' : 'bg-slate-500 text-white';
+      return (
+        <div onClick={onSelect} className="group flex flex-col items-center cursor-pointer transition-transform hover:scale-105 w-20 sm:w-24 relative">
+          <div className="relative">
+            <PlayerAvatar player={player} size="md" showBadge={true} />
+            <div className={`absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center rounded-full text-[11px] font-bold shadow-md border-2 border-white dark:border-slate-900 ${getPointsColor(lastMatchPts)}`}>
+              {lastMatchPts}
+            </div>
+          </div>
+          <div className="mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm px-1 py-0.5">
+            <p className="text-[10px] font-semibold text-slate-800 dark:text-slate-200 truncate text-center">{player.name.split(' ').slice(-1)[0]}</p>
+          </div>
+          {owner && <span className="text-[9px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-full">{owner.managerName}</span>}
+        </div>
+      );
     }
 
-    function EmptySlotCard({ pos }) {
+    <comment-tag id="2">function EmptySlotCard({ pos }) {
       return (
         <div className="flex flex-col items-center justify-center w-20 sm:w-24 opacity-90">
           <div className="w-11 h-12 rounded-2xl border-2 border-dashed border-rose-400/80 bg-rose-950/60 flex flex-col items-center justify-center text-rose-300 shadow">
@@ -858,6 +875,15 @@
             <span className="text-[10px] font-black text-rose-400">-4 pts</span>
           </div>
           <span className="mt-1 text-[10px] font-bold text-rose-200 bg-rose-950/90 px-2 py-0.5 rounded">Vacío (-4)</span>
+        </div>
+      );
+    }</comment-tag id="2" text="Hacer el hueco vacío más sutil y clásico, circular, sin los colores neón, para asemejarse a la UI limpia de Biwenger." type="suggestion">function EmptySlotCard({ pos }) {
+      return (
+        <div className="flex flex-col items-center justify-center w-20 sm:w-24 opacity-75">
+          <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-400/60 bg-slate-900/30 flex items-center justify-center text-slate-300 shadow-inner">
+            <span className="text-xs font-bold">{pos}</span>
+          </div>
+          <span className="mt-1 text-[9px] font-medium text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded">-4 pts</span>
         </div>
       );
     }
@@ -1748,10 +1774,13 @@
                     ].map(t => {
                       const active = activeTab === t.id;
                       return (
-                        <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-black transition cursor-pointer whitespace-nowrap border ${active ? `bg-gradient-to-r ${t.grad} text-white border-white/30 shadow-lg scale-[1.02]` : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'}`}>
+                        <comment-tag id="3">                        <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-black transition cursor-pointer whitespace-nowrap border ${active ? `bg-gradient-to-r ${t.grad} text-white border-white/30 shadow-lg scale-[1.02]` : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'}`}>
                           <Icon name={t.icon} className="w-4 h-4" /><span>{t.label}</span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full ${active ? 'bg-black/25 text-white' : 'bg-slate-800 text-slate-400'}`}>{t.badge}</span>
-                        </button>
+                        </button></comment-tag id="3" text="Transformar el menú de navegación a pestañas más limpias, sin degradados, con un simple borde inferior (estilo Material o web limpia) típico de este tipo de apps." type="suggestion">                        <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition cursor-pointer whitespace-nowrap border-b-2 ${active ? 'border-emerald-500 text-emerald-500 bg-emerald-500/10' : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}>
+                          <Icon name={t.icon} className="w-4 h-4" /><span>{t.label}</span>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${active ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-300'}`}>{t.badge}</span>
+                        </button></comment-tag>
                       );
                     })}
                   </nav>
@@ -1810,7 +1839,7 @@
                       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h2 className="text-lg font-extrabold text-white">Alineación Titular</h2>
+                            <comment-tag id="4"><h2 className="text-lg font-extrabold text-white">Alineación Titular</h2></comment-tag id="4" text="Reducir el grosor de las tipografías globales (de extrabold/black a semibold/bold) proporciona una lectura visual más clara y se asimila a diseños limpios como el de Biwenger." type="suggestion"><h2 className="text-lg font-bold text-white">Alineación Titular</h2></comment-tag>
                             <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">{lineupByPos.totalStarters}/11</span>
                             <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">Cambios: {myMemberProfile?.changesUsedThisMatchday || 0}/3</span>
                           </div>
@@ -1824,10 +1853,16 @@
                         </div>
                       </div>
 
-                      <div className="relative rounded-3xl overflow-hidden border-2 border-emerald-700/70 bg-gradient-to-b from-emerald-800 via-emerald-700 to-emerald-800 p-5 min-h-[540px] flex flex-col justify-between shadow-2xl">
+                      <comment-tag id="5"><div className="relative rounded-3xl overflow-hidden border-2 border-emerald-700/70 bg-gradient-to-b from-emerald-800 via-emerald-700 to-emerald-800 p-5 min-h-[540px] flex flex-col justify-between shadow-2xl">
                         <div className="absolute inset-4 border-2 border-white/25 rounded-xl pointer-events-none"></div>
                         <div className="absolute left-4 right-4 top-1/2 h-0.5 bg-white/25 pointer-events-none"></div>
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border-2 border-white/25 pointer-events-none"></div>
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border-2 border-white/25 pointer-events-none"></div></comment-tag id="5" text="Utilizar un césped verde plano (o con bandas sutiles) en lugar de un degradado neón vibrante, da un look de 'pizarra' clásica que es estándar en estas apps." type="suggestion"><div className="relative rounded-xl overflow-hidden border-2 border-[#6f9e53] bg-[#5a8c3d] p-5 min-h-[540px] flex flex-col justify-between shadow-md">
+                        {/* Líneas de campo más sutiles y clásicas */}
+                        <div className="absolute inset-2 border border-white/30 rounded pointer-events-none"></div>
+                        <div className="absolute left-2 right-2 top-1/2 h-px bg-white/30 pointer-events-none"></div>
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border border-white/30 pointer-events-none"></div>
+                        <div className="absolute left-1/2 -top-2 -translate-x-1/2 w-32 h-16 border border-white/30 rounded-b-md pointer-events-none"></div>
+                        <div className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-32 h-16 border border-white/30 rounded-t-md pointer-events-none"></div></comment-tag>
 
                         <div className="relative z-10 flex justify-around items-center gap-2 py-2 flex-wrap">
                           {lineupByPos.DEL.map(p => <PitchPlayerCard key={p.id} player={p} owner={playerOwnerMap[p.id]} onSelect={() => setSelectedPlayerModal(p)} />)}
@@ -2110,7 +2145,7 @@
                                   <td className="py-3 px-2"><button onClick={() => setInspectingMember(m)} className="text-xs text-emerald-400 font-bold hover:underline cursor-pointer">Ver {(m.squad || []).length} jug.</button></td>
                                   <td className="py-3 px-2">
                                     <span className="text-xs font-bold text-emerald-400 block">+{m.lastMatchdayPoints || 0} pts</span>
-                                    {m.lastPotReward !== undefined && <span className="text-[10px] text-amber-400 font-bold">Pozo: +{formatCOP(m.lastPotReward)}</span>}
+                                    {m.lastMatchdayPoints !== undefined && <span className="text-[10px] text-amber-400 font-bold">Pozo: +{formatCOP(m.lastPotReward)}</span>}
                                   </td>
                                   <td className="py-3 px-2 text-right font-black text-amber-400">{m.points || 0} pts</td>
                                 </tr>
@@ -2479,3 +2514,5 @@
   </script>
 </body>
 </html>
+```eof
+*Sugerencias añadidas.*
