@@ -91,12 +91,13 @@
     const { useState, useEffect, useMemo } = React;
 
     const VERCEL_FIREBASE_CONFIG = {
-      apiKey: "",
-      authDomain: "",
-      projectId: "",
-      storageBucket: "",
-      messagingSenderId: "",
-      appId: ""
+      apiKey: "AIzaSyBIDcuUwbGhCYJ8Gh8mCUNWde1gbpVQYxU",
+      authDomain: "fantasy-46423.firebaseapp.com",
+      projectId: "fantasy-46423",
+      storageBucket: "fantasy-46423.firebasestorage.app",
+      messagingSenderId: "338491388424",
+      appId: "1:338491388424:web:fc7cf304ee3dbd3cf157bd",
+      measurementId: "G-7SWDB75F9W"
     };
 
     const FORMATIONS = {
@@ -742,22 +743,44 @@
         else window.addEventListener('fpc-firebase-ready', () => initFirebaseConnection());
       }, []);
 
+      const parseFlexibleFirebaseConfig = (rawText) => {
+        if (!rawText) return null;
+        try {
+          return JSON.parse(rawText);
+        } catch {
+          const extractField = (key) => {
+            const regex = new RegExp(`${key}\\s*:\\s*["']([^"']+)["']`);
+            const match = rawText.match(regex);
+            return match ? match[1] : "";
+          };
+          const apiKey = extractField('apiKey');
+          const projectId = extractField('projectId');
+          if (!apiKey || !projectId) return null;
+          return {
+            apiKey,
+            authDomain: extractField('authDomain'),
+            projectId,
+            storageBucket: extractField('storageBucket'),
+            messagingSenderId: extractField('messagingSenderId'),
+            appId: extractField('appId')
+          };
+        }
+      };
+
       const handleSaveCustomFirebase = async (e) => {
         e.preventDefault();
-        try {
-          const parsed = JSON.parse(firebaseConfigInput);
-          if (!parsed.apiKey || !parsed.projectId) {
-            showNotification('El JSON debe incluir apiKey y projectId de Firebase', 'error');
-            return;
-          }
-          localStorage.setItem('fpc_custom_firebase_cfg', JSON.stringify(parsed));
-          const ok = await initFirebaseConnection(parsed);
-          if (ok) {
-            setShowCloudSetupModal(false);
-            showNotification('¡Conectado a Firebase Cloud! Ahora pueden jugar desde distintos celulares.');
-          }
-        } catch {
-          showNotification('Formato JSON inválido. Copia el objeto firebaseConfig en formato JSON válido.', 'error');
+        const parsed = parseFlexibleFirebaseConfig(firebaseConfigInput);
+        if (!parsed || !parsed.apiKey || !parsed.projectId) {
+          showNotification('Pega el bloque firebaseConfig completo que te da Firebase (debe tener apiKey y projectId).', 'error');
+          return;
+        }
+        localStorage.setItem('fpc_custom_firebase_cfg', JSON.stringify(parsed));
+        const ok = await initFirebaseConnection(parsed);
+        if (ok) {
+          setShowCloudSetupModal(false);
+          showNotification('¡Conectado a Firebase Cloud! Ya pueden jugar todos en tiempo real.');
+        } else {
+          showNotification('No se pudo conectar. Verifica que habilitaste Firestore Database.', 'error');
         }
       };
 
