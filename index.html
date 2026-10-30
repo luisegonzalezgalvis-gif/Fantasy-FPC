@@ -715,24 +715,24 @@
             if (saved) cfg = JSON.parse(saved);
           } catch {}
         }
+        // Prioridad absoluta al proyecto de Firebase propio (fantasy-46423)
+        if (!cfg && VERCEL_FIREBASE_CONFIG && VERCEL_FIREBASE_CONFIG.apiKey) {
+          cfg = VERCEL_FIREBASE_CONFIG;
+        }
         if (!cfg) {
-          cfg = (typeof __firebase_config !== 'undefined' && __firebase_config) ? JSON.parse(__firebase_config) : VERCEL_FIREBASE_CONFIG;
+          cfg = (typeof __firebase_config !== 'undefined' && __firebase_config) ? JSON.parse(__firebase_config) : null;
         }
         if (cfg && cfg.apiKey) {
           try {
-            const app = sdk.initializeApp(cfg, `fpc_${Date.now()}`);
+            const app = sdk.initializeApp(cfg, `fpc_${cfg.projectId || Date.now()}`);
             const auth = sdk.getAuth(app);
             const db = sdk.getFirestore(app);
-            setCloudServices({ auth, db, isCloud: true });
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-              await sdk.signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-              await sdk.signInAnonymously(auth);
-            }
+            setCloudServices({ auth, db, isCloud: true, projectId: cfg.projectId });
+            await sdk.signInAnonymously(auth);
             sdk.onAuthStateChanged(auth, (u) => setUser(u));
             return true;
           } catch (e) {
-            console.warn(e);
+            console.warn('Error conectando a Firebase:', e);
           }
         }
         return false;
@@ -1531,11 +1531,11 @@
                 <div className="flex items-center justify-between mb-4">
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1.5 ${cloudServices.isCloud ? 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-600 border border-amber-500/30'}`}>
                     <span className={`w-2 h-2 rounded-full ${cloudServices.isCloud ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-                    {cloudServices.isCloud ? 'Multijugador Cloud Activo' : 'Modo Dispositivo Local'}
+                    {cloudServices.isCloud ? `Conectado: ${cloudServices.projectId || 'Cloud'}` : 'Modo Dispositivo Local'}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button type="button" onClick={() => setShowCloudSetupModal(true)} className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-sky-500/15 text-sky-600 hover:bg-sky-500/25 cursor-pointer">
-                      ☁️ Configurar Nube
+                      ☁️ Estado Nube
                     </button>
                     <button type="button" onClick={toggleTheme} className="p-1.5 rounded-xl bw-subcard border cursor-pointer">
                       <Icon name={isLight ? 'moon' : 'sun'} className="w-4 h-4 text-amber-500" />
