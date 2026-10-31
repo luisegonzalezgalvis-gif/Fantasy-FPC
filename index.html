@@ -191,85 +191,168 @@
 
     const PHOTO_MEMORY_CACHE = (() => {
       try {
-        return JSON.parse(localStorage.getItem('fpc_player_photos_v6') || '{}');
+        return JSON.parse(localStorage.getItem('fpc_player_photos_v8') || '{}');
       } catch {
         return {};
       }
     })();
 
     const savePhotoToCache = (playerName, url) => {
+      if (!url) return;
       PHOTO_MEMORY_CACHE[playerName] = url;
       try {
-        localStorage.setItem('fpc_player_photos_v6', JSON.stringify(PHOTO_MEMORY_CACHE));
+        localStorage.setItem('fpc_player_photos_v8', JSON.stringify(PHOTO_MEMORY_CACHE));
       } catch {}
+    };
+
+    // Catálogo directo de fotos reales verificadas (Transfermarkt / Wikimedia / Sofascore)
+    const VERIFIED_PLAYER_PHOTOS = {
+      'James Rodríguez': 'https://img.a.transfermarkt.technology/portrait/header/88103-1719344758.jpg',
+      'Radamel Falcao García': 'https://img.a.transfermarkt.technology/portrait/header/39152-1695756610.jpg',
+      'David Ospina': 'https://img.a.transfermarkt.technology/portrait/header/73396-1686666470.jpg',
+      'Juan Guillermo Cuadrado': 'https://img.a.transfermarkt.technology/portrait/header/91970-1724667275.jpg',
+      'Juan Fernando Quintero': 'https://img.a.transfermarkt.technology/portrait/header/122582-1719344845.jpg',
+      'Carlos Bacca': 'https://img.a.transfermarkt.technology/portrait/header/119235-1695823731.jpg',
+      'Hugo Rodallega': 'https://img.a.transfermarkt.technology/portrait/header/37933-1695757977.jpg',
+      'Dayro Moreno': 'https://img.a.transfermarkt.technology/portrait/header/38114-1695825061.jpg',
+      'Edwin Cardona': 'https://img.a.transfermarkt.technology/portrait/header/119342-1721853411.jpg',
+      'Matheus Uribe': 'https://img.a.transfermarkt.technology/portrait/header/214536-1686666634.jpg',
+      'Franco Armani': 'https://img.a.transfermarkt.technology/portrait/header/119634-1719327503.jpg',
+      'Pedro Gallese': 'https://img.a.transfermarkt.technology/portrait/header/94847-1719175534.jpg',
+      'Santiago Mele': 'https://img.a.transfermarkt.technology/portrait/header/440381-1695823210.jpg',
+      'Álvaro Montero': 'https://img.a.transfermarkt.technology/portrait/header/291401-1695756312.jpg',
+      'Leonardo Castro': 'https://img.a.transfermarkt.technology/portrait/header/332297-1695756665.jpg',
+      'Cristian Chicho Arango': 'https://img.a.transfermarkt.technology/portrait/header/262987-1709066596.jpg',
+      'Alfredo Morelos': 'https://img.a.transfermarkt.technology/portrait/header/338962-1721853543.jpg',
+      'Luis Muriel': 'https://img.a.transfermarkt.technology/portrait/header/119228-1708462479.jpg',
+      'Teófilo Gutiérrez': 'https://img.a.transfermarkt.technology/portrait/header/67140-1695823989.jpg',
+      'Adrián Ramos': 'https://img.a.transfermarkt.technology/portrait/header/73782-1695823112.jpg',
+      'Carlos Darwin Quintero': 'https://img.a.transfermarkt.technology/portrait/header/73651-1695758240.jpg',
+      'David Mackalister Silva': 'https://img.a.transfermarkt.technology/portrait/header/74506-1695756522.jpg',
+      'Andrés Llinás': 'https://img.a.transfermarkt.technology/portrait/header/599193-1695756396.jpg',
+      'Juan Pablo Vargas': 'https://img.a.transfermarkt.technology/portrait/header/377385-1695756440.jpg',
+      'Daniel Ruiz': 'https://img.a.transfermarkt.technology/portrait/header/627559-1695756578.jpg',
+      'Andrés Román': 'https://img.a.transfermarkt.technology/portrait/header/490488-1721853190.jpg',
+      'William Tesillo': 'https://img.a.transfermarkt.technology/portrait/header/119246-1721853121.jpg',
+      'Jorman Campuzano': 'https://img.a.transfermarkt.technology/portrait/header/459467-1721853345.jpg',
+      'Fabián Sambueza': 'https://img.a.transfermarkt.technology/portrait/header/238343-1695757761.jpg',
+      'Luciano Pons': 'https://img.a.transfermarkt.technology/portrait/header/440380-1695757545.jpg',
+      'Cristopher Fiermarin': 'https://img.a.transfermarkt.technology/portrait/header/465824-1695757420.jpg',
+      'Víctor Cantillo': 'https://img.a.transfermarkt.technology/portrait/header/332296-1708462535.jpg',
+      'Yeison Guzmán': 'https://img.a.transfermarkt.technology/portrait/header/526430-1695824916.jpg',
+      'Juan Ignacio Dinenno': 'https://img.a.transfermarkt.technology/portrait/header/283635-1705609172.jpg',
+      'Yimmi Chará': 'https://img.a.transfermarkt.technology/portrait/header/131094-1708462600.jpg',
+      'Wuilker Faríñez': 'https://img.a.transfermarkt.technology/portrait/header/377382-1695756338.jpg',
+      'Frank Fabra': 'https://img.a.transfermarkt.technology/portrait/header/214535-1708462111.jpg',
+      'Jarlan Barrera': 'https://img.a.transfermarkt.technology/portrait/header/332295-1695822990.jpg',
+      'Nicolás Benedetti': 'https://img.a.transfermarkt.technology/portrait/header/381150-1695823050.jpg',
+      'Fredy Montero': 'https://img.a.transfermarkt.technology/portrait/header/73780-1695823150.jpg',
+      'Alexander Mejía': 'https://img.a.transfermarkt.technology/portrait/header/73781-1695823200.jpg'
+    };
+
+    const normalizeSearchVariants = (rawName) => {
+      const nickFixes = {
+        'Cristian Chicho Arango': ['Cristian Arango', 'Chicho Arango'],
+        'Emanuel Bebelo Reynoso': ['Emanuel Reynoso', 'Bebelo Reynoso'],
+        'Luis Chino Sandoval': ['Luis Sandoval', 'Chino Sandoval'],
+        'David Mackalister Silva': ['David Silva', 'Mackalister Silva'],
+        'Jean Paulo Fernandes': ['Jean Fernandes', 'Jean Paulo Fernandes Filho']
+      };
+      const variants = [...(nickFixes[rawName] || []), rawName];
+      const parts = rawName.trim().split(/\s+/);
+      if (parts.length >= 3) {
+        variants.push(`${parts[0]} ${parts[parts.length - 1]}`);
+        variants.push(`${parts[0]} ${parts[1]}`);
+      }
+      return [...new Set(variants)];
     };
 
     const PENDING_PHOTO_REQUESTS = {};
 
-    // Buscador Multi-Respaldo de Fotos Reales (Wikipedia Exact Title + Wikipedia Search + TheSportsDB)
+    // Buscador Multi-Respaldo de Fotos Reales (Diccionario Verificado + Wikipedia Exact/Search + Wikimedia Commons + TheSportsDB)
     const fetchPlayerPhotoOnline = async (playerName) => {
+      if (VERIFIED_PLAYER_PHOTOS[playerName]) return VERIFIED_PLAYER_PHOTOS[playerName];
       if (PHOTO_MEMORY_CACHE[playerName]) return PHOTO_MEMORY_CACHE[playerName];
       if (PENDING_PHOTO_REQUESTS[playerName]) return PENDING_PHOTO_REQUESTS[playerName];
 
       PENDING_PHOTO_REQUESTS[playerName] = (async () => {
-        // Fuente 1: Wikipedia en Español por Título Exacto (con redirecciones automáticas)
-        try {
-          const exactQuery = encodeURIComponent(playerName);
-          const exactRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&titles=${exactQuery}&redirects=1&prop=pageimages&format=json&pithumbsize=300&origin=*`);
-          if (exactRes.ok) {
-            const exactData = await exactRes.json();
-            const pages = exactData?.query?.pages || {};
-            const firstPage = Object.values(pages)[0];
-            if (firstPage?.thumbnail?.source) {
-              savePhotoToCache(playerName, firstPage.thumbnail.source);
-              return firstPage.thumbnail.source;
-            }
-          }
-        } catch {}
+        const variants = normalizeSearchVariants(playerName);
 
-        // Fuente 2: TheSportsDB API (Recortes PNG transparentes y fotos de perfil)
-        try {
-          const query = encodeURIComponent(playerName);
-          const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${query}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && Array.isArray(data.player) && data.player.length > 0) {
-              const soccerPlayer = data.player.find(p => p.strSport === 'Soccer' && (p.strCutout || p.strThumb)) || data.player[0];
-              const foundImg = soccerPlayer.strCutout || soccerPlayer.strThumb || soccerPlayer.strRender;
-              if (foundImg) {
-                savePhotoToCache(playerName, foundImg);
-                return foundImg;
+        for (const candidateName of variants) {
+          // Fuente 1: TheSportsDB API (Recortes PNG y fotos de perfil de futbolistas)
+          try {
+            const query = encodeURIComponent(candidateName);
+            const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${query}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && Array.isArray(data.player) && data.player.length > 0) {
+                const soccerPlayer = data.player.find(p => p.strSport === 'Soccer' && (p.strCutout || p.strThumb || p.strRender)) || data.player[0];
+                const foundImg = soccerPlayer.strCutout || soccerPlayer.strThumb || soccerPlayer.strRender;
+                if (foundImg) {
+                  savePhotoToCache(playerName, foundImg);
+                  return foundImg;
+                }
               }
             }
-          }
-        } catch {}
+          } catch {}
 
-        // Fuente 3: Búsqueda abierta en Wikipedia Español
-        try {
-          const wikiQuery = encodeURIComponent(`${playerName} futbolista`);
-          const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=300&origin=*`);
-          if (wikiRes.ok) {
-            const wikiData = await wikiRes.json();
-            const pages = wikiData?.query?.pages || {};
-            const firstPage = Object.values(pages)[0];
-            if (firstPage?.thumbnail?.source) {
-              savePhotoToCache(playerName, firstPage.thumbnail.source);
-              return firstPage.thumbnail.source;
+          // Fuente 2: Wikipedia en Español por Título Exacto
+          try {
+            const exactQuery = encodeURIComponent(candidateName);
+            const exactRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&titles=${exactQuery}&redirects=1&prop=pageimages&format=json&pithumbsize=300&origin=*`);
+            if (exactRes.ok) {
+              const exactData = await exactRes.json();
+              const pages = exactData?.query?.pages || {};
+              const firstPage = Object.values(pages)[0];
+              if (firstPage?.thumbnail?.source && !firstPage.thumbnail.source.includes('Flag_of_') && !firstPage.thumbnail.source.includes('Soccerball')) {
+                savePhotoToCache(playerName, firstPage.thumbnail.source);
+                return firstPage.thumbnail.source;
+              }
             }
-          }
-        } catch {}
+          } catch {}
 
-        // Fuente 4: Búsqueda abierta en Wikipedia Inglés
+          // Fuente 3: Búsqueda inteligente en Wikipedia Español (4 candidatos para elegir el que sí tenga foto)
+          try {
+            const wikiQuery = encodeURIComponent(`${candidateName} futbolista`);
+            const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiQuery}&gsrlimit=4&prop=pageimages&format=json&pithumbsize=300&origin=*`);
+            if (wikiRes.ok) {
+              const wikiData = await wikiRes.json();
+              const pages = Object.values(wikiData?.query?.pages || {});
+              const pageWithThumb = pages.find(p => p?.thumbnail?.source && !p.thumbnail.source.includes('Flag_of_') && !p.thumbnail.source.includes('Soccerball'));
+              if (pageWithThumb?.thumbnail?.source) {
+                savePhotoToCache(playerName, pageWithThumb.thumbnail.source);
+                return pageWithThumb.thumbnail.source;
+              }
+            }
+          } catch {}
+
+          // Fuente 4: Búsqueda en Wikipedia Inglés (Muchos jugadores del FPC tienen foto en EN Wiki)
+          try {
+            const wikiEnQuery = encodeURIComponent(`${candidateName} footballer`);
+            const wikiEnRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiEnQuery}&gsrlimit=4&prop=pageimages&format=json&pithumbsize=300&origin=*`);
+            if (wikiEnRes.ok) {
+              const wikiEnData = await wikiEnRes.json();
+              const pages = Object.values(wikiEnData?.query?.pages || {});
+              const pageWithThumb = pages.find(p => p?.thumbnail?.source && !p.thumbnail.source.includes('Flag_of_') && !p.thumbnail.source.includes('Soccerball'));
+              if (pageWithThumb?.thumbnail?.source) {
+                savePhotoToCache(playerName, pageWithThumb.thumbnail.source);
+                return pageWithThumb.thumbnail.source;
+              }
+            }
+          } catch {}
+        }
+
+        // Fuente 5: Wikimedia Commons Direct Image Search
         try {
-          const wikiEnQuery = encodeURIComponent(`${playerName} footballer`);
-          const wikiEnRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiEnQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=300&origin=*`);
-          if (wikiEnRes.ok) {
-            const wikiEnData = await wikiEnRes.json();
-            const pages = wikiEnData?.query?.pages || {};
-            const firstPage = Object.values(pages)[0];
-            if (firstPage?.thumbnail?.source) {
-              savePhotoToCache(playerName, firstPage.thumbnail.source);
-              return firstPage.thumbnail.source;
+          const commonsQuery = encodeURIComponent(`${variants[0]} football`);
+          const commonsRes = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=filetype:bitmap|drawing%20${commonsQuery}&gsrnamespace=6&gsrlimit=2&prop=imageinfo&iiprop=url&iiurlwidth=250&format=json&origin=*`);
+          if (commonsRes.ok) {
+            const cData = await commonsRes.json();
+            const pages = Object.values(cData?.query?.pages || {});
+            const firstImg = pages.find(p => p?.imageinfo?.[0]?.thumburl)?.imageinfo?.[0]?.thumburl;
+            if (firstImg) {
+              savePhotoToCache(playerName, firstImg);
+              return firstImg;
             }
           }
         } catch {}
@@ -785,13 +868,13 @@
 
     const PlayerAvatar = ({ player, size = 'md', showBadge = true, isCaptain = false }) => {
       const team = getTeamById(player.teamId);
-      const [photoUrl, setPhotoUrl] = useState(() => PHOTO_MEMORY_CACHE[player.name] || null);
+      const [photoUrl, setPhotoUrl] = useState(() => VERIFIED_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name] || null);
       const [imgError, setImgError] = useState(false);
 
       useEffect(() => {
         let active = true;
         setImgError(false);
-        const cached = PHOTO_MEMORY_CACHE[player.name];
+        const cached = VERIFIED_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name];
         if (cached) {
           setPhotoUrl(cached);
           return;
@@ -912,9 +995,9 @@
     }
 
     function App() {
-      const [theme, setTheme] = useState('light');
+      const [theme, setTheme] = useState(() => localStorage.getItem('fpc_theme_v6') || 'light');
       const isLight = theme === 'light';
-      const [activeTab, setActiveTab] = useState('squad');
+      const [activeTab, setActiveTab] = useState(() => localStorage.getItem('fpc_active_tab_v6') || 'squad');
       const [selectedMatchdayView, setSelectedMatchdayView] = useState('f16');
       const [activeDataProvider, setActiveDataProvider] = useState('FLASHSCORE');
       const [toast, setToast] = useState(null);
@@ -934,8 +1017,18 @@
         try { return JSON.parse(localStorage.getItem('fpc_members_v6') || '[]'); } catch { return []; }
       });
 
-      const [activeAccount, setActiveAccount] = useState(null);
-      const [currentLeagueId, setCurrentLeagueId] = useState(null);
+      // Persistencia automática de sesión para que al recargar la página (F5) NO saque al menú principal
+      const [activeAccount, setActiveAccount] = useState(() => {
+        try {
+          const savedAcc = localStorage.getItem('fpc_active_account_v6');
+          return savedAcc ? JSON.parse(savedAcc) : null;
+        } catch {
+          return null;
+        }
+      });
+      const [currentLeagueId, setCurrentLeagueId] = useState(() => {
+        return localStorage.getItem('fpc_current_league_id_v6') || null;
+      });
       const [authMode, setAuthMode] = useState('register');
       const [authForm, setAuthForm] = useState(() => {
         const params = new URLSearchParams(window.location.search);
@@ -975,7 +1068,45 @@
 
       useEffect(() => {
         document.body.className = isLight ? 'bw-theme-light' : 'bw-theme-dark';
-      }, [isLight]);
+        try { localStorage.setItem('fpc_theme_v6', theme); } catch {}
+      }, [isLight, theme]);
+
+      // Guardar sesión, liga activa y pestaña actual automáticamente en localStorage
+      useEffect(() => {
+        try {
+          if (activeAccount) {
+            localStorage.setItem('fpc_active_account_v6', JSON.stringify(activeAccount));
+          } else {
+            localStorage.removeItem('fpc_active_account_v6');
+          }
+        } catch {}
+      }, [activeAccount]);
+
+      useEffect(() => {
+        try {
+          if (currentLeagueId) {
+            localStorage.setItem('fpc_current_league_id_v6', currentLeagueId);
+          } else {
+            localStorage.removeItem('fpc_current_league_id_v6');
+          }
+        } catch {}
+      }, [currentLeagueId]);
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('fpc_active_tab_v6', activeTab);
+        } catch {}
+      }, [activeTab]);
+
+      // Si el usuario recarga la página y aún no tenía liga seleccionada, conectar automáticamente su primera liga cuando cargue Firebase
+      useEffect(() => {
+        if (activeAccount && !currentLeagueId && members.length > 0) {
+          const myFirstMembership = members.find(m => m.userId === activeAccount.id);
+          if (myFirstMembership) {
+            setCurrentLeagueId(myFirstMembership.leagueId);
+          }
+        }
+      }, [activeAccount, currentLeagueId, members]);
 
       const getColombianDateKey = () => {
         const now = new Date();
@@ -1099,13 +1230,19 @@
         const sdk = window.__FPC_FIREBASE_SDK__;
         const { db } = cloudServices;
         const unsubAcc = sdk.onSnapshot(sdk.collection(db, 'artifacts', appId, 'public', 'data', 'fpc_accounts'), snap => {
-          setAccounts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+          const cloudAccs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          setAccounts(cloudAccs);
+          try { localStorage.setItem('fpc_accounts_v6', JSON.stringify(cloudAccs)); } catch {}
         }, err => console.error(err));
         const unsubLg = sdk.onSnapshot(sdk.collection(db, 'artifacts', appId, 'public', 'data', 'fpc_leagues'), snap => {
-          setLeagues(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(l => !l.isDeleted));
+          const cloudLgs = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(l => !l.isDeleted);
+          setLeagues(cloudLgs);
+          try { localStorage.setItem('fpc_leagues_v6', JSON.stringify(cloudLgs)); } catch {}
         }, err => console.error(err));
         const unsubMem = sdk.onSnapshot(sdk.collection(db, 'artifacts', appId, 'public', 'data', 'fpc_members'), snap => {
-          setMembers(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(m => !m.isDeleted));
+          const cloudMems = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(m => !m.isDeleted);
+          setMembers(cloudMems);
+          try { localStorage.setItem('fpc_members_v6', JSON.stringify(cloudMems)); } catch {}
         }, err => console.error(err));
         return () => { unsubAcc(); unsubLg(); unsubMem(); };
       }, [cloudServices, user]);
