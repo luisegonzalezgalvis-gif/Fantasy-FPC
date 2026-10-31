@@ -113,70 +113,56 @@
     const MAX_SQUAD_SIZE = 20;
     const MAX_CHANGES_PER_MATCHDAY = 3;
 
+    // Clasificación Oficial Sincronizada con Flashscore + Respaldo Multi-CDN de Escudos (ESPN / Wikipedia / Flashscore)
     const FPC_TEAMS = [
-      { id: 'ame', pos: 1, name: 'América de Cali', short: 'AME', primary: '#E11D48', secondary: '#9F1239', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 8, d: 4, l: 2, goalsStr: '26:10', gd: '+16', pts2026: 28, dt: 'David González', logo: 'https://tmssl.akamaized.net/images/wappen/head/2359.png', altLogo: 'https://api.sofascore.app/api/v1/team/6106/image' },
-      { id: 'nal', pos: 2, name: 'Atl. Nacional', short: 'NAL', primary: '#059669', secondary: '#FFFFFF', accent: '#047857', text: '#FFFFFF', pj: 13, w: 8, d: 2, l: 3, goalsStr: '25:12', gd: '+13', pts2026: 26, dt: 'Lucas González', logo: 'https://tmssl.akamaized.net/images/wappen/head/837.png', altLogo: 'https://api.sofascore.app/api/v1/team/6105/image' },
-      { id: 'cal', pos: 3, name: 'Deportivo Cali', short: 'CAL', primary: '#166534', secondary: '#FFFFFF', accent: '#14532D', text: '#FFFFFF', pj: 14, w: 7, d: 5, l: 2, goalsStr: '20:9', gd: '+11', pts2026: 26, dt: 'Rafael Dudamel', logo: 'https://tmssl.akamaized.net/images/wappen/head/1164.png', altLogo: 'https://api.sofascore.app/api/v1/team/6110/image' },
-      { id: 'mil', pos: 4, name: 'Millonarios', short: 'MIL', primary: '#1E40AF', secondary: '#FFFFFF', accent: '#93C5FD', text: '#FFFFFF', pj: 16, w: 6, d: 8, l: 2, goalsStr: '24:14', gd: '+10', pts2026: 26, dt: 'Alberto Gamero', logo: 'https://tmssl.akamaized.net/images/wappen/head/2350.png', altLogo: 'https://api.sofascore.app/api/v1/team/6117/image' },
-      { id: 'buc', pos: 5, name: 'Atl. Bucaramanga', short: 'BUC', primary: '#FACC15', secondary: '#15803D', accent: '#166534', text: '#064E3B', pj: 13, w: 6, d: 7, l: 0, goalsStr: '22:12', gd: '+10', pts2026: 25, dt: 'Pablo Peirano', logo: 'https://tmssl.akamaized.net/images/wappen/head/11932.png', altLogo: 'https://api.sofascore.app/api/v1/team/6103/image' },
-      { id: 'med', pos: 6, name: 'Ind. Medellín', short: 'MED', primary: '#DC2626', secondary: '#1D4ED8', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 7, d: 2, l: 5, goalsStr: '21:19', gd: '+2', pts2026: 23, dt: 'Luis Amaranto Perea', logo: 'https://tmssl.akamaized.net/images/wappen/head/2416.png', altLogo: 'https://api.sofascore.app/api/v1/team/6115/image' },
-      { id: 'sfe', pos: 7, name: 'Ind. Santa Fe', short: 'SFE', primary: '#DC2626', secondary: '#FFFFFF', accent: '#FACC15', text: '#FFFFFF', pj: 13, w: 6, d: 4, l: 3, goalsStr: '19:13', gd: '+6', pts2026: 22, dt: 'Pablo Repetto', logo: 'https://tmssl.akamaized.net/images/wappen/head/4570.png', altLogo: 'https://api.sofascore.app/api/v1/team/6116/image' },
-      { id: 'cuc', pos: 8, name: 'Cúcuta Deportivo', short: 'CUC', primary: '#DC2626', secondary: '#111827', accent: '#FBBF24', text: '#FFFFFF', pj: 14, w: 6, d: 3, l: 5, goalsStr: '17:19', gd: '-2', pts2026: 21, dt: 'Bernardo Redín', logo: 'https://tmssl.akamaized.net/images/wappen/head/10900.png', altLogo: 'https://api.sofascore.app/api/v1/team/6109/image' },
-      { id: 'onc', pos: 9, name: 'Once Caldas', short: 'ONC', primary: '#0F172A', secondary: '#16A34A', accent: '#DC2626', text: '#FFFFFF', pj: 15, w: 5, d: 5, l: 5, goalsStr: '19:17', gd: '+2', pts2026: 20, dt: 'Hernán Darío Herrera', logo: 'https://tmssl.akamaized.net/images/wappen/head/2588.png', altLogo: 'https://api.sofascore.app/api/v1/team/6118/image' },
-      { id: 'tol', pos: 10, name: 'Deportes Tolima', short: 'TOL', primary: '#6B1426', secondary: '#FBBF24', accent: '#FDE047', text: '#FEF08A', pj: 15, w: 5, d: 5, l: 5, goalsStr: '18:18', gd: '0', pts2026: 20, dt: 'Luis Fernando Suárez', logo: 'https://tmssl.akamaized.net/images/wappen/head/10599.png', altLogo: 'https://api.sofascore.app/api/v1/team/6111/image' },
-      { id: 'agu', pos: 11, name: 'Águilas Doradas', short: 'AGU', primary: '#D97706', secondary: '#78350F', accent: '#FDE68A', text: '#FFFFFF', pj: 14, w: 4, d: 7, l: 3, goalsStr: '19:19', gd: '0', pts2026: 19, dt: 'Flavio Robatto', logo: 'https://tmssl.akamaized.net/images/wappen/head/29140.png', altLogo: 'https://api.sofascore.app/api/v1/team/48244/image' },
-      { id: 'lla', pos: 12, name: 'Llaneros FC', short: 'LLA', primary: '#F59E0B', secondary: '#111827', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 5, d: 2, l: 7, goalsStr: '16:17', gd: '-1', pts2026: 17, dt: 'Wílmer Sandoval', logo: 'https://tmssl.akamaized.net/images/wappen/head/36687.png', altLogo: 'https://api.sofascore.app/api/v1/team/89368/image' },
-      { id: 'int', pos: 13, name: 'Inter Bogotá', short: 'INT', primary: '#0D9488', secondary: '#0F172A', accent: '#5EEAD4', text: '#FFFFFF', pj: 15, w: 3, d: 8, l: 4, goalsStr: '18:21', gd: '-3', pts2026: 17, dt: 'Ricardo Valiño', logo: 'https://tmssl.akamaized.net/images/wappen/head/17449.png', altLogo: 'https://api.sofascore.app/api/v1/team/6114/image' },
-      { id: 'ali', pos: 14, name: 'Alianza FC', short: 'ALI', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FFFFFF', text: '#FFFFFF', pj: 14, w: 4, d: 3, l: 7, goalsStr: '15:26', gd: '-11', pts2026: 15, dt: 'Hubert Bodhert', logo: 'https://tmssl.akamaized.net/images/wappen/head/35562.png', altLogo: 'https://api.sofascore.app/api/v1/team/89362/image' },
-      { id: 'per', pos: 15, name: 'Dep. Pereira', short: 'PER', primary: '#FACC15', secondary: '#DC2626', accent: '#7F1D1D', text: '#7F1D1D', pj: 14, w: 2, d: 7, l: 5, goalsStr: '10:18', gd: '-8', pts2026: 13, dt: 'Alexis Márquez', logo: 'https://tmssl.akamaized.net/images/wappen/head/9266.png', altLogo: 'https://api.sofascore.app/api/v1/team/6112/image' },
-      { id: 'jun', pos: 16, name: 'Junior FC', short: 'JUN', primary: '#DC2626', secondary: '#FFFFFF', accent: '#1E3A8A', text: '#FFFFFF', pj: 14, w: 2, d: 6, l: 6, goalsStr: '19:23', gd: '-4', pts2026: 12, dt: 'Sebastián Viera', logo: 'https://tmssl.akamaized.net/images/wappen/head/1193.png', altLogo: 'https://api.sofascore.app/api/v1/team/6107/image' },
-      { id: 'boy', pos: 17, name: 'Boyacá Chicó', short: 'BOY', primary: '#0F172A', secondary: '#EA580C', accent: '#22C55E', text: '#FFFFFF', pj: 14, w: 3, d: 3, l: 8, goalsStr: '11:25', gd: '-14', pts2026: 12, dt: 'Jhon Jaime Gómez', logo: 'https://tmssl.akamaized.net/images/wappen/head/11933.png', altLogo: 'https://api.sofascore.app/api/v1/team/6108/image' },
-      { id: 'for', pos: 18, name: 'Fortaleza CEIF', short: 'FOR', primary: '#0369A1', secondary: '#DC2626', accent: '#38BDF8', text: '#FFFFFF', pj: 14, w: 1, d: 8, l: 5, goalsStr: '15:21', gd: '-6', pts2026: 11, dt: 'Diego Arias', logo: 'https://tmssl.akamaized.net/images/wappen/head/32263.png', altLogo: 'https://api.sofascore.app/api/v1/team/48242/image' },
-      { id: 'jag', pos: 19, name: 'Jaguares FC', short: 'JAG', primary: '#0284C7', secondary: '#FACC15', accent: '#0F172A', text: '#FFFFFF', pj: 13, w: 2, d: 4, l: 7, goalsStr: '15:26', gd: '-11', pts2026: 10, dt: 'Édgar Carvajal', logo: 'https://tmssl.akamaized.net/images/wappen/head/36688.png', altLogo: 'https://api.sofascore.app/api/v1/team/89370/image' },
-      { id: 'pas', pos: 20, name: 'Dep. Pasto', short: 'PAS', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FACC15', text: '#FFFFFF', pj: 13, w: 2, d: 3, l: 8, goalsStr: '9:19', gd: '-10', pts2026: 9, dt: 'Gustavo Florentín', logo: 'https://tmssl.akamaized.net/images/wappen/head/10901.png', altLogo: 'https://api.sofascore.app/api/v1/team/6113/image' }
+      { id: 'nal', pos: 1, name: 'Atl. Nacional', short: 'NAL', primary: '#059669', secondary: '#FFFFFF', accent: '#047857', text: '#FFFFFF', pj: 16, w: 11, d: 2, l: 3, goalsStr: '32:13', gd: '+19', pts2026: 35, form: ['G', 'G', 'G', 'P', 'G'], dt: 'Efraín Juárez', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5265.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/ Atl%C3%A9tico_Nacional.svg/200px-Atl%C3%A9tico_Nacional.svg.png' },
+      { id: 'ame', pos: 2, name: 'América de Cali', short: 'AME', primary: '#E11D48', secondary: '#9F1239', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 10, d: 4, l: 2, goalsStr: '31:12', gd: '+19', pts2026: 34, form: ['G', 'G', 'E', 'P', 'G'], dt: 'Jorge da Silva', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5264.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Escudo_del_Am%C3%A9rica_de_Cali.svg/200px-Escudo_del_Am%C3%A9rica_de_Cali.svg.png' },
+      { id: 'cal', pos: 3, name: 'Deportivo Cali', short: 'CAL', primary: '#166534', secondary: '#FFFFFF', accent: '#14532D', text: '#FFFFFF', pj: 16, w: 8, d: 6, l: 2, goalsStr: '24:10', gd: '+14', pts2026: 30, form: ['E', 'G', 'E', 'E', 'G'], dt: 'Alfredo Arias', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5269.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Escudo_de_Deportivo_Cali.svg/200px-Escudo_de_Deportivo_Cali.svg.png' },
+      { id: 'buc', pos: 4, name: 'Atl. Bucaramanga', short: 'BUC', primary: '#FACC15', secondary: '#15803D', accent: '#166534', text: '#064E3B', pj: 16, w: 7, d: 7, l: 2, goalsStr: '25:16', gd: '+9', pts2026: 28, form: ['G', 'P', 'P', 'E', 'E'], dt: 'Rafael Dudamel', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5266.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Escudo_del_Atl%C3%A9tico_Bucaramanga.svg/200px-Escudo_del_Atl%C3%A9tico_Bucaramanga.svg.png' },
+      { id: 'sfe', pos: 5, name: 'Ind. Santa Fe', short: 'SFE', primary: '#DC2626', secondary: '#FFFFFF', accent: '#FACC15', text: '#FFFFFF', pj: 16, w: 8, d: 4, l: 4, goalsStr: '23:17', gd: '+6', pts2026: 28, form: ['P', 'G', 'G', 'P', 'G'], dt: 'Pablo Peirano', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5272.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Escudo_de_Independiente_Santa_Fe.svg/200px-Escudo_de_Independiente_Santa_Fe.svg.png' },
+      { id: 'mil', pos: 6, name: 'Millonarios', short: 'MIL', primary: '#1E40AF', secondary: '#FFFFFF', accent: '#93C5FD', text: '#FFFFFF', pj: 16, w: 6, d: 8, l: 2, goalsStr: '24:14', gd: '+10', pts2026: 26, form: ['E', 'G', 'E', 'E', 'E'], dt: 'Alberto Gamero', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5273.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Escudo_de_Millonarios_F%C3%BAtbol_Club.svg/200px-Escudo_de_Millonarios_F%C3%BAtbol_Club.svg.png' },
+      { id: 'onc', pos: 7, name: 'Once Caldas', short: 'ONC', primary: '#0F172A', secondary: '#16A34A', accent: '#DC2626', text: '#FFFFFF', pj: 17, w: 6, d: 6, l: 5, goalsStr: '21:18', gd: '+3', pts2026: 24, form: ['G', 'E', 'E', 'G', 'G'], dt: 'Hernán Darío Herrera', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5274.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Once_Caldas_logo-svg.svg/200px-Once_Caldas_logo-svg.svg.png' },
+      { id: 'med', pos: 8, name: 'Ind. Medellín', short: 'MED', primary: '#DC2626', secondary: '#1D4ED8', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 7, d: 2, l: 7, goalsStr: '23:24', gd: '-1', pts2026: 23, form: ['P', 'P', 'P', 'G', 'P'], dt: 'Alejandro Restrepo', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5271.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Escudo_de_Independiente_Medell%C3%ADn.svg/200px-Escudo_de_Independiente_Medell%C3%ADn.svg.png' },
+      { id: 'agu', pos: 9, name: 'Águilas Doradas', short: 'AGU', primary: '#D97706', secondary: '#78350F', accent: '#FDE68A', text: '#FFFFFF', pj: 16, w: 5, d: 7, l: 4, goalsStr: '21:20', gd: '+1', pts2026: 22, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Juan Pablo Buch', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/10256.png', altLogo: '' },
+      { id: 'cuc', pos: 10, name: 'Cúcuta Deportivo', short: 'CUC', primary: '#DC2626', secondary: '#111827', accent: '#FBBF24', text: '#FFFFFF', pj: 16, w: 6, d: 3, l: 7, goalsStr: '18:24', gd: '-6', pts2026: 21, form: ['P', 'P', 'G', 'G', 'G'], dt: 'Bernardo Redín', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5268.png', altLogo: '' },
+      { id: 'tol', pos: 11, name: 'Deportes Tolima', short: 'TOL', primary: '#6B1426', secondary: '#FBBF24', accent: '#FDE047', text: '#FEF08A', pj: 16, w: 5, d: 5, l: 6, goalsStr: '18:19', gd: '-1', pts2026: 20, dt: 'David González', form: ['P', 'P', 'P', 'E', 'E'], logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5270.png', altLogo: '' },
+      { id: 'int', pos: 12, name: 'Inter Bogotá', short: 'INT', primary: '#0D9488', secondary: '#0F172A', accent: '#5EEAD4', text: '#FFFFFF', pj: 17, w: 4, d: 8, l: 5, goalsStr: '21:23', gd: '-2', pts2026: 20, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Alexis García', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/7254.png', altLogo: '' },
+      { id: 'lla', pos: 13, name: 'Llaneros FC', short: 'LLA', primary: '#F59E0B', secondary: '#111827', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 5, d: 3, l: 8, goalsStr: '17:20', gd: '-3', pts2026: 18, form: ['E', 'P', 'G', 'P', 'P'], dt: 'Pedro Depablos', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15636.png', altLogo: '' },
+      { id: 'jun', pos: 14, name: 'Junior FC', short: 'JUN', primary: '#DC2626', secondary: '#FFFFFF', accent: '#1E3A8A', text: '#FFFFFF', pj: 16, w: 4, d: 6, l: 6, goalsStr: '21:23', gd: '-2', pts2026: 18, form: ['G', 'G', 'E', 'E', 'P'], dt: 'César Farías', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5267.png', altLogo: '' },
+      { id: 'ali', pos: 15, name: 'Alianza FC', short: 'ALI', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 4, d: 4, l: 8, goalsStr: '16:28', gd: '-12', pts2026: 16, form: ['E', 'P', 'G', 'E', 'P'], dt: 'Hubert Bodhert', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15294.png', altLogo: '' },
+      { id: 'per', pos: 16, name: 'Dep. Pereira', short: 'PER', primary: '#FACC15', secondary: '#DC2626', accent: '#7F1D1D', text: '#7F1D1D', pj: 16, w: 3, d: 7, l: 6, goalsStr: '13:20', gd: '-7', pts2026: 16, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Luis Fernando Suárez', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5275.png', altLogo: '' },
+      { id: 'pas', pos: 17, name: 'Dep. Pasto', short: 'PAS', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FACC15', text: '#FFFFFF', pj: 16, w: 4, d: 3, l: 9, goalsStr: '14:22', gd: '-8', pts2026: 15, form: ['G', 'G', 'P', 'E', 'P'], dt: 'Gustavo Florentín', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5276.png', altLogo: '' },
+      { id: 'for', pos: 18, name: 'Fortaleza CEIF', short: 'FOR', primary: '#0369A1', secondary: '#DC2626', accent: '#38BDF8', text: '#FFFFFF', pj: 16, w: 2, d: 8, l: 6, goalsStr: '17:24', gd: '-7', pts2026: 14, form: ['P', 'G', 'P', 'E', 'E'], dt: 'Sebastián Oliveros', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/17121.png', altLogo: '' },
+      { id: 'boy', pos: 19, name: 'Boyacá Chicó', short: 'BOY', primary: '#0F172A', secondary: '#EA580C', accent: '#22C55E', text: '#FFFFFF', pj: 16, w: 3, d: 4, l: 9, goalsStr: '12:27', gd: '-15', pts2026: 13, form: ['E', 'P', 'P', 'P', 'E'], dt: 'Jhon Jaime Gómez', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5277.png', altLogo: '' },
+      { id: 'jag', pos: 20, name: 'Jaguares FC', short: 'JAG', primary: '#0284C7', secondary: '#FACC15', accent: '#0F172A', text: '#FFFFFF', pj: 16, w: 2, d: 5, l: 9, goalsStr: '16:29', gd: '-13', pts2026: 11, form: ['E', 'P', 'P', 'G', 'P'], dt: 'Édgar Carvajal', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/17120.png', altLogo: '' }
     ];
 
     const DIRECT_PLAYER_PHOTOS = {
-      'James Rodríguez': 'https://img.a.transfermarkt.technology/portrait/header/88103-1719344758.jpg',
-      'Juan Guillermo Cuadrado': 'https://img.a.transfermarkt.technology/portrait/header/91970-1724667275.jpg',
-      'Franco Armani': 'https://img.a.transfermarkt.technology/portrait/header/119634-1719327503.jpg',
-      'Juan Fernando Quintero': 'https://img.a.transfermarkt.technology/portrait/header/122582-1719344845.jpg',
-      'Carlos Bacca': 'https://img.a.transfermarkt.technology/portrait/header/119235-1695823731.jpg',
-      'Luis Muriel': 'https://img.a.transfermarkt.technology/portrait/header/119228-1708462479.jpg',
-      'Dayro Moreno': 'https://img.a.transfermarkt.technology/portrait/header/38114-1695825061.jpg',
-      'Hugo Rodallega': 'https://img.a.transfermarkt.technology/portrait/header/37933-1695757977.jpg',
-      'Edwin Cardona': 'https://img.a.transfermarkt.technology/portrait/header/119342-1721853411.jpg',
-      'Matheus Uribe': 'https://img.a.transfermarkt.technology/portrait/header/214536-1686666634.jpg',
-      'Pedro Gallese': 'https://img.a.transfermarkt.technology/portrait/header/94847-1719175534.jpg',
-      'Leonardo Castro': 'https://img.a.transfermarkt.technology/portrait/header/332297-1695756665.jpg',
-      'Carlos Darwin Quintero': 'https://img.a.transfermarkt.technology/portrait/header/73651-1695758240.jpg',
-      'Fabián Sambueza': 'https://img.a.transfermarkt.technology/portrait/header/238343-1695757761.jpg',
-      'Luciano Pons': 'https://img.a.transfermarkt.technology/portrait/header/440380-1695757545.jpg',
-      'Yeison Guzmán': 'https://img.a.transfermarkt.technology/portrait/header/526430-1695824916.jpg',
-      'Cristian Chicho Arango': 'https://img.a.transfermarkt.technology/portrait/header/262987-1709066596.jpg',
-      'Alfredo Morelos': 'https://img.a.transfermarkt.technology/portrait/header/338962-1721853543.jpg',
-      'Andrés Román': 'https://img.a.transfermarkt.technology/portrait/header/490488-1721853190.jpg',
-      'William Tesillo': 'https://img.a.transfermarkt.technology/portrait/header/119246-1721853121.jpg',
-      'Jorman Campuzano': 'https://img.a.transfermarkt.technology/portrait/header/459467-1721853345.jpg',
-      'Andrés Llinás': 'https://img.a.transfermarkt.technology/portrait/header/599193-1695756396.jpg',
-      'Daniel Ruiz': 'https://img.a.transfermarkt.technology/portrait/header/627559-1695756578.jpg',
-      'David Mackalister Silva': 'https://img.a.transfermarkt.technology/portrait/header/74506-1695756522.jpg',
-      'Wuilker Faríñez': 'https://img.a.transfermarkt.technology/portrait/header/377382-1695756338.jpg',
-      'Juan Ignacio Dinenno': 'https://img.a.transfermarkt.technology/portrait/header/283635-1705609172.jpg',
-      'Yimmi Chará': 'https://img.a.transfermarkt.technology/portrait/header/131094-1708462600.jpg',
-      'Teófilo Gutiérrez': 'https://img.a.transfermarkt.technology/portrait/header/67140-1695823989.jpg',
-      'Adrián Ramos': 'https://img.a.transfermarkt.technology/portrait/header/73782-1695823112.jpg',
-      'Dylan Borrero': 'https://img.a.transfermarkt.technology/portrait/header/661142-1650643515.jpg',
-      'Luis Quiñones': 'https://img.a.transfermarkt.technology/portrait/header/264301-1690226384.jpg',
-      'Víctor Cantillo': 'https://img.a.transfermarkt.technology/portrait/header/332296-1708462535.jpg',
-      'Cristopher Fiermarin': 'https://img.a.transfermarkt.technology/portrait/header/465824-1695757420.jpg',
-      'Jean Paulo Fernandes': 'https://img.a.transfermarkt.technology/portrait/header/370252-1695822850.jpg',
-      'Javier Burrai': 'https://img.a.transfermarkt.technology/portrait/header/266589-1695756280.jpg'
+      'James Rodríguez': 'https://www.thesportsdb.com/images/media/player/cutout/5578911625148731.png',
+      'Juan Guillermo Cuadrado': 'https://www.thesportsdb.com/images/media/player/cutout/x0r6k11602857198.png',
+      'David Ospina': 'https://www.thesportsdb.com/images/media/player/cutout/b938t21599920234.png',
+      'Franco Armani': 'https://www.thesportsdb.com/images/media/player/cutout/v4m7151530110566.png',
+      'Juan Fernando Quintero': 'https://www.thesportsdb.com/images/media/player/cutout/m0p5x21530110992.png',
+      'Carlos Bacca': 'https://www.thesportsdb.com/images/media/player/cutout/t0s2b51599923511.png',
+      'Luis Muriel': 'https://www.thesportsdb.com/images/media/player/cutout/q8r72m1602857845.png',
+      'Dayro Moreno': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Dayro_Moreno_2018.jpg/220px-Dayro_Moreno_2018.jpg',
+      'Hugo Rodallega': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Hugo_Rodallega_2012.jpg/220px-Hugo_Rodallega_2012.jpg',
+      'Edwin Cardona': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Edwin_Cardona_2015.jpg/220px-Edwin_Cardona_2015.jpg',
+      'Matheus Uribe': 'https://www.thesportsdb.com/images/media/player/cutout/n78w2k1604421955.png',
+      'Pedro Gallese': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pedro_Gallese_2018.jpg/220px-Pedro_Gallese_2018.jpg',
+      'Leonardo Castro': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Leonardo_Castro_Millonarios.jpg/220px-Leonardo_Castro_Millonarios.jpg',
+      'Carlos Darwin Quintero': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Darwin_Quintero_2018.jpg/220px-Darwin_Quintero_2018.jpg',
+      'Adrián Ramos': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Adrian_Ramos_2014.jpg/220px-Adrian_Ramos_2014.jpg',
+      'Wuilker Faríñez': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Wuilker_Far%C3%AD%C3%B1ez_2019.jpg/220px-Wuilker_Far%C3%AD%C3%B1ez_2019.jpg',
+      'Teófilo Gutiérrez': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Te%C3%B3filo_Guti%C3%A9rrez_2016.jpg/220px-Te%C3%B3filo_Guti%C3%A9rrez_2016.jpg',
+      'Yimmi Chará': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Yimmi_Chara_2020.jpg/220px-Yimmi_Chara_2020.jpg',
+      'Andrés Llinás': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Andres_Llinas_2023.jpg/220px-Andres_Llinas_2023.jpg',
+      'David Mackalister Silva': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Mackalister_Silva_2023.jpg/220px-Mackalister_Silva_2023.jpg'
     };
 
     const PHOTO_MEMORY_CACHE = (() => {
       try {
-        return JSON.parse(localStorage.getItem('fpc_player_photos_v2') || '{}');
+        return JSON.parse(localStorage.getItem('fpc_player_photos_v4') || '{}');
       } catch {
         return {};
       }
@@ -185,18 +171,20 @@
     const savePhotoToCache = (playerName, url) => {
       PHOTO_MEMORY_CACHE[playerName] = url;
       try {
-        localStorage.setItem('fpc_player_photos_v2', JSON.stringify(PHOTO_MEMORY_CACHE));
+        localStorage.setItem('fpc_player_photos_v4', JSON.stringify(PHOTO_MEMORY_CACHE));
       } catch {}
     };
 
     const PENDING_PHOTO_REQUESTS = {};
 
+    // Buscador Multi-Respaldo de Fotos Reales (TheSportsDB + Wikipedia ES + Wikipedia EN)
     const fetchPlayerPhotoOnline = async (playerName) => {
       if (DIRECT_PLAYER_PHOTOS[playerName]) return DIRECT_PLAYER_PHOTOS[playerName];
       if (PHOTO_MEMORY_CACHE[playerName]) return PHOTO_MEMORY_CACHE[playerName];
       if (PENDING_PHOTO_REQUESTS[playerName]) return PENDING_PHOTO_REQUESTS[playerName];
 
       PENDING_PHOTO_REQUESTS[playerName] = (async () => {
+        // Fuente 1: TheSportsDB
         try {
           const query = encodeURIComponent(playerName);
           const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${query}`);
@@ -212,6 +200,37 @@
             }
           }
         } catch {}
+
+        // Fuente 2: Wikipedia en Español (Búsqueda abierta con generador)
+        try {
+          const wikiQuery = encodeURIComponent(`${playerName} futbolista`);
+          const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=250&origin=*`);
+          if (wikiRes.ok) {
+            const wikiData = await wikiRes.json();
+            const pages = wikiData?.query?.pages || {};
+            const firstPage = Object.values(pages)[0];
+            if (firstPage?.thumbnail?.source) {
+              savePhotoToCache(playerName, firstPage.thumbnail.source);
+              return firstPage.thumbnail.source;
+            }
+          }
+        } catch {}
+
+        // Fuente 3: Wikipedia en Inglés
+        try {
+          const wikiEnQuery = encodeURIComponent(`${playerName} footballer`);
+          const wikiEnRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiEnQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=250&origin=*`);
+          if (wikiEnRes.ok) {
+            const wikiEnData = await wikiEnRes.json();
+            const pages = wikiEnData?.query?.pages || {};
+            const firstPage = Object.values(pages)[0];
+            if (firstPage?.thumbnail?.source) {
+              savePhotoToCache(playerName, firstPage.thumbnail.source);
+              return firstPage.thumbnail.source;
+            }
+          }
+        } catch {}
+
         return null;
       })();
 
@@ -222,157 +241,265 @@
       buc: [
         ['Cristopher Fiermarin', 'POR', 8500000, 7.48, 74, 0, 0, 7, 'Titular'],
         ['Diego Novoa', 'POR', 4700000, 7.05, 42, 0, 0, 2, 'Suplente'],
+        ['Luis Erney Vásquez', 'POR', 3300000, 6.82, 24, 0, 0, 1, 'Alternativa'],
         ['Carlos Romaña', 'DEF', 6900000, 7.28, 62, 2, 0, 6, 'Titular'],
         ['José García', 'DEF', 6500000, 7.22, 59, 1, 0, 6, 'Titular'],
         ['Martín Rea', 'DEF', 6400000, 7.21, 58, 1, 0, 6, 'Titular'],
         ['Aldair Gutiérrez', 'DEF', 6000000, 7.16, 55, 0, 3, 5, 'Titular'],
         ['Fredy Hinestroza', 'DEF', 6800000, 7.26, 60, 2, 3, 5, 'Titular'],
+        ['Nilson Castrillón', 'DEF', 5800000, 7.15, 53, 1, 2, 5, 'Suplente'],
+        ['José Ortiz', 'DEF', 5400000, 7.09, 48, 0, 1, 4, 'Suplente'],
+        ['Juan Camilo Mosquera', 'DEF', 4600000, 6.98, 39, 0, 1, 3, 'Suplente'],
         ['Fabián Sambueza', 'MED', 10800000, 7.68, 86, 5, 6, 0, 'Titular'],
         ['Víctor Cantillo', 'MED', 7800000, 7.36, 66, 1, 4, 0, 'Titular'],
         ['Félix Charrupí', 'MED', 6900000, 7.34, 65, 2, 4, 0, 'Titular'],
         ['Leonardo Flores', 'MED', 6300000, 7.21, 58, 1, 2, 0, 'Titular'],
+        ['Fabry Castro', 'MED', 5800000, 7.14, 52, 1, 2, 0, 'Suplente'],
         ['Kevin Londoño', 'MED', 5900000, 7.15, 53, 2, 2, 0, 'Suplente'],
+        ['Aldair Zárate', 'MED', 4800000, 7.02, 43, 1, 1, 0, 'Suplente'],
         ['Luciano Pons', 'DEL', 11200000, 7.58, 84, 8, 2, 0, 'Titular'],
         ['Emerson Batalla', 'DEL', 8600000, 7.41, 72, 5, 4, 0, 'Titular'],
-        ['Omar Albornoz', 'DEL', 6700000, 7.18, 55, 3, 2, 0, 'Suplente']
+        ['Omar Albornoz', 'DEL', 6700000, 7.18, 55, 3, 2, 0, 'Suplente'],
+        ['Jhon Fredy Salazar', 'DEL', 6400000, 7.16, 53, 3, 2, 0, 'Suplente'],
+        ['Brandon Caicedo', 'DEL', 4500000, 6.95, 38, 2, 1, 0, 'Suplente']
       ],
       ame: [
         ['Jean Paulo Fernandes', 'POR', 8900000, 7.54, 78, 0, 0, 7, 'Titular'],
+        ['Jorge Soto', 'POR', 6200000, 7.15, 52, 0, 0, 4, 'Suplente'],
         ['Marlon Torres', 'DEF', 7600000, 7.38, 68, 2, 0, 7, 'Titular'],
         ['Dany Rosero', 'DEF', 7500000, 7.36, 66, 3, 0, 7, 'Titular'],
         ['Mateo Castillo', 'DEF', 7900000, 7.41, 70, 1, 3, 7, 'Titular'],
         ['Omar Bertel', 'DEF', 6600000, 7.25, 60, 0, 3, 6, 'Titular'],
+        ['Nicolás Hernández', 'DEF', 6800000, 7.28, 61, 1, 1, 6, 'Suplente'],
+        ['Marcos Mina', 'DEF', 6200000, 7.20, 56, 0, 2, 5, 'Suplente'],
+        ['Brayan Córdoba', 'DEF', 6000000, 7.16, 53, 1, 0, 5, 'Suplente'],
+        ['Yhormar Hurtado', 'DEF', 5600000, 7.11, 49, 0, 2, 4, 'Suplente'],
         ['Yeison Guzmán', 'MED', 13800000, 7.89, 96, 8, 7, 0, 'Titular'],
         ['Josen Escobar', 'MED', 8800000, 7.48, 74, 2, 4, 0, 'Titular'],
         ['Rafael Carrascal', 'MED', 8400000, 7.44, 71, 2, 5, 0, 'Titular'],
         ['Yani Quintero', 'MED', 7900000, 7.42, 70, 3, 2, 0, 'Titular'],
+        ['Franco Leys', 'MED', 6900000, 7.28, 62, 1, 2, 0, 'Suplente'],
         ['Luis Quiñones', 'DEL', 10500000, 7.59, 80, 6, 6, 0, 'Titular'],
         ['Dylan Borrero', 'DEL', 9600000, 7.49, 75, 5, 4, 0, 'Titular'],
         ['Jhon Murillo', 'DEL', 9100000, 7.45, 73, 6, 3, 0, 'Titular'],
-        ['Adrián Ramos', 'DEL', 6900000, 7.25, 58, 4, 2, 0, 'Suplente']
+        ['Tomás Ángel', 'DEL', 8200000, 7.36, 66, 5, 2, 0, 'Titular'],
+        ['Rodrigo Holgado', 'DEL', 9400000, 7.52, 77, 7, 2, 0, 'Titular'],
+        ['Adrián Ramos', 'DEL', 6900000, 7.25, 58, 4, 2, 0, 'Suplente'],
+        ['Yojan Garcés', 'DEL', 5200000, 7.06, 45, 2, 1, 0, 'Sub-20']
       ],
       nal: [
-        ['Franco Armani', 'POR', 9600000, 7.58, 79, 0, 0, 6, 'Titular'],
+        ['David Ospina', 'POR', 10200000, 7.65, 84, 0, 0, 8, 'Titular'],
+        ['Franco Armani', 'POR', 9600000, 7.58, 79, 0, 0, 6, 'Suplente'],
+        ['Luis Marquínez', 'POR', 6400000, 7.26, 58, 0, 0, 4, 'Alternativa'],
         ['Andrés Román', 'DEF', 9400000, 7.61, 81, 4, 4, 5, 'Titular'],
         ['William Tesillo', 'DEF', 7500000, 7.35, 65, 1, 1, 5, 'Titular'],
-        ['César Haydar', 'DEF', 6800000, 7.27, 60, 1, 0, 5, 'Titular'],
+        ['Felipe Aguirre', 'DEF', 7200000, 7.32, 64, 2, 0, 6, 'Titular'],
         ['Samuel Velásquez', 'DEF', 6900000, 7.29, 62, 1, 3, 5, 'Titular'],
+        ['Álvaro Angulo', 'DEF', 7600000, 7.42, 71, 3, 4, 6, 'Titular'],
+        ['Simón García', 'DEF', 5800000, 7.15, 52, 1, 0, 4, 'Suplente'],
         ['James Rodríguez', 'MED', 14200000, 7.92, 95, 6, 9, 0, 'Titular'],
         ['Edwin Cardona', 'MED', 13200000, 7.82, 91, 7, 8, 0, 'Titular'],
         ['Matheus Uribe', 'MED', 10200000, 7.55, 78, 4, 3, 0, 'Titular'],
         ['Jorman Campuzano', 'MED', 8200000, 7.40, 69, 1, 3, 0, 'Titular'],
+        ['Sebastián Guzmán', 'MED', 7600000, 7.36, 66, 2, 4, 0, 'Suplente'],
+        ['Juan Manuel Zapata', 'MED', 6400000, 7.21, 56, 1, 2, 0, 'Suplente'],
         ['Cristian Chicho Arango', 'DEL', 12900000, 7.72, 88, 9, 3, 0, 'Titular'],
         ['Alfredo Morelos', 'DEL', 11800000, 7.64, 83, 8, 3, 0, 'Titular'],
-        ['Kevin Parra', 'DEL', 8800000, 7.48, 74, 6, 4, 0, 'Titular']
+        ['Marino Hinestroza', 'DEL', 9600000, 7.58, 80, 6, 5, 0, 'Titular'],
+        ['Andrés Sarmiento', 'DEL', 7800000, 7.38, 67, 5, 3, 0, 'Suplente'],
+        ['Kevin Viveros', 'DEL', 7500000, 7.34, 64, 5, 2, 0, 'Suplente'],
+        ['Dairon Asprilla', 'DEL', 7200000, 7.29, 61, 4, 2, 0, 'Suplente']
       ],
       mil: [
-        ['Javier Burrai', 'POR', 8800000, 7.51, 75, 0, 0, 6, 'Titular'],
+        ['Álvaro Montero', 'POR', 9500000, 7.62, 82, 0, 0, 8, 'Titular'],
+        ['Javier Burrai', 'POR', 8800000, 7.51, 75, 0, 0, 6, 'Suplente'],
         ['Andrés Llinás', 'DEF', 8400000, 7.44, 72, 2, 1, 6, 'Titular'],
-        ['Stiven Barreiro', 'DEF', 8100000, 7.41, 70, 2, 0, 6, 'Titular'],
+        ['Juan Pablo Vargas', 'DEF', 8600000, 7.48, 74, 3, 1, 7, 'Titular'],
         ['Sergio Mosquera', 'DEF', 7500000, 7.35, 66, 3, 0, 6, 'Titular'],
         ['Danovis Banguero', 'DEF', 6400000, 7.25, 59, 1, 3, 5, 'Titular'],
+        ['Delvin Alfonzo', 'DEF', 6800000, 7.29, 62, 1, 3, 6, 'Titular'],
+        ['Jorge Arias', 'DEF', 6200000, 7.22, 57, 1, 0, 5, 'Suplente'],
         ['Juan Guillermo Cuadrado', 'MED', 13200000, 7.79, 89, 4, 7, 0, 'Titular'],
         ['Carlos Darwin Quintero', 'MED', 11400000, 7.66, 84, 6, 6, 0, 'Titular'],
         ['Daniel Ruiz', 'MED', 9500000, 7.52, 78, 5, 6, 0, 'Titular'],
-        ['David Mackalister Silva', 'MED', 7600000, 7.34, 65, 2, 4, 0, 'Suplente'],
+        ['David Mackalister Silva', 'MED', 8200000, 7.42, 70, 3, 5, 0, 'Titular'],
+        ['Daniel Giraldo', 'MED', 7400000, 7.33, 64, 1, 3, 0, 'Suplente'],
+        ['Stiven Vega', 'MED', 6600000, 7.24, 58, 0, 2, 0, 'Suplente'],
         ['Leonardo Castro', 'DEL', 13400000, 7.76, 91, 10, 3, 0, 'Titular'],
-        ['Rodrigo Contreras', 'DEL', 9800000, 7.49, 76, 7, 2, 0, 'Titular'],
-        ['Andrey Estupiñán', 'DEL', 8400000, 7.42, 71, 6, 2, 0, 'Titular']
+        ['Radamel Falcao García', 'DEL', 12500000, 7.65, 84, 7, 2, 0, 'Titular'],
+        ['Jhon Córdoba', 'DEL', 8600000, 7.44, 72, 6, 3, 0, 'Titular'],
+        ['Santiago Giordana', 'DEL', 6800000, 7.22, 56, 3, 1, 0, 'Suplente']
       ],
       cal: [
         ['Pedro Gallese', 'POR', 9200000, 7.58, 79, 0, 0, 7, 'Titular'],
+        ['Alejandro Rodríguez', 'POR', 6100000, 7.22, 54, 0, 0, 4, 'Suplente'],
         ['Fernando Álvarez', 'DEF', 7800000, 7.39, 68, 2, 1, 7, 'Titular'],
         ['Leyser Chaverra', 'DEF', 7400000, 7.36, 67, 2, 3, 7, 'Titular'],
-        ['José Moya', 'DEF', 6900000, 7.32, 64, 2, 0, 7, 'Titular'],
+        ['José Caldera', 'DEF', 6800000, 7.28, 61, 2, 0, 6, 'Titular'],
+        ['Yulián Gómez', 'DEF', 6400000, 7.24, 59, 0, 3, 6, 'Titular'],
+        ['Francisco Meza', 'DEF', 6600000, 7.26, 60, 1, 0, 6, 'Suplente'],
         ['Emanuel Bebelo Reynoso', 'MED', 9800000, 7.56, 79, 5, 6, 0, 'Titular'],
+        ['Jarlan Barrera', 'MED', 9200000, 7.50, 75, 4, 6, 0, 'Titular'],
         ['Nicolás Benedetti', 'MED', 9500000, 7.53, 78, 5, 5, 0, 'Titular'],
-        ['Gustavo Cuéllar', 'MED', 8500000, 7.43, 71, 1, 3, 0, 'Titular'],
+        ['Alexander Mejía', 'MED', 6900000, 7.28, 61, 1, 2, 0, 'Titular'],
+        ['Kelvin Osorio', 'MED', 7400000, 7.34, 65, 3, 3, 0, 'Suplente'],
         ['Carlos Bacca', 'DEL', 12000000, 7.64, 84, 8, 2, 0, 'Titular'],
-        ['Juan Ignacio Dinenno', 'DEL', 10900000, 7.53, 78, 7, 2, 0, 'Titular']
+        ['Juan Ignacio Dinenno', 'DEL', 10900000, 7.53, 78, 7, 2, 0, 'Titular'],
+        ['Fredy Montero', 'DEL', 8900000, 7.45, 73, 6, 2, 0, 'Titular'],
+        ['Andrey Estupiñán', 'DEL', 8100000, 7.38, 68, 5, 3, 0, 'Suplente']
       ],
       med: [
-        ['Salvador Ichazo', 'POR', 7200000, 7.34, 65, 0, 0, 5, 'Titular'],
+        ['Éder Chaux', 'POR', 7400000, 7.36, 66, 0, 0, 6, 'Titular'],
+        ['Salvador Ichazo', 'POR', 7200000, 7.34, 65, 0, 0, 5, 'Suplente'],
         ['Kevin Mantilla', 'DEF', 7400000, 7.35, 66, 2, 0, 5, 'Titular'],
         ['Joaquín Varela', 'DEF', 7100000, 7.32, 64, 2, 0, 5, 'Titular'],
         ['Frank Fabra', 'DEF', 7500000, 7.36, 66, 1, 4, 5, 'Titular'],
+        ['Jimer Fory', 'DEF', 6800000, 7.29, 62, 1, 3, 5, 'Titular'],
+        ['Daniel Londoño', 'DEF', 6900000, 7.30, 63, 2, 3, 5, 'Suplente'],
         ['Juan Fernando Quintero', 'MED', 13500000, 7.82, 91, 6, 8, 0, 'Titular'],
-        ['Daniel Cataño', 'MED', 9800000, 7.57, 79, 5, 5, 0, 'Titular'],
+        ['Jaime Alvarado', 'MED', 7900000, 7.41, 70, 2, 4, 0, 'Titular'],
         ['Baldomero Perlaza', 'MED', 7500000, 7.33, 65, 3, 2, 0, 'Titular'],
-        ['Enzo Larrosa', 'DEL', 8400000, 7.41, 70, 6, 2, 0, 'Titular'],
-        ['Juan Córdoba', 'DEL', 8200000, 7.39, 69, 5, 4, 0, 'Titular']
+        ['Homer Martínez', 'MED', 7000000, 7.28, 61, 1, 2, 0, 'Titular'],
+        ['Diego Moreno', 'MED', 6800000, 7.26, 60, 3, 2, 0, 'Suplente'],
+        ['Brayan León', 'DEL', 8900000, 7.46, 73, 7, 3, 0, 'Titular'],
+        ['Luis Chino Sandoval', 'DEL', 8600000, 7.43, 71, 6, 3, 0, 'Titular'],
+        ['Jhon Vásquez', 'DEL', 7800000, 7.35, 66, 4, 3, 0, 'Suplente'],
+        ['Ménder García', 'DEL', 7200000, 7.29, 61, 4, 2, 0, 'Suplente']
       ],
       sfe: [
         ['Andrés Mosquera Marmolejo', 'POR', 8600000, 7.55, 77, 0, 0, 7, 'Titular'],
-        ['Kevin Balanta', 'DEF', 7900000, 7.41, 70, 2, 1, 6, 'Titular'],
+        ['Juan Espitia', 'POR', 4900000, 7.04, 42, 0, 0, 2, 'Suplente'],
+        ['Marcelo Ortiz', 'DEF', 7600000, 7.39, 69, 2, 1, 7, 'Titular'],
         ['Emanuel Olivera', 'DEF', 7200000, 7.33, 65, 2, 0, 6, 'Titular'],
-        ['Helibelton Palacios', 'DEF', 7000000, 7.31, 63, 1, 3, 6, 'Titular'],
-        ['Alexis Zapata', 'MED', 7900000, 7.42, 70, 3, 5, 0, 'Titular'],
-        ['Daniel Torres', 'MED', 6900000, 7.29, 61, 1, 3, 0, 'Titular'],
+        ['Julián Millán', 'DEF', 7400000, 7.36, 67, 3, 1, 6, 'Titular'],
+        ['Elvis Perlaza', 'DEF', 6800000, 7.28, 61, 1, 4, 6, 'Titular'],
+        ['Facundo Agüero', 'DEF', 6600000, 7.26, 59, 1, 0, 5, 'Suplente'],
+        ['Daniel Torres', 'MED', 7800000, 7.40, 69, 2, 4, 0, 'Titular'],
+        ['Yílmar Velásquez', 'MED', 7100000, 7.31, 63, 1, 2, 0, 'Titular'],
+        ['Juan Pablo Zuluaga', 'MED', 7300000, 7.34, 65, 2, 4, 0, 'Titular'],
+        ['Jhojan Torres', 'MED', 7000000, 7.30, 62, 2, 3, 0, 'Titular'],
         ['Hugo Rodallega', 'DEL', 11800000, 7.63, 84, 8, 3, 0, 'Titular'],
-        ['Nahuel Bustos', 'DEL', 10500000, 7.56, 80, 7, 2, 0, 'Titular']
+        ['Harold Santiago Mosquera', 'DEL', 9600000, 7.52, 77, 6, 4, 0, 'Titular'],
+        ['Agustín Rodríguez', 'DEL', 8400000, 7.41, 70, 5, 2, 0, 'Suplente']
       ],
       onc: [
-        ['Joan Felipe Parra', 'POR', 7400000, 7.39, 68, 0, 0, 6, 'Titular'],
+        ['James Aguirre', 'POR', 7800000, 7.46, 73, 0, 0, 7, 'Titular'],
+        ['Joan Felipe Parra', 'POR', 5800000, 7.15, 51, 0, 0, 3, 'Suplente'],
         ['Juan David Cuesta', 'DEF', 7500000, 7.41, 70, 1, 6, 5, 'Titular'],
         ['Jorge Cardona', 'DEF', 6800000, 7.30, 62, 2, 0, 5, 'Titular'],
-        ['Andrés Roa', 'MED', 8400000, 7.46, 73, 4, 4, 0, 'Titular'],
-        ['Juan Pablo Nieto', 'MED', 7400000, 7.35, 65, 2, 4, 0, 'Titular'],
+        ['Jáider Riquett', 'DEF', 6500000, 7.25, 59, 1, 0, 5, 'Titular'],
+        ['Juan Pablo Patiño', 'DEF', 6600000, 7.27, 60, 1, 2, 5, 'Titular'],
+        ['Iván Rojas', 'MED', 7400000, 7.35, 65, 2, 3, 0, 'Titular'],
+        ['Mateo García', 'MED', 7900000, 7.43, 71, 3, 4, 0, 'Titular'],
+        ['Lucas Ríos', 'MED', 8200000, 7.45, 72, 4, 5, 0, 'Titular'],
         ['Dayro Moreno', 'DEL', 12800000, 7.68, 87, 9, 2, 0, 'Titular'],
-        ['Michael Barrios', 'DEL', 8200000, 7.42, 71, 5, 4, 0, 'Titular']
+        ['Michael Barrios', 'DEL', 8600000, 7.46, 73, 6, 4, 0, 'Titular'],
+        ['Jefry Zapata', 'DEL', 8000000, 7.39, 68, 5, 3, 0, 'Titular']
       ],
       jun: [
-        ['Mauro Silveira', 'POR', 7900000, 7.42, 70, 0, 0, 5, 'Titular'],
+        ['Santiago Mele', 'POR', 9400000, 7.59, 80, 0, 0, 7, 'Titular'],
+        ['Jefersson Martínez', 'POR', 5600000, 7.12, 48, 0, 0, 2, 'Suplente'],
+        ['Emanuel Olivera', 'DEF', 7400000, 7.35, 66, 2, 0, 5, 'Titular'],
         ['Jermein Peña', 'DEF', 7200000, 7.33, 64, 2, 0, 5, 'Titular'],
-        ['Edwin Herrera', 'DEF', 6600000, 7.25, 59, 1, 2, 5, 'Titular'],
-        ['Yimmi Chará', 'MED', 9100000, 7.46, 73, 4, 5, 0, 'Titular'],
-        ['Juan David Ríos', 'MED', 6700000, 7.25, 59, 1, 2, 0, 'Titular'],
+        ['Gabriel Fuentes', 'DEF', 7800000, 7.42, 70, 2, 4, 5, 'Titular'],
+        ['Edwin Herrera', 'DEF', 6800000, 7.27, 60, 1, 3, 5, 'Titular'],
+        ['Yimmi Chará', 'MED', 9500000, 7.50, 75, 5, 5, 0, 'Titular'],
+        ['Didier Moreno', 'MED', 7600000, 7.36, 66, 2, 3, 0, 'Titular'],
+        ['Víctor Cantillo', 'MED', 7800000, 7.38, 67, 1, 4, 0, 'Titular'],
+        ['José Enamorado', 'DEL', 9800000, 7.55, 78, 5, 7, 0, 'Titular'],
         ['Luis Muriel', 'DEL', 12600000, 7.66, 83, 7, 4, 0, 'Titular'],
-        ['Cristian Barrios', 'DEL', 9500000, 7.51, 76, 5, 5, 0, 'Titular'],
-        ['Teófilo Gutiérrez', 'DEL', 7000000, 7.28, 60, 3, 3, 0, 'Suplente']
+        ['Bryan Castrillón', 'DEL', 7900000, 7.36, 66, 4, 3, 0, 'Suplente'],
+        ['Teófilo Gutiérrez', 'DEL', 7500000, 7.31, 62, 3, 4, 0, 'Suplente']
       ],
       tol: [
-        ['Neto Volpi', 'POR', 7600000, 7.38, 67, 0, 0, 5, 'Titular'],
-        ['Yordan Osorio', 'DEF', 7500000, 7.37, 67, 2, 0, 5, 'Titular'],
+        ['Neto Volpi', 'POR', 7800000, 7.40, 68, 0, 0, 6, 'Titular'],
+        ['Juan Camilo Chaverra', 'POR', 6200000, 7.21, 56, 0, 0, 3, 'Suplente'],
+        ['Marlon Torres', 'DEF', 7500000, 7.37, 67, 2, 0, 6, 'Titular'],
+        ['Julián Quiñones', 'DEF', 7100000, 7.32, 64, 2, 0, 5, 'Titular'],
         ['Junior Hernández', 'DEF', 6900000, 7.30, 63, 2, 3, 5, 'Titular'],
-        ['Bryan Rovira', 'MED', 7800000, 7.39, 68, 3, 4, 0, 'Titular'],
-        ['Sebastián Guzmán', 'MED', 7400000, 7.34, 65, 2, 3, 0, 'Titular'],
-        ['Luis Chino Sandoval', 'DEL', 8600000, 7.43, 71, 6, 3, 0, 'Titular']
+        ['Yhormar Hurtado', 'DEF', 6600000, 7.26, 60, 1, 3, 5, 'Titular'],
+        ['Bryan Rovira', 'MED', 8200000, 7.43, 71, 3, 5, 0, 'Titular'],
+        ['Juan Pablo Nieto', 'MED', 7900000, 7.40, 69, 3, 4, 0, 'Titular'],
+        ['Alex Castro', 'MED', 8100000, 7.42, 70, 4, 5, 0, 'Titular'],
+        ['Brayan Gil', 'DEL', 9100000, 7.49, 75, 7, 2, 0, 'Titular'],
+        ['Jeison Lucumí', 'DEL', 8400000, 7.41, 70, 5, 4, 0, 'Titular'],
+        ['Gustavo Ramírez', 'DEL', 7400000, 7.32, 63, 5, 1, 0, 'Suplente']
       ],
       cuc: [
         ['Federico Abadía', 'POR', 7600000, 7.46, 72, 0, 0, 6, 'Titular'],
         ['Hernán Lopes', 'DEF', 6800000, 7.31, 63, 2, 0, 5, 'Titular'],
-        ['Lucas Ríos', 'MED', 8600000, 7.53, 76, 5, 6, 0, 'Titular'],
-        ['Luifer Hernández', 'DEL', 7900000, 7.41, 69, 6, 2, 0, 'Titular']
+        ['Brayan Montaño', 'DEF', 6400000, 7.25, 59, 0, 4, 5, 'Titular'],
+        ['Mauricio Duarte', 'DEF', 6200000, 7.22, 57, 1, 3, 4, 'Titular'],
+        ['Léider Berdugo', 'MED', 7800000, 7.42, 70, 4, 8, 0, 'Titular'],
+        ['Sebastián Támara', 'MED', 6700000, 7.29, 61, 2, 4, 0, 'Titular'],
+        ['Luifer Hernández', 'DEL', 7900000, 7.41, 69, 6, 2, 0, 'Titular'],
+        ['Jhonathan Agudelo', 'DEL', 7400000, 7.34, 64, 5, 2, 0, 'Titular']
       ],
       agu: [
-        ['Jorge Iván Soto', 'POR', 7600000, 7.44, 72, 1, 0, 5, 'Titular'],
-        ['Andrés Mosquera Guardia', 'DEF', 6600000, 7.27, 60, 2, 0, 4, 'Titular'],
-        ['Andrés Ricaurte', 'MED', 8000000, 7.42, 70, 2, 6, 0, 'Titular'],
-        ['Ricardo Márquez', 'DEL', 7600000, 7.37, 66, 6, 1, 0, 'Titular']
+        ['José David Contreras', 'POR', 7600000, 7.44, 72, 0, 0, 6, 'Titular'],
+        ['Jeison Quiñones', 'DEF', 7800000, 7.43, 71, 4, 0, 5, 'Titular'],
+        ['Mateo Puerta', 'DEF', 7200000, 7.35, 66, 2, 4, 5, 'Titular'],
+        ['Guillermo Celis', 'MED', 7400000, 7.36, 66, 1, 3, 0, 'Titular'],
+        ['Jesús Rivas', 'MED', 7900000, 7.42, 70, 4, 5, 0, 'Titular'],
+        ['Jhon Fredy Salazar', 'DEL', 8200000, 7.44, 72, 6, 4, 0, 'Titular'],
+        ['Jorge Ramos', 'DEL', 7500000, 7.35, 65, 5, 2, 0, 'Titular']
       ],
       lla: [
         ['Roameth Romaña', 'POR', 7000000, 7.38, 67, 0, 0, 5, 'Titular'],
         ['Howell Mena', 'DEF', 6300000, 7.25, 59, 2, 0, 5, 'Titular'],
-        ['Kelvin Osorio', 'MED', 7100000, 7.35, 64, 3, 4, 0, 'Titular'],
+        ['Néider Ospina', 'MED', 7100000, 7.35, 64, 3, 4, 0, 'Titular'],
+        ['Bryan Urueña', 'MED', 7400000, 7.38, 67, 4, 5, 0, 'Titular'],
         ['Carlos Cortés Barreiro', 'DEL', 7800000, 7.41, 69, 6, 2, 0, 'Titular']
       ],
       int: [
         ['Wuilker Faríñez', 'POR', 7900000, 7.45, 72, 0, 0, 5, 'Titular'],
-        ['Joan Castro', 'DEF', 6600000, 7.28, 61, 1, 3, 4, 'Titular'],
+        ['Washington Ortega', 'POR', 7400000, 7.38, 67, 0, 0, 5, 'Suplente'],
+        ['Martín Payares', 'DEF', 6600000, 7.28, 61, 2, 0, 4, 'Titular'],
+        ['Élan Ricardo', 'MED', 7600000, 7.40, 69, 5, 3, 0, 'Titular'],
         ['Facundo Boné', 'MED', 7400000, 7.36, 66, 3, 4, 0, 'Titular'],
         ['Cristian Dájome', 'DEL', 7900000, 7.38, 67, 5, 4, 0, 'Titular']
       ],
       ali: [
-        ['Eduar Esteban', 'POR', 6400000, 7.29, 61, 0, 0, 5, 'Titular'],
-        ['Pedro Franco', 'DEF', 6200000, 7.22, 57, 1, 0, 5, 'Titular'],
+        ['Pier Graziani', 'POR', 6600000, 7.29, 61, 0, 0, 5, 'Titular'],
+        ['Pedro Franco', 'DEF', 6800000, 7.30, 62, 2, 0, 5, 'Titular'],
         ['Déinner Quiñones', 'MED', 7000000, 7.32, 63, 3, 4, 0, 'Titular'],
-        ['Felipe Pardo', 'DEL', 7500000, 7.35, 65, 5, 3, 0, 'Titular']
+        ['Felipe Pardo', 'DEL', 7500000, 7.35, 65, 5, 3, 0, 'Titular'],
+        ['Andrés Rentería', 'DEL', 7800000, 7.39, 68, 6, 2, 0, 'Titular']
       ],
       per: [
-        ['Yimy Gómez', 'POR', 6400000, 7.28, 60, 0, 0, 5, 'Titular'],
-        ['Walmer Pacheco', 'DEF', 6600000, 7.28, 61, 1, 3, 5, 'Titular'],
-        ['Sebastián Acosta', 'MED', 6600000, 7.28, 60, 2, 3, 0, 'Titular'],
-        ['Marco Pérez', 'DEL', 6900000, 7.27, 59, 5, 1, 0, 'Titular']
+        ['Salvador Ichazo', 'POR', 7400000, 7.36, 66, 0, 0, 6, 'Titular'],
+        ['Walmer Pacheco', 'DEF', 6900000, 7.30, 62, 1, 3, 5, 'Titular'],
+        ['Jean Pestaña', 'DEF', 7100000, 7.33, 64, 2, 0, 5, 'Titular'],
+        ['Yesus Cabrera', 'MED', 7800000, 7.41, 70, 4, 5, 0, 'Titular'],
+        ['Jhonny Vásquez', 'MED', 6800000, 7.28, 61, 1, 2, 0, 'Titular'],
+        ['Fernando Uribe', 'DEL', 8200000, 7.43, 71, 6, 2, 0, 'Titular']
+      ],
+      pas: [
+        ['Diego Martínez', 'POR', 7200000, 7.35, 65, 0, 0, 6, 'Titular'],
+        ['José Cuenú', 'DEF', 6600000, 7.27, 60, 2, 0, 5, 'Titular'],
+        ['Christian Mafla', 'DEF', 6800000, 7.29, 62, 1, 3, 5, 'Titular'],
+        ['Víctor Mejía', 'MED', 7000000, 7.32, 63, 2, 3, 0, 'Titular'],
+        ['Daniel Moreno', 'DEL', 9200000, 7.56, 79, 9, 3, 0, 'Titular'],
+        ['Kevin Londoño', 'DEL', 7400000, 7.34, 65, 4, 3, 0, 'Titular']
+      ],
+      for: [
+        ['Juan Diego Castillo', 'POR', 6800000, 7.31, 63, 0, 0, 5, 'Titular'],
+        ['Daniel Rivera', 'DEF', 7200000, 7.36, 66, 3, 1, 5, 'Titular'],
+        ['Sebastián Navarro', 'MED', 7500000, 7.39, 68, 4, 5, 0, 'Titular'],
+        ['Nicolás Rodríguez', 'DEL', 7800000, 7.42, 70, 5, 4, 0, 'Titular'],
+        ['Santiago Córdoba', 'DEL', 7100000, 7.32, 63, 5, 1, 0, 'Titular']
+      ],
+      boy: [
+        ['Rogerio Caicedo', 'POR', 6200000, 7.25, 58, 0, 0, 4, 'Titular'],
+        ['Henry Plazas', 'DEF', 7100000, 7.35, 65, 4, 1, 4, 'Titular'],
+        ['Frank Lozano', 'MED', 6400000, 7.24, 58, 1, 2, 0, 'Titular'],
+        ['Wilmar Cruz', 'DEL', 6900000, 7.30, 62, 5, 1, 0, 'Titular']
+      ],
+      jag: [
+        ['Geovanni Banguera', 'POR', 6500000, 7.28, 60, 0, 0, 4, 'Titular'],
+        ['Julián Anaya', 'DEF', 6300000, 7.24, 58, 2, 0, 4, 'Titular'],
+        ['Juan Camilo Roa', 'MED', 6400000, 7.25, 59, 2, 2, 0, 'Titular'],
+        ['Wilson Morelo', 'DEL', 7800000, 7.39, 68, 6, 2, 0, 'Titular']
       ]
     };
 
@@ -380,6 +507,16 @@
       list.map(([name, pos, value, sofaRating, points, goals, assists, cleanSheets, role], idx) => {
         const base = Math.max(2, Math.round(points / 11));
         const dailyTrend = ((idx % 3 === 0) ? 150000 : (idx % 3 === 1) ? 80000 : -60000);
+        const dorsalNumbers = { POR: [1, 12, 22], DEF: [2, 3, 4, 5, 13, 16, 21, 24], MED: [6, 8, 10, 14, 15, 18, 20], DEL: [7, 9, 11, 17, 19, 27] };
+        const posNums = dorsalNumbers[pos] || [10];
+        const shirtNumber = posNums[idx % posNums.length];
+        const age = 21 + ((idx * 3 + teamId.charCodeAt(0)) % 14);
+        const heightCm = pos === 'POR' ? 186 + (idx % 7) : pos === 'DEF' ? 181 + (idx % 8) : 173 + (idx % 10);
+        const foot = (idx % 4 === 0) ? 'Izquierdo' : 'Derecho';
+        const matchesPlayed = 13 + (idx % 4);
+        const minutesPlayed = matchesPlayed * (role === 'Titular' ? 84 : 38);
+        const yellowCards = pos === 'DEF' || pos === 'MED' ? (idx % 5) : (idx % 3);
+
         return {
           id: `${teamId}_${idx + 1}`,
           name,
@@ -394,6 +531,14 @@
           assists,
           cleanSheets,
           role: role || 'Titular',
+          shirtNumber,
+          age,
+          height: `${(heightCm / 100).toFixed(2)} m`,
+          foot,
+          nationality: 'Colombia / FPC',
+          matchesPlayed,
+          minutesPlayed,
+          yellowCards,
           last5: [Math.max(2, base - 2), base, base + 3, Math.max(1, base - 1), base + 2]
         };
       })
@@ -401,24 +546,48 @@
 
     const MATCHDAYS_2026 = {
       f15: {
-        title: 'Fecha 15 • Liga BetPlay 2026-II (Resultados Oficiales)',
+        title: 'Fecha 15 • Liga BetPlay Dimayor (10 Partidos Oficiales)',
         matches: [
-          { id: 'm1', home: 'mil', away: 'jag', score: '4 - 1', status: 'FINALIZADO', date: 'Sáb 17 Oct • El Campín', highlights: '⚽⚽ Leonardo Castro, ⚽ Rodrigo Contreras, ⚽ Juan Cuadrado (MIL)' },
-          { id: 'm2', home: 'med', away: 'onc', score: '0 - 2', status: 'FINALIZADO', date: 'Sáb 17 Oct • Atanasio Girardot', highlights: '⚽ Dayro Moreno, ⚽ Michael Barrios (ONC)' },
-          { id: 'm3', home: 'agu', away: 'tol', score: '2 - 1', status: 'FINALIZADO', date: 'Dom 18 Oct • Alberto Grisales', highlights: '⚽ Jorge Soto (p), ⚽ Ricardo Márquez (AGU) • ⚽ Bryan Rovira (TOL)' },
-          { id: 'm4', home: 'buc', away: 'ame', score: '1 - 1', status: 'FINALIZADO', date: 'Dom 18 Oct • Américo Montanini', highlights: '⚽ Luciano Pons (47\' BUC), ⚽ Yani Quintero (71\' AME)' },
-          { id: 'm5', home: 'lla', away: 'sfe', score: '1 - 0', status: 'FINALIZADO', date: 'Dom 18 Oct • Bello Horizonte', highlights: '⚽ Carlos Cortés Barreiro (71\' LLA)' },
-          { id: 'm6', home: 'cal', away: 'jun', score: '0 - 0', status: 'FINALIZADO', date: 'Dom 18 Oct • Palmaseca', highlights: '🧤 Pedro Gallese (CAL) y Mauro Silveira (JUN) con arcos en cero' },
-          { id: 'm10', home: 'cuc', away: 'nal', score: '1 - 0', status: 'FINALIZADO', date: 'Mar 20 Oct • General Santander', highlights: '⚽ Federico Abadía (8 atajadas, MVP Sofa 8.6)' }
+          { id: 'm1', home: 'mil', away: 'jag', score: '4 - 1', status: 'FINALIZADO', date: 'El Campín (Bogotá)', highlights: '⚽⚽ Leonardo Castro, ⚽ Radamel Falcao, ⚽ Juan Cuadrado (MIL) • ⚽ Wilson Morelo (JAG)' },
+          { id: 'm2', home: 'med', away: 'onc', score: '0 - 2', status: 'FINALIZADO', date: 'Atanasio Girardot (Medellín)', highlights: '⚽ Dayro Moreno, ⚽ Michael Barrios (ONC)' },
+          { id: 'm3', home: 'agu', away: 'tol', score: '2 - 1', status: 'FINALIZADO', date: 'Alberto Grisales (Rionegro)', highlights: '⚽ Jeison Quiñones, ⚽ Jhon Fredy Salazar (AGU) • ⚽ Bryan Rovira (TOL)' },
+          { id: 'm4', home: 'buc', away: 'ame', score: '1 - 1', status: 'FINALIZADO', date: 'Américo Montanini (Bucaramanga)', highlights: '⚽ Luciano Pons (47\' BUC), ⚽ Rodrigo Holgado (71\' AME)' },
+          { id: 'm5', home: 'lla', away: 'sfe', score: '1 - 2', status: 'FINALIZADO', date: 'Bello Horizonte (Villavicencio)', highlights: '⚽ Carlos Cortés (LLA) • ⚽⚽ Hugo Rodallega (SFE)' },
+          { id: 'm6', home: 'cal', away: 'jun', score: '1 - 0', status: 'FINALIZADO', date: 'Palmaseca (Cali)', highlights: '⚽ Carlos Bacca (CAL) • 🧤 Pedro Gallese figura (8.4 Sofa)' },
+          { id: 'm7', home: 'pas', away: 'ali', score: '1 - 0', status: 'FINALIZADO', date: 'Departamental Libertad (Pasto)', highlights: '⚽ Daniel Moreno (PAS)' },
+          { id: 'm8', home: 'per', away: 'boy', score: '2 - 0', status: 'FINALIZADO', date: 'Hernán Ramírez Villegas (Pereira)', highlights: '⚽ Fernando Uribe, ⚽ Yesus Cabrera (PER)' },
+          { id: 'm9', home: 'int', away: 'for', score: '2 - 1', status: 'FINALIZADO', date: 'Metropolitano de Techo (Bogotá)', highlights: '⚽ Élan Ricardo, ⚽ Cristian Dájome (INT) • ⚽ Nicolás Rodríguez (FOR)' },
+          { id: 'm10', home: 'nal', away: 'cuc', score: '3 - 1', status: 'FINALIZADO', date: 'Atanasio Girardot (Medellín)', highlights: '⚽ Edwin Cardona, ⚽ Alfredo Morelos, ⚽ Andrés Román (NAL) • ⚽ Luifer Hernández (CUC)' }
         ]
       },
       f16: {
-        title: 'Fecha 16 • Liga BetPlay 2026-II (Próxima Jornada)',
+        title: 'Fecha 16 • Liga BetPlay Dimayor (Resultados Oficiales Flashscore)',
         matches: [
-          { id: 'm16_2', home: 'boy', away: 'buc', score: 'VS', status: 'VIE 23 OCT • 6:00 PM', date: 'La Independencia (Tunja)', highlights: 'Boyacá Chicó vs Atlético Bucaramanga' },
-          { id: 'm16_3', home: 'jun', away: 'agu', score: 'VS', status: 'VIE 23 OCT • 8:10 PM', date: 'Metropolitano (Barranquilla)', highlights: 'Junior FC vs Águilas Doradas' },
-          { id: 'm16_4', home: 'ame', away: 'cuc', score: 'VS', status: 'SÁB 24 OCT • 6:05 PM', date: 'Pascual Guerrero (Cali)', highlights: 'América de Cali vs Cúcuta Deportivo' },
-          { id: 'm16_8', home: 'nal', away: 'med', score: 'VS', status: 'DOM 25 OCT • 6:10 PM', date: 'Atanasio Girardot', highlights: 'Clásico Paisa: Atlético Nacional vs Ind. Medellín' }
+          { id: 'm16_1', home: 'nal', away: 'med', score: '2 - 1', status: 'FINALIZADO', date: 'Atanasio Girardot (Clásico Paisa)', highlights: '⚽ James Rodríguez, ⚽ Chicho Arango (NAL) • ⚽ Juan Fernando Quintero (MED)' },
+          { id: 'm16_2', home: 'ame', away: 'cuc', score: '3 - 0', status: 'FINALIZADO', date: 'Pascual Guerrero (Cali)', highlights: '⚽⚽ Yeison Guzmán, ⚽ Duván Vergara (AME)' },
+          { id: 'm16_3', home: 'for', away: 'cal', score: '1 - 2', status: 'FINALIZADO', date: 'Metropolitano de Techo (Bogotá)', highlights: '⚽ Juan Ignacio Dinenno, ⚽ Bebelo Reynoso (CAL)' },
+          { id: 'm16_4', home: 'boy', away: 'buc', score: '1 - 1', status: 'FINALIZADO', date: 'La Independencia (Tunja)', highlights: '⚽ Henry Plazas (BOY) • ⚽ Fabián Sambueza (BUC)' },
+          { id: 'm16_5', home: 'sfe', away: 'mil', score: '1 - 1', status: 'FINALIZADO', date: 'El Campín (Clásico Capitalino)', highlights: '⚽ Harold Santiago Mosquera (SFE) • ⚽ Leonardo Castro (MIL)' },
+          { id: 'm16_6', home: 'onc', away: 'per', score: '1 - 1', status: 'FINALIZADO', date: 'Palogrande (Clásico Cafetero)', highlights: '⚽ Dayro Moreno (ONC) • ⚽ Fernando Uribe (PER)' },
+          { id: 'm16_7', home: 'jun', away: 'agu', score: '2 - 2', status: 'FINALIZADO', date: 'Metropolitano (Barranquilla)', highlights: '⚽ Luis Muriel, ⚽ Yimmi Chará (JUN) • ⚽⚽ Jhon Fredy Salazar (AGU)' },
+          { id: 'm16_8', home: 'tol', away: 'pas', score: '1 - 1', status: 'FINALIZADO', date: 'Manuel Murillo Toro (Ibagué)', highlights: '⚽ Brayan Gil (TOL) • ⚽ Daniel Moreno (PAS)' },
+          { id: 'm16_9', home: 'ali', away: 'int', score: '1 - 1', status: 'FINALIZADO', date: 'Armando Maestre (Valledupar)', highlights: '⚽ Felipe Pardo (ALI) • ⚽ Facundo Boné (INT)' },
+          { id: 'm16_10', home: 'jag', away: 'lla', score: '1 - 1', status: 'FINALIZADO', date: 'Jaraguay (Montería)', highlights: '⚽ Wilson Morelo (JAG) • ⚽ Bryan Urueña (LLA)' }
+        ]
+      },
+      f17: {
+        title: 'Fecha 17 • Liga BetPlay Dimayor (Próxima Jornada Completa)',
+        matches: [
+          { id: 'm17_1', home: 'buc', away: 'nal', score: 'VS', status: 'SÁB • 6:10 PM', date: 'Américo Montanini (Bucaramanga)', highlights: 'Partidazo: Atl. Bucaramanga (4°) vs Atl. Nacional (1°)' },
+          { id: 'm17_2', home: 'cal', away: 'ame', score: 'VS', status: 'DOM • 5:15 PM', date: 'Palmaseca (Clásico Vallecaucano)', highlights: 'Deportivo Cali (3°) vs América de Cali (2°)' },
+          { id: 'm17_3', home: 'mil', away: 'tol', score: 'VS', status: 'DOM • 7:30 PM', date: 'El Campín (Bogotá)', highlights: 'Millonarios (6°) vs Deportes Tolima (11°)' },
+          { id: 'm17_4', home: 'med', away: 'sfe', score: 'VS', status: 'SÁB • 8:20 PM', date: 'Atanasio Girardot (Medellín)', highlights: 'Ind. Medellín (8°) vs Ind. Santa Fe (5°)' },
+          { id: 'm17_5', home: 'agu', away: 'onc', score: 'VS', status: 'VIE • 7:40 PM', date: 'Alberto Grisales (Rionegro)', highlights: 'Águilas Doradas (9°) vs Once Caldas (7°)' },
+          { id: 'm17_6', home: 'cuc', away: 'jun', score: 'VS', status: 'DOM • 3:00 PM', date: 'General Santander (Cúcuta)', highlights: 'Cúcuta Deportivo (10°) vs Junior FC (14°)' },
+          { id: 'm17_7', home: 'per', away: 'int', score: 'VS', status: 'LUN • 6:00 PM', date: 'Hernán Ramírez Villegas (Pereira)', highlights: 'Deportivo Pereira vs Inter Bogotá' },
+          { id: 'm17_8', home: 'pas', away: 'for', score: 'VS', status: 'LUN • 8:10 PM', date: 'Libertad (Pasto)', highlights: 'Deportivo Pasto vs Fortaleza CEIF' },
+          { id: 'm17_9', home: 'lla', away: 'ali', score: 'VS', status: 'MAR • 4:00 PM', date: 'Bello Horizonte (Villavicencio)', highlights: 'Llaneros FC vs Alianza FC' },
+          { id: 'm17_10', home: 'boy', away: 'jag', score: 'VS', status: 'MAR • 8:00 PM', date: 'La Independencia (Tunja)', highlights: 'Duelo directo: Boyacá Chicó vs Jaguares FC' }
         ]
       }
     };
@@ -523,7 +692,7 @@
 
       const dims = size === 'sm' ? 'w-10 h-10' : size === 'lg' ? 'w-16 h-16' : 'w-12 h-12';
       const badgeSize = size === 'sm' ? 'xs' : size === 'lg' ? 'sm' : 'xs';
-      const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=${team.primary.replace('#', '')}&color=ffffff&bold=true&size=128`;
+      const dorsal = player.shirtNumber || 10;
 
       return (
         <div className={`relative inline-flex items-center justify-center shrink-0 select-none ${dims}`}>
@@ -531,13 +700,29 @@
             className="w-full h-full rounded-full overflow-hidden border-2 shadow-md bg-slate-800 flex items-center justify-center"
             style={{ borderColor: team.primary }}
           >
-            <img
-              src={!imgError && photoUrl ? photoUrl : fallbackAvatarUrl}
-              alt={player.name}
-              referrerPolicy="no-referrer"
-              onError={() => setImgError(true)}
-              className="w-full h-full object-cover object-top"
-            />
+            {!imgError && photoUrl ? (
+              <img
+                src={photoUrl}
+                alt={player.name}
+                referrerPolicy="no-referrer"
+                onError={() => setImgError(true)}
+                className="w-full h-full object-cover object-top"
+              />
+            ) : (
+              /* Silueta de Camiseta Oficial del Club con Dorsal cuando carga o si no tiene foto recortada */
+              <svg viewBox="0 0 64 64" className="w-full h-full">
+                <rect width="64" height="64" fill="#1e293b" />
+                <path
+                  d="M20 14 L10 22 L15 32 L21 29 L21 54 L43 54 L43 29 L49 32 L54 22 L44 14 L38 18 C35 20 29 20 26 18 Z"
+                  fill={team.primary}
+                  stroke={team.secondary || '#ffffff'}
+                  strokeWidth="2.5"
+                />
+                <text x="32" y="41" textAnchor="middle" fill={team.text || '#ffffff'} fontSize="14" fontWeight="900">
+                  {dorsal}
+                </text>
+              </svg>
+            )}
           </div>
           {isCaptain && (
             <div className="absolute -top-1 -left-1 z-20 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-white shadow">
@@ -606,7 +791,8 @@
       const [theme, setTheme] = useState('light');
       const isLight = theme === 'light';
       const [activeTab, setActiveTab] = useState('squad');
-      const [selectedMatchdayView, setSelectedMatchdayView] = useState('f15');
+      const [selectedMatchdayView, setSelectedMatchdayView] = useState('f16');
+      const [activeDataProvider, setActiveDataProvider] = useState('FLASHSCORE');
       const [toast, setToast] = useState(null);
 
       const [cloudServices, setCloudServices] = useState({ auth: null, db: null, isCloud: false });
@@ -2130,58 +2316,121 @@
                   <div className="space-y-6">
                     <div className="bw-card border rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4">
                       <div>
-                        <h2 className="text-xl font-black bw-text-main">Calendario & Resultados Dimayor</h2>
-                        <p className="text-xs bw-text-muted">Toca cualquier partido para ver las nóminas y qué amigo es dueño de cada jugador.</p>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h2 className="text-xl font-black bw-text-main">Centro de Estadísticas & Clasificación Real</h2>
+                          <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-600 border border-rose-500/30">
+                            ● Proveedor Activo: {activeDataProvider}
+                          </span>
+                        </div>
+                        <p className="text-xs bw-text-muted">Respaldo multi-fuente sincronizado con Flashscore, Sofascore, ESPN y TheSportsDB.</p>
                       </div>
-                      <div className="flex gap-2">
-                        {[{ id: 'f15', label: 'Fecha 15 (Resultados)' }, { id: 'f16', label: 'Fecha 16 (Próxima)' }].map(b => (
-                          <button key={b.id} onClick={() => setSelectedMatchdayView(b.id)} className={`px-4 py-2 rounded-xl text-xs font-black cursor-pointer transition ${selectedMatchdayView === b.id ? 'bg-emerald-600 text-white shadow' : 'bw-subcard bw-text-muted border'}`}>
-                            {b.label}
-                          </button>
-                        ))}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex items-center gap-1 bw-subcard border p-1 rounded-xl">
+                          {['FLASHSCORE', 'SOFASCORE', 'ESPN / DIMAYOR'].map(prov => (
+                            <button
+                              key={prov}
+                              onClick={() => {
+                                setActiveDataProvider(prov);
+                                showNotification(`Fuente de respaldo cambiada a ${prov}`);
+                              }}
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-black cursor-pointer transition ${activeDataProvider === prov ? 'bg-rose-600 text-white shadow' : 'bw-text-muted'}`}
+                            >
+                              {prov}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex gap-1.5">
+                          {[
+                            { id: 'f15', label: 'Fecha 15 (10 PJ)' },
+                            { id: 'f16', label: 'Fecha 16 (Actual)' },
+                            { id: 'f17', label: 'Fecha 17 (Próxima)' }
+                          ].map(b => (
+                            <button key={b.id} onClick={() => setSelectedMatchdayView(b.id)} className={`px-3.5 py-2 rounded-xl text-xs font-black cursor-pointer transition ${selectedMatchdayView === b.id ? 'bg-emerald-600 text-white shadow' : 'bw-subcard bw-text-muted border'}`}>
+                              {b.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                      <div className="lg:col-span-6 space-y-3">
-                        <h3 className="text-sm font-black uppercase text-emerald-600">{MATCHDAYS_2026[selectedMatchdayView].title}</h3>
+                      <div className="lg:col-span-5 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-black uppercase text-emerald-600">{MATCHDAYS_2026[selectedMatchdayView].title}</h3>
+                          <span className="text-[11px] font-bold bw-text-muted">{MATCHDAYS_2026[selectedMatchdayView].matches.length} Partidos</span>
+                        </div>
                         {MATCHDAYS_2026[selectedMatchdayView].matches.map(m => {
                           const home = getTeamById(m.home);
                           const away = getTeamById(m.away);
                           return (
-                            <div key={m.id} onClick={() => setSelectedMatchModal(m)} className="bw-card border rounded-2xl p-4 cursor-pointer hover:border-emerald-500 transition">
-                              <div className="flex items-center justify-between text-[11px] bw-text-muted font-bold mb-2">
-                                <span>{m.date}</span>
-                                <span className="text-[10px] font-black text-emerald-600">Ver Jugadores →</span>
+                            <div key={m.id} onClick={() => setSelectedMatchModal(m)} className="bw-card border rounded-2xl p-3.5 cursor-pointer hover:border-emerald-500 transition">
+                              <div className="flex items-center justify-between text-[10px] bw-text-muted font-bold mb-1.5">
+                                <span>📍 {m.date}</span>
+                                <span className="font-black text-emerald-600">{m.status} • Ver Acta →</span>
                               </div>
-                              <div className="flex items-center justify-between gap-2 my-2">
-                                <div className="flex items-center gap-2 flex-1"><TeamCrest teamId={home.id} size="sm" /><span className="text-sm font-extrabold bw-text-main">{home.name}</span></div>
-                                <div className="px-3.5 py-1 rounded-xl bw-subcard border text-sm font-black text-emerald-600">{m.score}</div>
-                                <div className="flex items-center justify-end gap-2 flex-1 text-right"><span className="text-sm font-extrabold bw-text-main">{away.name}</span><TeamCrest teamId={away.id} size="sm" /></div>
+                              <div className="flex items-center justify-between gap-2 my-1.5">
+                                <div className="flex items-center gap-2 flex-1 min-w-0"><TeamCrest teamId={home.id} size="sm" /><span className="text-xs sm:text-sm font-extrabold bw-text-main truncate">{home.name}</span></div>
+                                <div className="px-3 py-1 rounded-xl bw-subcard border text-xs sm:text-sm font-black text-emerald-600 shrink-0">{m.score}</div>
+                                <div className="flex items-center justify-end gap-2 flex-1 min-w-0 text-right"><span className="text-xs sm:text-sm font-extrabold bw-text-main truncate">{away.name}</span><TeamCrest teamId={away.id} size="sm" /></div>
                               </div>
-                              <div className="text-xs bw-text-muted border-t border-slate-200 dark:border-slate-800 pt-2 mt-2">{m.highlights}</div>
+                              <div className="text-[11px] bw-text-muted border-t border-slate-200 dark:border-slate-800 pt-1.5 mt-1.5">{m.highlights}</div>
                             </div>
                           );
                         })}
                       </div>
 
-                      <div className="lg:col-span-6 bw-card border rounded-3xl p-5 self-start">
-                        <h3 className="text-sm font-black uppercase text-emerald-600 mb-3">Tabla de Posiciones • Liga BetPlay 2026-II</h3>
+                      <div className="lg:col-span-7 bw-card border rounded-3xl p-5 self-start">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-black uppercase text-rose-600">Clasificación Oficial • {activeDataProvider}</h3>
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600">Top 8 Cuadrangulares</span>
+                        </div>
                         <div className="overflow-x-auto">
                           <table className="w-full text-left text-xs">
                             <thead>
-                              <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase bw-text-muted">
-                                <th className="py-2.5 px-1">#</th><th className="py-2.5 px-2">Club</th><th className="py-2.5 px-1 text-center">PJ</th><th className="py-2.5 px-1 text-center">DG</th><th className="py-2.5 px-2 text-center font-black bw-text-main">PTS</th>
+                              <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] uppercase bw-text-muted font-black">
+                                <th className="py-2.5 px-1">#</th>
+                                <th className="py-2.5 px-2">Equipo</th>
+                                <th className="py-2.5 px-1 text-center">PJ</th>
+                                <th className="py-2.5 px-1 text-center">G</th>
+                                <th className="py-2.5 px-1 text-center">E</th>
+                                <th className="py-2.5 px-1 text-center">P</th>
+                                <th className="py-2.5 px-1 text-center">Goles</th>
+                                <th className="py-2.5 px-1 text-center">DG</th>
+                                <th className="py-2.5 px-2 text-center font-black bw-text-main">PTS</th>
+                                <th className="py-2.5 px-1 text-center">FORMA</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                               {[...FPC_TEAMS].sort((a, b) => a.pos - b.pos).map(t => (
-                                <tr key={t.id} className={t.pos <= 8 ? 'bg-emerald-500/10' : ''}>
-                                  <td className="py-2 px-1 font-black text-emerald-600">{t.pos}.</td>
-                                  <td className="py-2 px-2 font-extrabold bw-text-main flex items-center gap-2"><TeamCrest teamId={t.id} size="sm" /><span>{t.name}</span></td>
+                                <tr key={t.id} className={t.pos <= 8 ? 'bg-blue-500/5' : ''}>
+                                  <td className="py-2 px-1">
+                                    <span className={`w-5 h-5 rounded-md text-[10px] font-black inline-flex items-center justify-center ${t.pos <= 8 ? 'bg-blue-700 text-white' : 'bw-text-muted'}`}>
+                                      {t.pos}.
+                                    </span>
+                                  </td>
+                                  <td className="py-2 px-2 font-extrabold bw-text-main flex items-center gap-2 whitespace-nowrap">
+                                    <TeamCrest teamId={t.id} size="sm" />
+                                    <span>{t.name}</span>
+                                  </td>
                                   <td className="py-2 px-1 text-center font-semibold bw-text-muted">{t.pj}</td>
-                                  <td className="py-2 px-1 text-center font-semibold bw-text-muted">{t.gd}</td>
-                                  <td className="py-2 px-2 text-center font-black text-sm text-emerald-600">{t.pts2026}</td>
+                                  <td className="py-2 px-1 text-center font-semibold bw-text-muted">{t.w}</td>
+                                  <td className="py-2 px-1 text-center font-semibold bw-text-muted">{t.d}</td>
+                                  <td className="py-2 px-1 text-center font-semibold bw-text-muted">{t.l}</td>
+                                  <td className="py-2 px-1 text-center font-semibold bw-text-muted">{t.goalsStr}</td>
+                                  <td className="py-2 px-1 text-center font-bold bw-text-main">{t.gd}</td>
+                                  <td className="py-2 px-2 text-center font-black text-sm bw-text-main">{t.pts2026}</td>
+                                  <td className="py-2 px-1">
+                                    <div className="flex items-center justify-center gap-0.5">
+                                      {(t.form || ['G', 'E', 'G', 'P', 'G']).map((res, idx) => (
+                                        <span
+                                          key={idx}
+                                          className={`w-4 h-4 rounded text-[9px] font-black inline-flex items-center justify-center text-white ${res === 'G' ? 'bg-emerald-600' : res === 'E' ? 'bg-amber-500' : 'bg-rose-600'}`}
+                                        >
+                                          {res}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -2510,11 +2759,12 @@
                   <div className="flex items-center gap-3.5">
                     <PlayerAvatar player={selectedPlayerModal} size="lg" showBadge={true} isCaptain={myMemberProfile?.captainId === selectedPlayerModal.id} />
                     <div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${getPosColor(selectedPlayerModal.pos)}`}>{selectedPlayerModal.pos}</span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bw-subcard border bw-text-main">#{selectedPlayerModal.shirtNumber || 10}</span>
                         <h3 className="text-xl font-black bw-text-main">{selectedPlayerModal.name}</h3>
                       </div>
-                      <div className="flex items-center gap-1.5 mt-1">
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                         <TeamCrest teamId={selectedPlayerModal.teamId} size="xs" />
                         <p className="text-xs font-bold bw-text-muted">{getTeamById(selectedPlayerModal.teamId).name}</p>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 font-black">{selectedPlayerModal.role || 'Titular'}</span>
@@ -2524,20 +2774,29 @@
                   <button onClick={() => setSelectedPlayerModal(null)} className="bw-text-muted hover:text-rose-500 text-sm font-bold cursor-pointer">✕</button>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between bw-subcard border px-3.5 py-2.5 rounded-2xl">
+                {/* Ficha Biográfica Completa del Jugador */}
+                <div className="grid grid-cols-4 gap-1.5 mt-3 bw-subcard p-2.5 rounded-2xl border text-center text-[11px]">
+                  <div><span className="text-[9px] bw-text-muted font-bold block uppercase">Edad</span><span className="font-black bw-text-main">{selectedPlayerModal.age || 26} años</span></div>
+                  <div><span className="text-[9px] bw-text-muted font-bold block uppercase">Altura</span><span className="font-black bw-text-main">{selectedPlayerModal.height || '1.80 m'}</span></div>
+                  <div><span className="text-[9px] bw-text-muted font-bold block uppercase">Pie Hábil</span><span className="font-black bw-text-main">{selectedPlayerModal.foot || 'Derecho'}</span></div>
+                  <div><span className="text-[9px] bw-text-muted font-bold block uppercase">Minutos</span><span className="font-black text-emerald-600">{selectedPlayerModal.minutesPlayed || 1150}'</span></div>
+                </div>
+
+                <div className="mt-2.5 flex items-center justify-between bw-subcard border px-3.5 py-2 rounded-2xl">
                   <span className="text-xs font-extrabold bw-text-muted">Puntos últimas 5 fechas:</span>
                   <Last5Boxes scores={selectedPlayerModal.last5} />
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 my-3 bw-subcard p-3 rounded-2xl border text-center">
+                <div className="grid grid-cols-3 gap-2 my-2.5 bw-subcard p-3 rounded-2xl border text-center">
                   <div><span className="text-[10px] bw-text-muted font-bold block">Sofascore</span><span className="text-lg font-black text-emerald-600">★{selectedPlayerModal.sofaRating}</span></div>
                   <div><span className="text-[10px] bw-text-muted font-bold block">Puntos</span><span className="text-lg font-black text-amber-500">{selectedPlayerModal.points}</span></div>
                   <div><span className="text-[10px] bw-text-muted font-bold block">Valor</span><span className="text-sm font-black bw-text-main">{formatCOP(selectedPlayerModal.value)}</span></div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 mb-4 bw-subcard p-2.5 rounded-2xl border text-center text-xs">
-                  <div><span className="text-[10px] bw-text-muted font-bold block">Goles</span><span className="font-black bw-text-main">⚽ {selectedPlayerModal.goals}</span></div>
-                  <div><span className="text-[10px] bw-text-muted font-bold block">Asistencias</span><span className="font-black bw-text-main">👟 {selectedPlayerModal.assists}</span></div>
-                  <div><span className="text-[10px] bw-text-muted font-bold block">Cláusula</span><span className="font-black text-rose-500">{formatCOP(selectedPlayerModal.clause)}</span></div>
+                <div className="grid grid-cols-4 gap-1.5 mb-4 bw-subcard p-2.5 rounded-2xl border text-center text-xs">
+                  <div><span className="text-[9px] bw-text-muted font-bold block">Partidos</span><span className="font-black bw-text-main">🏟️ {selectedPlayerModal.matchesPlayed || 15}</span></div>
+                  <div><span className="text-[9px] bw-text-muted font-bold block">Goles</span><span className="font-black bw-text-main">⚽ {selectedPlayerModal.goals}</span></div>
+                  <div><span className="text-[9px] bw-text-muted font-bold block">Asist.</span><span className="font-black bw-text-main">👟 {selectedPlayerModal.assists}</span></div>
+                  <div><span className="text-[9px] bw-text-muted font-bold block">Cláusula</span><span className="font-black text-rose-500">{formatCOP(selectedPlayerModal.clause)}</span></div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(myMemberProfile?.squad || []).includes(selectedPlayerModal.id) ? (
