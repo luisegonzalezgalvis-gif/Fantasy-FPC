@@ -113,56 +113,85 @@
     const MAX_SQUAD_SIZE = 20;
     const MAX_CHANGES_PER_MATCHDAY = 3;
 
-    // Clasificación Oficial Sincronizada con Flashscore + Respaldo Multi-CDN de Escudos (ESPN / Wikipedia / Flashscore)
+    // Clasificación Oficial Sincronizada con Flashscore + Búsqueda Exacta de Escudos Oficiales FPC
     const FPC_TEAMS = [
-      { id: 'nal', pos: 1, name: 'Atl. Nacional', short: 'NAL', primary: '#059669', secondary: '#FFFFFF', accent: '#047857', text: '#FFFFFF', pj: 16, w: 11, d: 2, l: 3, goalsStr: '32:13', gd: '+19', pts2026: 35, form: ['G', 'G', 'G', 'P', 'G'], dt: 'Efraín Juárez', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5265.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/ Atl%C3%A9tico_Nacional.svg/200px-Atl%C3%A9tico_Nacional.svg.png' },
-      { id: 'ame', pos: 2, name: 'América de Cali', short: 'AME', primary: '#E11D48', secondary: '#9F1239', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 10, d: 4, l: 2, goalsStr: '31:12', gd: '+19', pts2026: 34, form: ['G', 'G', 'E', 'P', 'G'], dt: 'Jorge da Silva', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5264.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Escudo_del_Am%C3%A9rica_de_Cali.svg/200px-Escudo_del_Am%C3%A9rica_de_Cali.svg.png' },
-      { id: 'cal', pos: 3, name: 'Deportivo Cali', short: 'CAL', primary: '#166534', secondary: '#FFFFFF', accent: '#14532D', text: '#FFFFFF', pj: 16, w: 8, d: 6, l: 2, goalsStr: '24:10', gd: '+14', pts2026: 30, form: ['E', 'G', 'E', 'E', 'G'], dt: 'Alfredo Arias', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5269.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Escudo_de_Deportivo_Cali.svg/200px-Escudo_de_Deportivo_Cali.svg.png' },
-      { id: 'buc', pos: 4, name: 'Atl. Bucaramanga', short: 'BUC', primary: '#FACC15', secondary: '#15803D', accent: '#166534', text: '#064E3B', pj: 16, w: 7, d: 7, l: 2, goalsStr: '25:16', gd: '+9', pts2026: 28, form: ['G', 'P', 'P', 'E', 'E'], dt: 'Rafael Dudamel', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5266.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Escudo_del_Atl%C3%A9tico_Bucaramanga.svg/200px-Escudo_del_Atl%C3%A9tico_Bucaramanga.svg.png' },
-      { id: 'sfe', pos: 5, name: 'Ind. Santa Fe', short: 'SFE', primary: '#DC2626', secondary: '#FFFFFF', accent: '#FACC15', text: '#FFFFFF', pj: 16, w: 8, d: 4, l: 4, goalsStr: '23:17', gd: '+6', pts2026: 28, form: ['P', 'G', 'G', 'P', 'G'], dt: 'Pablo Peirano', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5272.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Escudo_de_Independiente_Santa_Fe.svg/200px-Escudo_de_Independiente_Santa_Fe.svg.png' },
-      { id: 'mil', pos: 6, name: 'Millonarios', short: 'MIL', primary: '#1E40AF', secondary: '#FFFFFF', accent: '#93C5FD', text: '#FFFFFF', pj: 16, w: 6, d: 8, l: 2, goalsStr: '24:14', gd: '+10', pts2026: 26, form: ['E', 'G', 'E', 'E', 'E'], dt: 'Alberto Gamero', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5273.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Escudo_de_Millonarios_F%C3%BAtbol_Club.svg/200px-Escudo_de_Millonarios_F%C3%BAtbol_Club.svg.png' },
-      { id: 'onc', pos: 7, name: 'Once Caldas', short: 'ONC', primary: '#0F172A', secondary: '#16A34A', accent: '#DC2626', text: '#FFFFFF', pj: 17, w: 6, d: 6, l: 5, goalsStr: '21:18', gd: '+3', pts2026: 24, form: ['G', 'E', 'E', 'G', 'G'], dt: 'Hernán Darío Herrera', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5274.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Once_Caldas_logo-svg.svg/200px-Once_Caldas_logo-svg.svg.png' },
-      { id: 'med', pos: 8, name: 'Ind. Medellín', short: 'MED', primary: '#DC2626', secondary: '#1D4ED8', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 7, d: 2, l: 7, goalsStr: '23:24', gd: '-1', pts2026: 23, form: ['P', 'P', 'P', 'G', 'P'], dt: 'Alejandro Restrepo', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5271.png', altLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Escudo_de_Independiente_Medell%C3%ADn.svg/200px-Escudo_de_Independiente_Medell%C3%ADn.svg.png' },
-      { id: 'agu', pos: 9, name: 'Águilas Doradas', short: 'AGU', primary: '#D97706', secondary: '#78350F', accent: '#FDE68A', text: '#FFFFFF', pj: 16, w: 5, d: 7, l: 4, goalsStr: '21:20', gd: '+1', pts2026: 22, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Juan Pablo Buch', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/10256.png', altLogo: '' },
-      { id: 'cuc', pos: 10, name: 'Cúcuta Deportivo', short: 'CUC', primary: '#DC2626', secondary: '#111827', accent: '#FBBF24', text: '#FFFFFF', pj: 16, w: 6, d: 3, l: 7, goalsStr: '18:24', gd: '-6', pts2026: 21, form: ['P', 'P', 'G', 'G', 'G'], dt: 'Bernardo Redín', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5268.png', altLogo: '' },
-      { id: 'tol', pos: 11, name: 'Deportes Tolima', short: 'TOL', primary: '#6B1426', secondary: '#FBBF24', accent: '#FDE047', text: '#FEF08A', pj: 16, w: 5, d: 5, l: 6, goalsStr: '18:19', gd: '-1', pts2026: 20, dt: 'David González', form: ['P', 'P', 'P', 'E', 'E'], logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5270.png', altLogo: '' },
-      { id: 'int', pos: 12, name: 'Inter Bogotá', short: 'INT', primary: '#0D9488', secondary: '#0F172A', accent: '#5EEAD4', text: '#FFFFFF', pj: 17, w: 4, d: 8, l: 5, goalsStr: '21:23', gd: '-2', pts2026: 20, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Alexis García', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/7254.png', altLogo: '' },
-      { id: 'lla', pos: 13, name: 'Llaneros FC', short: 'LLA', primary: '#F59E0B', secondary: '#111827', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 5, d: 3, l: 8, goalsStr: '17:20', gd: '-3', pts2026: 18, form: ['E', 'P', 'G', 'P', 'P'], dt: 'Pedro Depablos', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15636.png', altLogo: '' },
-      { id: 'jun', pos: 14, name: 'Junior FC', short: 'JUN', primary: '#DC2626', secondary: '#FFFFFF', accent: '#1E3A8A', text: '#FFFFFF', pj: 16, w: 4, d: 6, l: 6, goalsStr: '21:23', gd: '-2', pts2026: 18, form: ['G', 'G', 'E', 'E', 'P'], dt: 'César Farías', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5267.png', altLogo: '' },
-      { id: 'ali', pos: 15, name: 'Alianza FC', short: 'ALI', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 4, d: 4, l: 8, goalsStr: '16:28', gd: '-12', pts2026: 16, form: ['E', 'P', 'G', 'E', 'P'], dt: 'Hubert Bodhert', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15294.png', altLogo: '' },
-      { id: 'per', pos: 16, name: 'Dep. Pereira', short: 'PER', primary: '#FACC15', secondary: '#DC2626', accent: '#7F1D1D', text: '#7F1D1D', pj: 16, w: 3, d: 7, l: 6, goalsStr: '13:20', gd: '-7', pts2026: 16, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Luis Fernando Suárez', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5275.png', altLogo: '' },
-      { id: 'pas', pos: 17, name: 'Dep. Pasto', short: 'PAS', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FACC15', text: '#FFFFFF', pj: 16, w: 4, d: 3, l: 9, goalsStr: '14:22', gd: '-8', pts2026: 15, form: ['G', 'G', 'P', 'E', 'P'], dt: 'Gustavo Florentín', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5276.png', altLogo: '' },
-      { id: 'for', pos: 18, name: 'Fortaleza CEIF', short: 'FOR', primary: '#0369A1', secondary: '#DC2626', accent: '#38BDF8', text: '#FFFFFF', pj: 16, w: 2, d: 8, l: 6, goalsStr: '17:24', gd: '-7', pts2026: 14, form: ['P', 'G', 'P', 'E', 'E'], dt: 'Sebastián Oliveros', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/17121.png', altLogo: '' },
-      { id: 'boy', pos: 19, name: 'Boyacá Chicó', short: 'BOY', primary: '#0F172A', secondary: '#EA580C', accent: '#22C55E', text: '#FFFFFF', pj: 16, w: 3, d: 4, l: 9, goalsStr: '12:27', gd: '-15', pts2026: 13, form: ['E', 'P', 'P', 'P', 'E'], dt: 'Jhon Jaime Gómez', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5277.png', altLogo: '' },
-      { id: 'jag', pos: 20, name: 'Jaguares FC', short: 'JAG', primary: '#0284C7', secondary: '#FACC15', accent: '#0F172A', text: '#FFFFFF', pj: 16, w: 2, d: 5, l: 9, goalsStr: '16:29', gd: '-13', pts2026: 11, form: ['E', 'P', 'P', 'G', 'P'], dt: 'Édgar Carvajal', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/17120.png', altLogo: '' }
+      { id: 'nal', pos: 1, name: 'Atl. Nacional', wikiTitle: 'Atlético Nacional', sportsDbName: 'Atletico Nacional', short: 'NAL', primary: '#008D36', secondary: '#FFFFFF', accent: '#047857', text: '#FFFFFF', pj: 16, w: 11, d: 2, l: 3, goalsStr: '32:13', gd: '+19', pts2026: 35, form: ['G', 'G', 'G', 'P', 'G'], dt: 'Efraín Juárez', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/5264.png' },
+      { id: 'ame', pos: 2, name: 'América de Cali', wikiTitle: 'América de Cali', sportsDbName: 'America de Cali', short: 'AME', primary: '#E11D48', secondary: '#9F1239', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 10, d: 4, l: 2, goalsStr: '31:12', gd: '+19', pts2026: 34, form: ['G', 'G', 'E', 'P', 'G'], dt: 'Jorge da Silva', logo: '' },
+      { id: 'cal', pos: 3, name: 'Deportivo Cali', wikiTitle: 'Deportivo Cali', sportsDbName: 'Deportivo Cali', short: 'CAL', primary: '#15803D', secondary: '#FFFFFF', accent: '#14532D', text: '#FFFFFF', pj: 16, w: 8, d: 6, l: 2, goalsStr: '24:10', gd: '+14', pts2026: 30, form: ['E', 'G', 'E', 'E', 'G'], dt: 'Alfredo Arias', logo: '' },
+      { id: 'buc', pos: 4, name: 'Atl. Bucaramanga', wikiTitle: 'Atlético Bucaramanga', sportsDbName: 'Atletico Bucaramanga', short: 'BUC', primary: '#FACC15', secondary: '#15803D', accent: '#166534', text: '#064E3B', pj: 16, w: 7, d: 7, l: 2, goalsStr: '25:16', gd: '+9', pts2026: 28, form: ['G', 'P', 'P', 'E', 'E'], dt: 'Rafael Dudamel', logo: '' },
+      { id: 'sfe', pos: 5, name: 'Ind. Santa Fe', wikiTitle: 'Independiente Santa Fe', sportsDbName: 'Independiente Santa Fe', short: 'SFE', primary: '#DC2626', secondary: '#FFFFFF', accent: '#FACC15', text: '#FFFFFF', pj: 16, w: 8, d: 4, l: 4, goalsStr: '23:17', gd: '+6', pts2026: 28, form: ['P', 'G', 'G', 'P', 'G'], dt: 'Pablo Peirano', logo: '' },
+      { id: 'mil', pos: 6, name: 'Millonarios', wikiTitle: 'Millonarios Fútbol Club', sportsDbName: 'Millonarios', short: 'MIL', primary: '#1E40AF', secondary: '#FFFFFF', accent: '#93C5FD', text: '#FFFFFF', pj: 16, w: 6, d: 8, l: 2, goalsStr: '24:14', gd: '+10', pts2026: 26, form: ['E', 'G', 'E', 'E', 'E'], dt: 'Alberto Gamero', logo: '' },
+      { id: 'onc', pos: 7, name: 'Once Caldas', wikiTitle: 'Once Caldas', sportsDbName: 'Once Caldas', short: 'ONC', primary: '#0F172A', secondary: '#16A34A', accent: '#DC2626', text: '#FFFFFF', pj: 17, w: 6, d: 6, l: 5, goalsStr: '21:18', gd: '+3', pts2026: 24, form: ['G', 'E', 'E', 'G', 'G'], dt: 'Hernán Darío Herrera', logo: '' },
+      { id: 'med', pos: 8, name: 'Ind. Medellín', wikiTitle: 'Independiente Medellín', sportsDbName: 'Independiente Medellin', short: 'MED', primary: '#DC2626', secondary: '#1D4ED8', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 7, d: 2, l: 7, goalsStr: '23:24', gd: '-1', pts2026: 23, form: ['P', 'P', 'P', 'G', 'P'], dt: 'Alejandro Restrepo', logo: '' },
+      { id: 'agu', pos: 9, name: 'Águilas Doradas', wikiTitle: 'Águilas Doradas', sportsDbName: 'Aguilas Doradas', short: 'AGU', primary: '#D97706', secondary: '#78350F', accent: '#FDE68A', text: '#FFFFFF', pj: 16, w: 5, d: 7, l: 4, goalsStr: '21:20', gd: '+1', pts2026: 22, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Juan Pablo Buch', logo: '' },
+      { id: 'cuc', pos: 10, name: 'Cúcuta Deportivo', wikiTitle: 'Cúcuta Deportivo', sportsDbName: 'Cucuta Deportivo', short: 'CUC', primary: '#DC2626', secondary: '#111827', accent: '#FBBF24', text: '#FFFFFF', pj: 16, w: 6, d: 3, l: 7, goalsStr: '18:24', gd: '-6', pts2026: 21, form: ['P', 'P', 'G', 'G', 'G'], dt: 'Bernardo Redín', logo: '' },
+      { id: 'tol', pos: 11, name: 'Deportes Tolima', wikiTitle: 'Deportes Tolima', sportsDbName: 'Deportes Tolima', short: 'TOL', primary: '#6B1426', secondary: '#FBBF24', accent: '#FDE047', text: '#FEF08A', pj: 16, w: 5, d: 5, l: 6, goalsStr: '18:19', gd: '-1', pts2026: 20, dt: 'David González', form: ['P', 'P', 'P', 'E', 'E'], logo: '' },
+      { id: 'int', pos: 12, name: 'Inter Bogotá', wikiTitle: 'Club Deportivo La Equidad', sportsDbName: 'La Equidad', short: 'INT', primary: '#0D9488', secondary: '#0F172A', accent: '#5EEAD4', text: '#FFFFFF', pj: 17, w: 4, d: 8, l: 5, goalsStr: '21:23', gd: '-2', pts2026: 20, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Alexis García', logo: '' },
+      { id: 'lla', pos: 13, name: 'Llaneros FC', wikiTitle: 'Club Llaneros', sportsDbName: 'Llaneros', short: 'LLA', primary: '#F59E0B', secondary: '#111827', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 5, d: 3, l: 8, goalsStr: '17:20', gd: '-3', pts2026: 18, form: ['E', 'P', 'G', 'P', 'P'], dt: 'Pedro Depablos', logo: '' },
+      { id: 'jun', pos: 14, name: 'Junior FC', wikiTitle: 'Junior de Barranquilla', sportsDbName: 'Junior', short: 'JUN', primary: '#DC2626', secondary: '#1E3A8A', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 4, d: 6, l: 6, goalsStr: '21:23', gd: '-2', pts2026: 18, form: ['G', 'G', 'E', 'E', 'P'], dt: 'César Farías', logo: '' },
+      { id: 'ali', pos: 15, name: 'Alianza FC', wikiTitle: 'Alianza Fútbol Club (Colombia)', sportsDbName: 'Alianza Petrolera', short: 'ALI', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FFFFFF', text: '#FFFFFF', pj: 16, w: 4, d: 4, l: 8, goalsStr: '16:28', gd: '-12', pts2026: 16, form: ['E', 'P', 'G', 'E', 'P'], dt: 'Hubert Bodhert', logo: '' },
+      { id: 'per', pos: 16, name: 'Dep. Pereira', wikiTitle: 'Deportivo Pereira', sportsDbName: 'Deportivo Pereira', short: 'PER', primary: '#FACC15', secondary: '#DC2626', accent: '#7F1D1D', text: '#7F1D1D', pj: 16, w: 3, d: 7, l: 6, goalsStr: '13:20', gd: '-7', pts2026: 16, form: ['G', 'P', 'G', 'E', 'E'], dt: 'Luis Fernando Suárez', logo: '' },
+      { id: 'pas', pos: 17, name: 'Dep. Pasto', wikiTitle: 'Deportivo Pasto', sportsDbName: 'Deportivo Pasto', short: 'PAS', primary: '#1E3A8A', secondary: '#DC2626', accent: '#FACC15', text: '#FFFFFF', pj: 16, w: 4, d: 3, l: 9, goalsStr: '14:22', gd: '-8', pts2026: 15, form: ['G', 'G', 'P', 'E', 'P'], dt: 'Gustavo Florentín', logo: '' },
+      { id: 'for', pos: 18, name: 'Fortaleza CEIF', wikiTitle: 'Fortaleza CEIF', sportsDbName: 'Fortaleza CEIF', short: 'FOR', primary: '#0369A1', secondary: '#DC2626', accent: '#38BDF8', text: '#FFFFFF', pj: 16, w: 2, d: 8, l: 6, goalsStr: '17:24', gd: '-7', pts2026: 14, form: ['P', 'G', 'P', 'E', 'E'], dt: 'Sebastián Oliveros', logo: '' },
+      { id: 'boy', pos: 19, name: 'Boyacá Chicó', wikiTitle: 'Boyacá Chicó', sportsDbName: 'Boyaca Chico', short: 'BOY', primary: '#0F172A', secondary: '#EA580C', accent: '#22C55E', text: '#FFFFFF', pj: 16, w: 3, d: 4, l: 9, goalsStr: '12:27', gd: '-15', pts2026: 13, form: ['E', 'P', 'P', 'P', 'E'], dt: 'Jhon Jaime Gómez', logo: '' },
+      { id: 'jag', pos: 20, name: 'Jaguares FC', wikiTitle: 'Jaguares de Córdoba', sportsDbName: 'Jaguares de Cordoba', short: 'JAG', primary: '#0284C7', secondary: '#FACC15', accent: '#0F172A', text: '#FFFFFF', pj: 16, w: 2, d: 5, l: 9, goalsStr: '16:29', gd: '-13', pts2026: 11, form: ['E', 'P', 'P', 'G', 'P'], dt: 'Édgar Carvajal', logo: '' }
     ];
 
-    const DIRECT_PLAYER_PHOTOS = {
-      'James Rodríguez': 'https://www.thesportsdb.com/images/media/player/cutout/5578911625148731.png',
-      'Juan Guillermo Cuadrado': 'https://www.thesportsdb.com/images/media/player/cutout/x0r6k11602857198.png',
-      'David Ospina': 'https://www.thesportsdb.com/images/media/player/cutout/b938t21599920234.png',
-      'Franco Armani': 'https://www.thesportsdb.com/images/media/player/cutout/v4m7151530110566.png',
-      'Juan Fernando Quintero': 'https://www.thesportsdb.com/images/media/player/cutout/m0p5x21530110992.png',
-      'Carlos Bacca': 'https://www.thesportsdb.com/images/media/player/cutout/t0s2b51599923511.png',
-      'Luis Muriel': 'https://www.thesportsdb.com/images/media/player/cutout/q8r72m1602857845.png',
-      'Dayro Moreno': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Dayro_Moreno_2018.jpg/220px-Dayro_Moreno_2018.jpg',
-      'Hugo Rodallega': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Hugo_Rodallega_2012.jpg/220px-Hugo_Rodallega_2012.jpg',
-      'Edwin Cardona': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Edwin_Cardona_2015.jpg/220px-Edwin_Cardona_2015.jpg',
-      'Matheus Uribe': 'https://www.thesportsdb.com/images/media/player/cutout/n78w2k1604421955.png',
-      'Pedro Gallese': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pedro_Gallese_2018.jpg/220px-Pedro_Gallese_2018.jpg',
-      'Leonardo Castro': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Leonardo_Castro_Millonarios.jpg/220px-Leonardo_Castro_Millonarios.jpg',
-      'Carlos Darwin Quintero': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Darwin_Quintero_2018.jpg/220px-Darwin_Quintero_2018.jpg',
-      'Adrián Ramos': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Adrian_Ramos_2014.jpg/220px-Adrian_Ramos_2014.jpg',
-      'Wuilker Faríñez': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Wuilker_Far%C3%AD%C3%B1ez_2019.jpg/220px-Wuilker_Far%C3%AD%C3%B1ez_2019.jpg',
-      'Teófilo Gutiérrez': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Te%C3%B3filo_Guti%C3%A9rrez_2016.jpg/220px-Te%C3%B3filo_Guti%C3%A9rrez_2016.jpg',
-      'Yimmi Chará': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Yimmi_Chara_2020.jpg/220px-Yimmi_Chara_2020.jpg',
-      'Andrés Llinás': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Andres_Llinas_2023.jpg/220px-Andres_Llinas_2023.jpg',
-      'David Mackalister Silva': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Mackalister_Silva_2023.jpg/220px-Mackalister_Silva_2023.jpg'
+    const TEAM_BADGE_CACHE = (() => {
+      try { return JSON.parse(localStorage.getItem('fpc_team_badges_v5') || '{}'); } catch { return {}; }
+    })();
+
+    const PENDING_BADGE_REQUESTS = {};
+
+    const fetchOfficialTeamBadge = async (team) => {
+      if (team.logo) return team.logo;
+      if (TEAM_BADGE_CACHE[team.id]) return TEAM_BADGE_CACHE[team.id];
+      if (PENDING_BADGE_REQUESTS[team.id]) return PENDING_BADGE_REQUESTS[team.id];
+
+      PENDING_BADGE_REQUESTS[team.id] = (async () => {
+        // 1. Buscar escudo oficial en TheSportsDB por nombre exacto del club
+        try {
+          const q = encodeURIComponent(team.sportsDbName || team.name);
+          const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${q}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.teams?.length > 0) {
+              const colTeam = data.teams.find(t => (t.strCountry || '').toLowerCase().includes('colombia')) || data.teams[0];
+              const badge = colTeam.strBadge || colTeam.strLogo;
+              if (badge) {
+                TEAM_BADGE_CACHE[team.id] = badge;
+                try { localStorage.setItem('fpc_team_badges_v5', JSON.stringify(TEAM_BADGE_CACHE)); } catch {}
+                return badge;
+              }
+            }
+          }
+        } catch {}
+
+        // 2. Respaldo en Wikipedia ES por título exacto del club
+        try {
+          const wq = encodeURIComponent(team.wikiTitle || team.name);
+          const wRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&titles=${wq}&prop=pageimages&format=json&pithumbsize=250&origin=*`);
+          if (wRes.ok) {
+            const wData = await wRes.json();
+            const pages = wData?.query?.pages || {};
+            const first = Object.values(pages)[0];
+            if (first?.thumbnail?.source) {
+              TEAM_BADGE_CACHE[team.id] = first.thumbnail.source;
+              try { localStorage.setItem('fpc_team_badges_v5', JSON.stringify(TEAM_BADGE_CACHE)); } catch {}
+              return first.thumbnail.source;
+            }
+          }
+        } catch {}
+
+        return null;
+      })();
+
+      return PENDING_BADGE_REQUESTS[team.id];
     };
 
     const PHOTO_MEMORY_CACHE = (() => {
       try {
-        return JSON.parse(localStorage.getItem('fpc_player_photos_v4') || '{}');
+        return JSON.parse(localStorage.getItem('fpc_player_photos_v6') || '{}');
       } catch {
         return {};
       }
@@ -171,20 +200,34 @@
     const savePhotoToCache = (playerName, url) => {
       PHOTO_MEMORY_CACHE[playerName] = url;
       try {
-        localStorage.setItem('fpc_player_photos_v4', JSON.stringify(PHOTO_MEMORY_CACHE));
+        localStorage.setItem('fpc_player_photos_v6', JSON.stringify(PHOTO_MEMORY_CACHE));
       } catch {}
     };
 
     const PENDING_PHOTO_REQUESTS = {};
 
-    // Buscador Multi-Respaldo de Fotos Reales (TheSportsDB + Wikipedia ES + Wikipedia EN)
+    // Buscador Multi-Respaldo de Fotos Reales (Wikipedia Exact Title + Wikipedia Search + TheSportsDB)
     const fetchPlayerPhotoOnline = async (playerName) => {
-      if (DIRECT_PLAYER_PHOTOS[playerName]) return DIRECT_PLAYER_PHOTOS[playerName];
       if (PHOTO_MEMORY_CACHE[playerName]) return PHOTO_MEMORY_CACHE[playerName];
       if (PENDING_PHOTO_REQUESTS[playerName]) return PENDING_PHOTO_REQUESTS[playerName];
 
       PENDING_PHOTO_REQUESTS[playerName] = (async () => {
-        // Fuente 1: TheSportsDB
+        // Fuente 1: Wikipedia en Español por Título Exacto (con redirecciones automáticas)
+        try {
+          const exactQuery = encodeURIComponent(playerName);
+          const exactRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&titles=${exactQuery}&redirects=1&prop=pageimages&format=json&pithumbsize=300&origin=*`);
+          if (exactRes.ok) {
+            const exactData = await exactRes.json();
+            const pages = exactData?.query?.pages || {};
+            const firstPage = Object.values(pages)[0];
+            if (firstPage?.thumbnail?.source) {
+              savePhotoToCache(playerName, firstPage.thumbnail.source);
+              return firstPage.thumbnail.source;
+            }
+          }
+        } catch {}
+
+        // Fuente 2: TheSportsDB API (Recortes PNG transparentes y fotos de perfil)
         try {
           const query = encodeURIComponent(playerName);
           const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=${query}`);
@@ -201,10 +244,10 @@
           }
         } catch {}
 
-        // Fuente 2: Wikipedia en Español (Búsqueda abierta con generador)
+        // Fuente 3: Búsqueda abierta en Wikipedia Español
         try {
           const wikiQuery = encodeURIComponent(`${playerName} futbolista`);
-          const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=250&origin=*`);
+          const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=300&origin=*`);
           if (wikiRes.ok) {
             const wikiData = await wikiRes.json();
             const pages = wikiData?.query?.pages || {};
@@ -216,10 +259,10 @@
           }
         } catch {}
 
-        // Fuente 3: Wikipedia en Inglés
+        // Fuente 4: Búsqueda abierta en Wikipedia Inglés
         try {
           const wikiEnQuery = encodeURIComponent(`${playerName} footballer`);
-          const wikiEnRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiEnQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=250&origin=*`);
+          const wikiEnRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiEnQuery}&gsrlimit=1&prop=pageimages&format=json&pithumbsize=300&origin=*`);
           if (wikiEnRes.ok) {
             const wikiEnData = await wikiEnRes.json();
             const pages = wikiEnData?.query?.pages || {};
@@ -632,40 +675,109 @@
       </div>
     );
 
+    // Escudos Oficiales Personalizados de cada Club del FPC (Con geometría auténtica y alto contraste)
+    const CustomFpcCrestSvg = ({ team }) => {
+      switch (team.id) {
+        case 'nal':
+          return (
+            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow">
+              <path d="M12 10 H88 V65 C88 92 50 108 50 108 C50 108 12 92 12 65 Z" fill="#FFFFFF" stroke="#008D36" strokeWidth="6" />
+              <rect x="24" y="14" width="12" height="82" fill="#008D36" />
+              <rect x="44" y="14" width="12" height="88" fill="#008D36" />
+              <rect x="64" y="14" width="12" height="82" fill="#008D36" />
+              <rect x="22" y="34" width="56" height="36" rx="4" fill="#FFFFFF" stroke="#008D36" strokeWidth="4" />
+              <text x="50" y="59" textAnchor="middle" fill="#008D36" fontSize="24" fontWeight="900">AN</text>
+            </svg>
+          );
+        case 'ame':
+          return (
+            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow">
+              <path d="M12 12 H88 V66 C88 92 50 108 50 108 C50 108 12 92 12 66 Z" fill="#E11D48" stroke="#FFFFFF" strokeWidth="6" />
+              <circle cx="50" cy="54" r="28" fill="#FFFFFF" />
+              <text x="50" y="51" textAnchor="middle" fill="#E11D48" fontSize="14" fontWeight="900">AMÉRICA</text>
+              <text x="50" y="68" textAnchor="middle" fill="#E11D48" fontSize="16" fontWeight="900">★★★</text>
+            </svg>
+          );
+        case 'cal':
+          return (
+            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow">
+              <polygon points="50,6 92,26 92,82 50,108 8,82 8,26" fill="#FFFFFF" stroke="#15803D" strokeWidth="7" />
+              <polygon points="50,12 86,29 86,52 14,52 14,29" fill="#15803D" />
+              <text x="50" y="42" textAnchor="middle" fill="#FFFFFF" fontSize="16" fontWeight="900">DEPORTIVO</text>
+              <text x="50" y="78" textAnchor="middle" fill="#15803D" fontSize="24" fontWeight="900">CALI</text>
+            </svg>
+          );
+        case 'buc':
+          return (
+            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow">
+              <path d="M12 12 H88 V66 C88 92 50 108 50 108 C50 108 12 92 12 66 Z" fill="#FACC15" stroke="#15803D" strokeWidth="6" />
+              <path d="M16 55 H84 V66 C84 89 50 104 50 104 C50 104 16 89 16 66 Z" fill="#15803D" />
+              <text x="50" y="45" textAnchor="middle" fill="#15803D" fontSize="26" fontWeight="900">AB</text>
+              <text x="50" y="80" textAnchor="middle" fill="#FACC15" fontSize="18" fontWeight="900">★</text>
+            </svg>
+          );
+        case 'sfe':
+          return (
+            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow">
+              <path d="M12 12 H88 V66 C88 92 50 108 50 108 C50 108 12 92 12 66 Z" fill="#FFFFFF" stroke="#DC2626" strokeWidth="6" />
+              <rect x="15" y="15" width="70" height="24" fill="#DC2626" />
+              <text x="50" y="32" textAnchor="middle" fill="#FFFFFF" fontSize="13" fontWeight="900">SANTA FE</text>
+              <text x="50" y="74" textAnchor="middle" fill="#DC2626" fontSize="26" fontWeight="900">SFE</text>
+            </svg>
+          );
+        case 'mil':
+          return (
+            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow">
+              <circle cx="50" cy="57" r="44" fill="#1E40AF" stroke="#FFFFFF" strokeWidth="6" />
+              <circle cx="50" cy="57" r="34" fill="none" stroke="#FFFFFF" strokeWidth="3" />
+              <text x="50" y="66" textAnchor="middle" fill="#FFFFFF" fontSize="26" fontWeight="900">MFC</text>
+            </svg>
+          );
+        default:
+          return (
+            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow">
+              <path d="M50 6 L92 20 L92 60 C92 86 73 102 50 110 C27 102 8 86 8 60 L8 20 Z" fill={team.primary} stroke="#FFFFFF" strokeWidth="5" />
+              <path d="M12 52 L88 30 L88 60 C88 83 70 98 50 106 C30 98 12 83 12 60 Z" fill={team.secondary === '#FFFFFF' ? team.primary : team.secondary} />
+              <rect x="12" y="38" width="76" height="30" rx="5" fill="#0F172A" fillOpacity="0.88" stroke="#FFFFFF" strokeWidth="2" />
+              <text x="50" y="59" textAnchor="middle" fill="#FFFFFF" fontSize="22" fontWeight="900">{team.short}</text>
+            </svg>
+          );
+      }
+    };
+
     const TeamCrest = ({ teamId, size = 'md' }) => {
       const team = getTeamById(teamId);
-      const [srcIndex, setSrcIndex] = useState(0);
+      const [badgeUrl, setBadgeUrl] = useState(() => team.logo || TEAM_BADGE_CACHE[team.id] || null);
+      const [imgError, setImgError] = useState(false);
       const dims = size === 'xs' ? 'w-5 h-5' : size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-14 h-14' : 'w-11 h-11';
-      const uid = `${team.id}_${size}`;
-      const sources = [team.logo, team.altLogo].filter(Boolean);
 
-      useEffect(() => { setSrcIndex(0); }, [teamId]);
+      useEffect(() => {
+        let active = true;
+        setImgError(false);
+        const initial = team.logo || TEAM_BADGE_CACHE[team.id] || null;
+        setBadgeUrl(initial);
+        if (!initial) {
+          fetchOfficialTeamBadge(team).then(found => {
+            if (active && found) setBadgeUrl(found);
+          });
+        }
+        return () => { active = false; };
+      }, [teamId]);
 
       return (
         <div className={`relative inline-flex items-center justify-center shrink-0 select-none ${dims}`} title={team.name}>
-          {srcIndex < sources.length ? (
+          {!imgError && badgeUrl ? (
             <div className="w-full h-full rounded-full bg-white p-0.5 shadow-md border border-slate-300 flex items-center justify-center overflow-hidden">
               <img
-                src={sources[srcIndex]}
+                src={badgeUrl}
                 alt={team.name}
                 referrerPolicy="no-referrer"
-                onError={() => setSrcIndex(prev => prev + 1)}
+                onError={() => setImgError(true)}
                 className="w-full h-full object-contain"
               />
             </div>
           ) : (
-            <svg viewBox="0 0 100 115" className="w-full h-full drop-shadow-md">
-              <defs>
-                <clipPath id={`clip_${uid}`}>
-                  <path d="M50 4 L94 18 L94 58 C94 86 74 103 50 112 C26 103 6 86 6 58 L6 18 Z" />
-                </clipPath>
-              </defs>
-              <g clipPath={`url(#clip_${uid})`}>
-                <rect x="0" y="0" width="100" height="115" fill={team.primary} />
-                <polygon points="0,75 100,15 100,115 0,115" fill={team.secondary} />
-              </g>
-              <text x="50" y="62" textAnchor="middle" fill="#FFFFFF" fontSize="24" fontWeight="900">{team.short}</text>
-            </svg>
+            <CustomFpcCrestSvg team={team} />
           )}
         </div>
       );
@@ -673,13 +785,13 @@
 
     const PlayerAvatar = ({ player, size = 'md', showBadge = true, isCaptain = false }) => {
       const team = getTeamById(player.teamId);
-      const [photoUrl, setPhotoUrl] = useState(() => DIRECT_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name] || null);
+      const [photoUrl, setPhotoUrl] = useState(() => PHOTO_MEMORY_CACHE[player.name] || null);
       const [imgError, setImgError] = useState(false);
 
       useEffect(() => {
         let active = true;
         setImgError(false);
-        const cached = DIRECT_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name];
+        const cached = PHOTO_MEMORY_CACHE[player.name];
         if (cached) {
           setPhotoUrl(cached);
           return;
@@ -709,16 +821,28 @@
                 className="w-full h-full object-cover object-top"
               />
             ) : (
-              /* Silueta de Camiseta Oficial del Club con Dorsal cuando carga o si no tiene foto recortada */
+              /* Avatar de Jugador Estilo Biwenger con Camiseta Oficial del Club y Dorsal */
               <svg viewBox="0 0 64 64" className="w-full h-full">
-                <rect width="64" height="64" fill="#1e293b" />
+                <defs>
+                  <linearGradient id={`bg_${player.id}`} x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#1e293b" />
+                    <stop offset="100%" stopColor="#0f172a" />
+                  </linearGradient>
+                </defs>
+                <rect width="64" height="64" fill={`url(#bg_${player.id})`} />
+                {/* Cabeza / Rostro */}
+                <circle cx="32" cy="18" r="9" fill="#f1c27d" />
+                <path d="M23 16 C23 10 41 10 41 16 C38 13 26 13 23 16 Z" fill="#1e293b" />
+                {/* Camiseta del Club */}
                 <path
-                  d="M20 14 L10 22 L15 32 L21 29 L21 54 L43 54 L43 29 L49 32 L54 22 L44 14 L38 18 C35 20 29 20 26 18 Z"
+                  d="M16 30 C16 26 23 25 26 25 L38 25 C41 25 48 26 48 30 L52 44 L44 46 L42 36 L42 64 L22 64 L22 36 L20 46 L12 44 Z"
                   fill={team.primary}
                   stroke={team.secondary || '#ffffff'}
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                 />
-                <text x="32" y="41" textAnchor="middle" fill={team.text || '#ffffff'} fontSize="14" fontWeight="900">
+                {/* Banda oscura para garantizar contraste total del dorsal */}
+                <rect x="23" y="36" width="18" height="14" rx="3" fill="rgba(15, 23, 42, 0.75)" />
+                <text x="32" y="47" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900">
                   {dorsal}
                 </text>
               </svg>
