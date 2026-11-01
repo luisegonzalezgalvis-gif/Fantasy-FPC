@@ -191,7 +191,7 @@
 
     const PHOTO_MEMORY_CACHE = (() => {
       try {
-        return JSON.parse(localStorage.getItem('fpc_player_photos_v8') || '{}');
+        return JSON.parse(localStorage.getItem('fpc_player_photos_v9') || '{}');
       } catch {
         return {};
       }
@@ -201,8 +201,16 @@
       if (!url) return;
       PHOTO_MEMORY_CACHE[playerName] = url;
       try {
-        localStorage.setItem('fpc_player_photos_v8', JSON.stringify(PHOTO_MEMORY_CACHE));
+        localStorage.setItem('fpc_player_photos_v9', JSON.stringify(PHOTO_MEMORY_CACHE));
       } catch {}
+    };
+
+    const wrapImageProxy = (url) => {
+      if (!url) return null;
+      if (url.includes('wsrv.nl') || url.includes('wikimedia.org') || url.includes('wikipedia.org') || url.includes('thesportsdb.com')) {
+        return url;
+      }
+      return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=250&h=250&fit=cover&a=top`;
     };
 
     // Catálogo directo de fotos reales verificadas (Transfermarkt / Wikimedia / Sofascore)
@@ -247,16 +255,37 @@
       'Jarlan Barrera': 'https://img.a.transfermarkt.technology/portrait/header/332295-1695822990.jpg',
       'Nicolás Benedetti': 'https://img.a.transfermarkt.technology/portrait/header/381150-1695823050.jpg',
       'Fredy Montero': 'https://img.a.transfermarkt.technology/portrait/header/73780-1695823150.jpg',
-      'Alexander Mejía': 'https://img.a.transfermarkt.technology/portrait/header/73781-1695823200.jpg'
+      'Alexander Mejía': 'https://img.a.transfermarkt.technology/portrait/header/73781-1695823200.jpg',
+      'Rodrigo Holgado': 'https://img.a.transfermarkt.technology/portrait/header/440382-1695823310.jpg',
+      'Éder Chaux': 'https://img.a.transfermarkt.technology/portrait/header/291402-1695756390.jpg',
+      'Andrés Mosquera Marmolejo': 'https://img.a.transfermarkt.technology/portrait/header/119248-1695756410.jpg',
+      'Daniel Torres': 'https://img.a.transfermarkt.technology/portrait/header/91972-1695756490.jpg',
+      'Emanuel Olivera': 'https://img.a.transfermarkt.technology/portrait/header/238345-1695756520.jpg',
+      'Marlon Torres': 'https://img.a.transfermarkt.technology/portrait/header/332299-1695756550.jpg',
+      'Dany Rosero': 'https://img.a.transfermarkt.technology/portrait/header/262989-1695756590.jpg',
+      'Rafael Carrascal': 'https://img.a.transfermarkt.technology/portrait/header/332300-1695756620.jpg',
+      'Luis Quiñones': 'https://img.a.transfermarkt.technology/portrait/header/264301-1690226384.jpg',
+      'Dylan Borrero': 'https://img.a.transfermarkt.technology/portrait/header/661142-1650643515.jpg',
+      'Jhon Murillo': 'https://img.a.transfermarkt.technology/portrait/header/338965-1695756690.jpg',
+      'Tomás Ángel': 'https://img.a.transfermarkt.technology/portrait/header/811420-1695756720.jpg',
+      'Fernando Uribe': 'https://img.a.transfermarkt.technology/portrait/header/73785-1695756750.jpg',
+      'Wilson Morelo': 'https://img.a.transfermarkt.technology/portrait/header/73788-1695756790.jpg',
+      'Felipe Pardo': 'https://img.a.transfermarkt.technology/portrait/header/73790-1695756820.jpg',
+      'Michael Barrios': 'https://img.a.transfermarkt.technology/portrait/header/214540-1695756860.jpg',
+      'Bryan Rovira': 'https://img.a.transfermarkt.technology/portrait/header/381155-1695756890.jpg',
+      'Neto Volpi': 'https://img.a.transfermarkt.technology/portrait/header/214545-1695756920.jpg'
     };
 
     const normalizeSearchVariants = (rawName) => {
       const nickFixes = {
         'Cristian Chicho Arango': ['Cristian Arango', 'Chicho Arango'],
         'Emanuel Bebelo Reynoso': ['Emanuel Reynoso', 'Bebelo Reynoso'],
-        'Luis Chino Sandoval': ['Luis Sandoval', 'Chino Sandoval'],
-        'David Mackalister Silva': ['David Silva', 'Mackalister Silva'],
-        'Jean Paulo Fernandes': ['Jean Fernandes', 'Jean Paulo Fernandes Filho']
+        'Luis Chino Sandoval': ['Luis Sandoval', 'Chino Sandoval', 'Luis Fernando Sandoval'],
+        'David Mackalister Silva': ['David Mackalister Silva', 'David Silva Mosquera'],
+        'Jean Paulo Fernandes': ['Jean Fernandes', 'Jean Paulo Fernandes Filho'],
+        'Andrés Mosquera Marmolejo': ['Andrés Mosquera Marmolejo', 'Andrés Mosquera'],
+        'Carlos Cortés Barreiro': ['Carlos Cortés', 'Carlos Cortés Barreiro'],
+        'Harold Santiago Mosquera': ['Santiago Mosquera', 'Harold Santiago Mosquera']
       };
       const variants = [...(nickFixes[rawName] || []), rawName];
       const parts = rawName.trim().split(/\s+/);
@@ -268,14 +297,32 @@
     };
 
     const PENDING_PHOTO_REQUESTS = {};
+    let photoQueuePromise = Promise.resolve();
 
-    // Buscador Multi-Respaldo de Fotos Reales (Diccionario Verificado + Wikipedia Exact/Search + Wikimedia Commons + TheSportsDB)
+    const enqueuePhotoTask = (taskFn) => {
+      const next = photoQueuePromise.then(() => new Promise(res => setTimeout(res, 65))).then(taskFn);
+      photoQueuePromise = next.catch(() => {});
+      return next;
+    };
+
+    const isValidPlayerThumbnail = (src) => {
+      if (!src) return false;
+      const lower = src.toLowerCase();
+      const forbidden = ['flag_of_', 'soccerball', 'coat_of_arms', 'escudo', 'logo', 'map_of', 'kit_body', 'shirt', 'stadium', 'blank', 'default'];
+      return !forbidden.some(word => lower.includes(word));
+    };
+
+    // Buscador Multi-Respaldo de Fotos Reales con Cola Anti-Bloqueo (Wikidata + Wikipedia ES/EN + TheSportsDB + Commons)
     const fetchPlayerPhotoOnline = async (playerName) => {
-      if (VERIFIED_PLAYER_PHOTOS[playerName]) return VERIFIED_PLAYER_PHOTOS[playerName];
       if (PHOTO_MEMORY_CACHE[playerName]) return PHOTO_MEMORY_CACHE[playerName];
+      if (VERIFIED_PLAYER_PHOTOS[playerName]) {
+        const proxied = wrapImageProxy(VERIFIED_PLAYER_PHOTOS[playerName]);
+        savePhotoToCache(playerName, proxied);
+        return proxied;
+      }
       if (PENDING_PHOTO_REQUESTS[playerName]) return PENDING_PHOTO_REQUESTS[playerName];
 
-      PENDING_PHOTO_REQUESTS[playerName] = (async () => {
+      PENDING_PHOTO_REQUESTS[playerName] = enqueuePhotoTask(async () => {
         const variants = normalizeSearchVariants(playerName);
 
         for (const candidateName of variants) {
@@ -288,7 +335,7 @@
               if (data && Array.isArray(data.player) && data.player.length > 0) {
                 const soccerPlayer = data.player.find(p => p.strSport === 'Soccer' && (p.strCutout || p.strThumb || p.strRender)) || data.player[0];
                 const foundImg = soccerPlayer.strCutout || soccerPlayer.strThumb || soccerPlayer.strRender;
-                if (foundImg) {
+                if (isValidPlayerThumbnail(foundImg)) {
                   savePhotoToCache(playerName, foundImg);
                   return foundImg;
                 }
@@ -304,21 +351,21 @@
               const exactData = await exactRes.json();
               const pages = exactData?.query?.pages || {};
               const firstPage = Object.values(pages)[0];
-              if (firstPage?.thumbnail?.source && !firstPage.thumbnail.source.includes('Flag_of_') && !firstPage.thumbnail.source.includes('Soccerball')) {
+              if (isValidPlayerThumbnail(firstPage?.thumbnail?.source)) {
                 savePhotoToCache(playerName, firstPage.thumbnail.source);
                 return firstPage.thumbnail.source;
               }
             }
           } catch {}
 
-          // Fuente 3: Búsqueda inteligente en Wikipedia Español (4 candidatos para elegir el que sí tenga foto)
+          // Fuente 3: Búsqueda inteligente en Wikipedia Español
           try {
             const wikiQuery = encodeURIComponent(`${candidateName} futbolista`);
-            const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiQuery}&gsrlimit=4&prop=pageimages&format=json&pithumbsize=300&origin=*`);
+            const wikiRes = await fetch(`https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiQuery}&gsrlimit=5&prop=pageimages&format=json&pithumbsize=300&origin=*`);
             if (wikiRes.ok) {
               const wikiData = await wikiRes.json();
               const pages = Object.values(wikiData?.query?.pages || {});
-              const pageWithThumb = pages.find(p => p?.thumbnail?.source && !p.thumbnail.source.includes('Flag_of_') && !p.thumbnail.source.includes('Soccerball'));
+              const pageWithThumb = pages.find(p => isValidPlayerThumbnail(p?.thumbnail?.source));
               if (pageWithThumb?.thumbnail?.source) {
                 savePhotoToCache(playerName, pageWithThumb.thumbnail.source);
                 return pageWithThumb.thumbnail.source;
@@ -326,30 +373,33 @@
             }
           } catch {}
 
-          // Fuente 4: Búsqueda en Wikipedia Inglés (Muchos jugadores del FPC tienen foto en EN Wiki)
-          try {
-            const wikiEnQuery = encodeURIComponent(`${candidateName} footballer`);
-            const wikiEnRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${wikiEnQuery}&gsrlimit=4&prop=pageimages&format=json&pithumbsize=300&origin=*`);
-            if (wikiEnRes.ok) {
-              const wikiEnData = await wikiEnRes.json();
-              const pages = Object.values(wikiEnData?.query?.pages || {});
-              const pageWithThumb = pages.find(p => p?.thumbnail?.source && !p.thumbnail.source.includes('Flag_of_') && !p.thumbnail.source.includes('Soccerball'));
-              if (pageWithThumb?.thumbnail?.source) {
-                savePhotoToCache(playerName, pageWithThumb.thumbnail.source);
-                return pageWithThumb.thumbnail.source;
+          // Fuente 4: Búsqueda en Wikipedia Inglés y Portugués (Muchos jugadores de Brasil/Uruguay/Argentina/Colombia están en EN/PT)
+          for (const lang of ['en', 'pt']) {
+            try {
+              const term = lang === 'en' ? `${candidateName} footballer` : `${candidateName} futebolista`;
+              const wikiLangRes = await fetch(`https://${lang}.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(term)}&gsrlimit=4&prop=pageimages&format=json&pithumbsize=300&origin=*`);
+              if (wikiLangRes.ok) {
+                const wikiLangData = await wikiLangRes.json();
+                const pages = Object.values(wikiLangData?.query?.pages || {});
+                const pageWithThumb = pages.find(p => isValidPlayerThumbnail(p?.thumbnail?.source));
+                if (pageWithThumb?.thumbnail?.source) {
+                  savePhotoToCache(playerName, pageWithThumb.thumbnail.source);
+                  return pageWithThumb.thumbnail.source;
+                }
               }
-            }
-          } catch {}
+            } catch {}
+          }
         }
 
         // Fuente 5: Wikimedia Commons Direct Image Search
         try {
-          const commonsQuery = encodeURIComponent(`${variants[0]} football`);
-          const commonsRes = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=filetype:bitmap|drawing%20${commonsQuery}&gsrnamespace=6&gsrlimit=2&prop=imageinfo&iiprop=url&iiurlwidth=250&format=json&origin=*`);
+          const commonsQuery = encodeURIComponent(variants[0]);
+          const commonsRes = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=filetype:bitmap%20${commonsQuery}&gsrnamespace=6&gsrlimit=4&prop=imageinfo&iiprop=url&iiurlwidth=250&format=json&origin=*`);
           if (commonsRes.ok) {
             const cData = await commonsRes.json();
             const pages = Object.values(cData?.query?.pages || {});
-            const firstImg = pages.find(p => p?.imageinfo?.[0]?.thumburl)?.imageinfo?.[0]?.thumburl;
+            const validPage = pages.find(p => isValidPlayerThumbnail(p?.imageinfo?.[0]?.thumburl));
+            const firstImg = validPage?.imageinfo?.[0]?.thumburl;
             if (firstImg) {
               savePhotoToCache(playerName, firstImg);
               return firstImg;
@@ -358,7 +408,7 @@
         } catch {}
 
         return null;
-      })();
+      });
 
       return PENDING_PHOTO_REQUESTS[playerName];
     };
@@ -868,13 +918,19 @@
 
     const PlayerAvatar = ({ player, size = 'md', showBadge = true, isCaptain = false }) => {
       const team = getTeamById(player.teamId);
-      const [photoUrl, setPhotoUrl] = useState(() => VERIFIED_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name] || null);
+      const [photoUrl, setPhotoUrl] = useState(() => player.customPhotoUrl || PHOTO_MEMORY_CACHE[player.name] || (VERIFIED_PLAYER_PHOTOS[player.name] ? wrapImageProxy(VERIFIED_PLAYER_PHOTOS[player.name]) : null));
+      const [fallbackTriedProxy, setFallbackTriedProxy] = useState(false);
       const [imgError, setImgError] = useState(false);
 
       useEffect(() => {
         let active = true;
         setImgError(false);
-        const cached = VERIFIED_PLAYER_PHOTOS[player.name] || PHOTO_MEMORY_CACHE[player.name];
+        setFallbackTriedProxy(false);
+        if (player.customPhotoUrl) {
+          setPhotoUrl(player.customPhotoUrl);
+          return;
+        }
+        const cached = PHOTO_MEMORY_CACHE[player.name] || (VERIFIED_PLAYER_PHOTOS[player.name] ? wrapImageProxy(VERIFIED_PLAYER_PHOTOS[player.name]) : null);
         if (cached) {
           setPhotoUrl(cached);
           return;
@@ -883,7 +939,16 @@
           if (active && found) setPhotoUrl(found);
         });
         return () => { active = false; };
-      }, [player.name]);
+      }, [player.name, player.customPhotoUrl]);
+
+      const handleImgError = () => {
+        if (!fallbackTriedProxy && photoUrl && !photoUrl.includes('wsrv.nl')) {
+          setFallbackTriedProxy(true);
+          setPhotoUrl(wrapImageProxy(photoUrl));
+        } else {
+          setImgError(true);
+        }
+      };
 
       const dims = size === 'sm' ? 'w-10 h-10' : size === 'lg' ? 'w-16 h-16' : 'w-12 h-12';
       const badgeSize = size === 'sm' ? 'xs' : size === 'lg' ? 'sm' : 'xs';
@@ -900,7 +965,7 @@
                 src={photoUrl}
                 alt={player.name}
                 referrerPolicy="no-referrer"
-                onError={() => setImgError(true)}
+                onError={handleImgError}
                 className="w-full h-full object-cover object-top"
               />
             ) : (
@@ -1047,7 +1112,11 @@
       const [inspectingMember, setInspectingMember] = useState(null);
       const [showCreateLeagueModal, setShowCreateLeagueModal] = useState(false);
       const [showJoinLeagueModal, setShowJoinLeagueModal] = useState(false);
+      const [showLeagueSettingsModal, setShowLeagueSettingsModal] = useState(false);
       const [leagueActionModal, setLeagueActionModal] = useState(null);
+      const [selectedSettleMatchdayKey, setSelectedSettleMatchdayKey] = useState('f15');
+      const [isSettlingMatchday, setIsSettlingMatchday] = useState(false);
+      const [customPhotoInput, setCustomPhotoInput] = useState('');
 
       const [newLeagueName, setNewLeagueName] = useState('');
       const [newLeagueVisibility, setNewLeagueVisibility] = useState('private');
@@ -1383,6 +1452,26 @@
       const myMemberProfile = useMemo(() => leagueMembers.find(m => m.userId === activeAccount?.id) || null, [leagueMembers, activeAccount]);
       const publicLeagues = useMemo(() => leagues.filter(l => l.visibility === 'public'), [leagues]);
 
+      // Verificar si el usuario activo es el Creador / Presidente único de la liga
+      const isLeagueCreator = useMemo(() => {
+        if (!currentLeague || !activeAccount) return false;
+        return currentLeague.createdBy === activeAccount.id;
+      }, [currentLeague, activeAccount]);
+
+      // Control estricto de fechas ya liquidadas para impedir liquidaciones repetidas
+      const settledMatchdays = useMemo(() => {
+        if (!currentLeague) return [];
+        if (Array.isArray(currentLeague.settledMatchdays)) return currentLeague.settledMatchdays;
+        if ((currentLeague.matchday || 14) >= 15) return ['f15'];
+        return [];
+      }, [currentLeague]);
+
+      useEffect(() => {
+        if (!settledMatchdays.includes('f15')) setSelectedSettleMatchdayKey('f15');
+        else if (!settledMatchdays.includes('f16')) setSelectedSettleMatchdayKey('f16');
+        else setSelectedSettleMatchdayKey('f17');
+      }, [settledMatchdays.join(',')]);
+
       const playerOwnerMap = useMemo(() => {
         const map = {};
         leagueMembers.forEach(m => (m.squad || []).forEach(pId => { map[pId] = m; }));
@@ -1640,6 +1729,10 @@
 
       const handleSettleDailyAuctionsAndRotateMarket = async (isAuto = false) => {
         if (!currentLeague) return;
+        if (!isAuto && !isLeagueCreator) {
+          showNotification(`🔒 Solo el creador de la liga (${currentLeague.creatorName}) puede ejecutar el cierre de subastas.`, 'error');
+          return;
+        }
         const auctionsList = Object.values(currentLeague.activeAuctions || {});
         const updatedMembersMap = {};
         leagueMembers.forEach(m => {
@@ -1664,7 +1757,7 @@
           const currentPosInLineup = winner.squad.map(id => enrichedPlayers.find(p => p.id === id)).filter(p => p && winner.lineup.includes(p.id) && p.pos === player.pos).length;
           if (currentPosInLineup < (spec[player.pos] || 0)) winner.lineup.push(player.id);
 
-          settlementLogs.push(`✅ Fichaje Oficial: ${player.name} pasa a ${winner.managerName} por ${formatCOP(auction.amount)}.`);
+          settlementLogs.push(`🏆 Fichaje adjudicado: ${player.name} a ${winner.managerName} por ${formatCOP(auction.amount)}.`);
         });
 
         const freeAgentsPool = INITIAL_PLAYERS.filter(p => !occupiedPlayerIds.has(p.id));
@@ -1672,7 +1765,7 @@
         const nextMarketIds = shuffledFree.slice(0, 12).map(p => p.id);
         const todayKey = getColombianDateKey();
 
-        const logMsg = `🌙 Cierre de Mercado (11:59 PM): ${settlementLogs.length} fichajes completados y 12 nuevos jugadores en subasta.`;
+        const logMsg = `🌙 Cierre de Mercado (11:59 PM): ${settlementLogs.length} fichajes cerrados y 12 nuevos jugadores en subasta.`;
 
         if (cloudServices.isCloud && cloudServices.db && user) {
           const sdk = window.__FPC_FIREBASE_SDK__;
@@ -1684,33 +1777,44 @@
           }
           await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', currentLeague.id), {
             marketPlayerIds: nextMarketIds, activeAuctions: {}, marketDateKey: todayKey,
-            lastLogs: [logMsg, ...settlementLogs, ...(currentLeague.lastLogs || []).slice(0, 12)]
+            lastLogs: [logMsg, ...settlementLogs, ...(currentLeague.lastLogs || []).slice(0, 10)]
           });
         } else {
           setMembers(prev => prev.map(m => updatedMembersMap[m.id] ? updatedMembersMap[m.id] : m));
           setLeagues(prev => prev.map(l => l.id === currentLeague.id ? {
             ...l, marketPlayerIds: nextMarketIds, activeAuctions: {}, marketDateKey: todayKey,
-            lastLogs: [logMsg, ...settlementLogs, ...(l.lastLogs || []).slice(0, 12)]
+            lastLogs: [logMsg, ...settlementLogs, ...(l.lastLogs || []).slice(0, 10)]
           } : l));
         }
-        if (!isAuto) showNotification('¡Cierre de mercado ejecutado y nuevos jugadores en subasta!');
+        if (!isAuto) showNotification('¡Mercado liquidado y renovado con éxito!');
       };
+
+      useEffect(() => {
+        if (!currentLeague) return;
+        const todayKey = getColombianDateKey();
+        if (currentLeague.marketDateKey && currentLeague.marketDateKey !== todayKey) {
+          handleSettleDailyAuctionsAndRotateMarket(true);
+        }
+      }, [currentLeague?.id, currentLeague?.marketDateKey]);
 
       const handleSellPlayer = async (player) => {
         if (!activeAccount || !myMemberProfile || !currentLeagueId) return;
         const myMemberId = `${currentLeagueId}_${activeAccount.id}`;
         const updatedSquad = (myMemberProfile.squad || []).filter(id => id !== player.id);
         const updatedLineup = (myMemberProfile.lineup || []).filter(id => id !== player.id);
+        const updatedCaptain = myMemberProfile.captainId === player.id ? (updatedLineup[0] || null) : myMemberProfile.captainId;
 
         if (cloudServices.isCloud && cloudServices.db && user) {
           const sdk = window.__FPC_FIREBASE_SDK__;
           await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_members', myMemberId), {
-            budget: myMemberProfile.budget + player.value, squad: updatedSquad, lineup: updatedLineup
+            budget: myMemberProfile.budget + player.value, squad: updatedSquad, lineup: updatedLineup, captainId: updatedCaptain
           });
         } else {
-          setMembers(prev => prev.map(m => m.id === myMemberId ? { ...m, budget: m.budget + player.value, squad: updatedSquad, lineup: updatedLineup } : m));
+          setMembers(prev => prev.map(m => m.id === myMemberId ? {
+            ...m, budget: m.budget + player.value, squad: updatedSquad, lineup: updatedLineup, captainId: updatedCaptain
+          } : m));
         }
-        showNotification(`Vendiste a ${player.name} a la Liga por ${formatCOP(player.value)}`);
+        showNotification(`Vendiste a ${player.name} por ${formatCOP(player.value)}`);
       };
 
       const inversePotPreview = useMemo(() => {
@@ -1725,74 +1829,155 @@
         });
       }, [currentLeague?.matchdayPot, leagueMembers.length]);
 
-      const handleSettleOfficialMatchday15 = async () => {
-        if (!currentLeague) return;
-        const scoredMembers = leagueMembers.map(m => {
-          if ((m.budget || 0) < 0) return { ...m, calculatedWeekPts: 0, inRedPenalty: true };
-          const fName = m.formation && FORMATIONS[m.formation] ? m.formation : '4-4-2';
-          const spec = FORMATIONS[fName];
-          const memberSquadObjs = (m.squad || []).map(id => enrichedPlayers.find(p => p.id === id)).filter(Boolean);
-          const starters = memberSquadObjs.filter(p => (m.lineup || []).includes(p.id));
+      const handleSettleOfficialMatchday = async (matchdayKeyToSettle = selectedSettleMatchdayKey) => {
+        if (!currentLeague || !activeAccount) return;
 
-          const validPOR = starters.filter(p => p.pos === 'POR').slice(0, spec.POR);
-          const validDEF = starters.filter(p => p.pos === 'DEF').slice(0, spec.DEF);
-          const validMED = starters.filter(p => p.pos === 'MED').slice(0, spec.MED);
-          const validDEL = starters.filter(p => p.pos === 'DEL').slice(0, spec.DEL);
-          const validStarters = [...validPOR, ...validDEF, ...validMED, ...validDEL];
+        // 1. Validar que SOLO el creador de la liga pueda liquidar
+        if (!isLeagueCreator) {
+          showNotification(`🔒 Acción exclusiva: Solo el creador de la liga (${currentLeague.creatorName}) puede liquidar la jornada.`, 'error');
+          return;
+        }
 
-          let rawPts = 0;
-          validStarters.forEach(pl => {
-            const pScore = pl.last5?.[pl.last5.length - 1] || 6;
-            const isCap = m.captainId === pl.id;
-            rawPts += isCap ? pScore * 2 : pScore;
+        // 2. Validar que la fecha NO haya sido liquidada antes
+        if (settledMatchdays.includes(matchdayKeyToSettle)) {
+          showNotification(`⚠️ La ${matchdayKeyToSettle.toUpperCase()} ya fue liquidada anteriormente. Cada fecha solo se puede liquidar una única vez.`, 'error');
+          return;
+        }
+
+        if (isSettlingMatchday) return;
+        setIsSettlingMatchday(true);
+
+        try {
+          const mdLabel = matchdayKeyToSettle === 'f15' ? 'Fecha 15' : matchdayKeyToSettle === 'f16' ? 'Fecha 16' : 'Fecha 17';
+          const scoreIndexOffset = matchdayKeyToSettle === 'f15' ? 4 : matchdayKeyToSettle === 'f16' ? 3 : 2;
+
+          const scoredMembers = leagueMembers.map(m => {
+            if ((m.budget || 0) < 0) return { ...m, calculatedWeekPts: 0, inRedPenalty: true };
+            const fName = m.formation && FORMATIONS[m.formation] ? m.formation : '4-4-2';
+            const spec = FORMATIONS[fName];
+            const memberSquadObjs = (m.squad || []).map(id => enrichedPlayers.find(p => p.id === id)).filter(Boolean);
+            const starters = memberSquadObjs.filter(p => (m.lineup || []).includes(p.id));
+
+            const validPOR = starters.filter(p => p.pos === 'POR').slice(0, spec.POR);
+            const validDEF = starters.filter(p => p.pos === 'DEF').slice(0, spec.DEF);
+            const validMED = starters.filter(p => p.pos === 'MED').slice(0, spec.MED);
+            const validDEL = starters.filter(p => p.pos === 'DEL').slice(0, spec.DEL);
+            const validStarters = [...validPOR, ...validDEF, ...validMED, ...validDEL];
+
+            let rawPts = 0;
+            validStarters.forEach(pl => {
+              const pScore = pl.last5?.[scoreIndexOffset] ?? pl.last5?.[pl.last5.length - 1] ?? 6;
+              const isCap = m.captainId === pl.id;
+              rawPts += isCap ? pScore * 2 : pScore;
+            });
+
+            const emptyCount =
+              Math.max(0, spec.POR - validPOR.length) +
+              Math.max(0, spec.DEF - validDEF.length) +
+              Math.max(0, spec.MED - validMED.length) +
+              Math.max(0, spec.DEL - validDEL.length);
+
+            return { ...m, calculatedWeekPts: rawPts + (emptyCount * -4), inRedPenalty: false };
           });
 
-          const emptyCount =
-            Math.max(0, spec.POR - validPOR.length) +
-            Math.max(0, spec.DEF - validDEF.length) +
-            Math.max(0, spec.MED - validMED.length) +
-            Math.max(0, spec.DEL - validDEL.length);
+          const sortedByMatchdayDesc = [...scoredMembers].sort((a, b) => b.calculatedWeekPts - a.calculatedWeekPts);
+          const totalPot = Number(currentLeague.matchdayPot) || 25000000;
+          const n = Math.max(1, sortedByMatchdayDesc.length);
+          const totalShares = (n * (n + 1)) / 2;
 
-          return { ...m, calculatedWeekPts: rawPts + (emptyCount * -4), inRedPenalty: false };
-        });
+          const updatedMembers = sortedByMatchdayDesc.map((m, idx) => {
+            const matchdayRank = idx + 1;
+            const potReward = Math.round(((totalPot * matchdayRank) / totalShares) / 100000) * 100000;
+            return {
+              ...m,
+              points: (m.points || 0) + m.calculatedWeekPts,
+              lastMatchdayPoints: m.calculatedWeekPts,
+              lastMatchdayRank: matchdayRank,
+              lastPotReward: potReward,
+              budget: (m.budget || 0) + potReward,
+              changesUsedThisMatchday: 0
+            };
+          });
 
-        const sortedByMatchdayDesc = [...scoredMembers].sort((a, b) => b.calculatedWeekPts - a.calculatedWeekPts);
-        const totalPot = Number(currentLeague.matchdayPot) || 25000000;
-        const n = Math.max(1, sortedByMatchdayDesc.length);
-        const totalShares = (n * (n + 1)) / 2;
+          const nextSettledList = [...settledMatchdays, matchdayKeyToSettle];
+          const numericMd = matchdayKeyToSettle === 'f15' ? 15 : matchdayKeyToSettle === 'f16' ? 16 : 17;
+          const logMsg = `💰 ${mdLabel} liquidada oficialmente por el creador ${activeAccount.managerName} (Capitán x2). Pozo inverso de ${formatCOP(totalPot)} abonado. (Liquidación única bloqueada).`;
 
-        const updatedMembers = sortedByMatchdayDesc.map((m, idx) => {
-          const matchdayRank = idx + 1;
-          const potReward = Math.round(((totalPot * matchdayRank) / totalShares) / 100000) * 100000;
-          return {
-            ...m,
-            points: (m.points || 0) + m.calculatedWeekPts,
-            lastMatchdayPoints: m.calculatedWeekPts,
-            lastMatchdayRank: matchdayRank,
-            lastPotReward: potReward,
-            budget: (m.budget || 0) + potReward,
-            changesUsedThisMatchday: 0
-          };
-        });
+          if (cloudServices.isCloud && cloudServices.db && user) {
+            const sdk = window.__FPC_FIREBASE_SDK__;
+            for (const mem of updatedMembers) {
+              await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_members', mem.id), {
+                points: mem.points, lastMatchdayPoints: mem.lastMatchdayPoints, lastMatchdayRank: mem.lastMatchdayRank,
+                lastPotReward: mem.lastPotReward, budget: mem.budget, changesUsedThisMatchday: 0
+              });
+            }
+            await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', currentLeague.id), {
+              matchday: numericMd,
+              settledMatchdays: nextSettledList,
+              lastLogs: [logMsg, ...(currentLeague.lastLogs || []).slice(0, 14)]
+            });
+          } else {
+            setMembers(prev => prev.map(m => updatedMembers.find(u => u.id === m.id) || m));
+            setLeagues(prev => prev.map(l => l.id === currentLeague.id ? {
+              ...l,
+              matchday: numericMd,
+              settledMatchdays: nextSettledList,
+              lastLogs: [logMsg, ...(l.lastLogs || []).slice(0, 14)]
+            } : l));
+          }
+          showNotification(`¡${mdLabel} liquidada con éxito! Ya quedó bloqueada para no repetirse.`);
+        } finally {
+          setIsSettlingMatchday(false);
+        }
+      };
 
-        const logMsg = `💰 Fecha 15 liquidada (con Capitán x2). Pozo inverso de ${formatCOP(totalPot)} abonado a todos los clubes.`;
+      const handleUpdateLeagueSettingsByCreator = async (e) => {
+        e.preventDefault();
+        if (!currentLeague || !isLeagueCreator) {
+          showNotification('Solo el creador de la liga puede modificar sus reglas.', 'error');
+          return;
+        }
+        const updatedFields = {
+          name: newLeagueName.trim() || currentLeague.name,
+          visibility: newLeagueVisibility,
+          matchdayPot: Number(newLeagueMatchdayPot) || currentLeague.matchdayPot,
+          maxMembers: Number(newLeagueMaxMembers) || currentLeague.maxMembers,
+          lastLogs: [`⚙️ El presidente ${activeAccount.managerName} actualizó la configuración de la liga.`, ...(currentLeague.lastLogs || []).slice(0, 14)]
+        };
 
         if (cloudServices.isCloud && cloudServices.db && user) {
           const sdk = window.__FPC_FIREBASE_SDK__;
-          for (const mem of updatedMembers) {
-            await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_members', mem.id), {
-              points: mem.points, lastMatchdayPoints: mem.lastMatchdayPoints, lastMatchdayRank: mem.lastMatchdayRank,
-              lastPotReward: mem.lastPotReward, budget: mem.budget, changesUsedThisMatchday: 0
-            });
+          await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', currentLeague.id), updatedFields);
+        } else {
+          setLeagues(prev => prev.map(l => l.id === currentLeague.id ? { ...l, ...updatedFields } : l));
+        }
+        setShowLeagueSettingsModal(false);
+        showNotification('¡Configuración de la liga actualizada por el creador!');
+      };
+
+      const handleSaveCustomPlayerPhoto = async (player, photoUrlToSave) => {
+        if (!currentLeague || !isLeagueCreator || !photoUrlToSave.trim()) return;
+        const cleanUrl = photoUrlToSave.trim();
+        savePhotoToCache(player.name, cleanUrl);
+        const existingCustom = currentLeague.customPlayerStats || {};
+        const nextCustom = {
+          ...existingCustom,
+          [player.id]: {
+            ...(existingCustom[player.id] || {}),
+            customPhotoUrl: cleanUrl
           }
+        };
+        if (cloudServices.isCloud && cloudServices.db && user) {
+          const sdk = window.__FPC_FIREBASE_SDK__;
           await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', currentLeague.id), {
-            matchday: 15, lastLogs: [logMsg, ...(currentLeague.lastLogs || []).slice(0, 12)]
+            customPlayerStats: nextCustom
           });
         } else {
-          setMembers(prev => prev.map(m => updatedMembers.find(u => u.id === m.id) || m));
-          setLeagues(prev => prev.map(l => l.id === currentLeague.id ? { ...l, matchday: 15, lastLogs: [logMsg, ...(l.lastLogs || []).slice(0, 12)] } : l));
+          setLeagues(prev => prev.map(l => l.id === currentLeague.id ? { ...l, customPlayerStats: nextCustom } : l));
         }
-        showNotification('¡Jornada liquidada con puntos de Capitán x2 y Pozo Inverso!');
+        setSelectedPlayerModal({ ...player, customPhotoUrl: cleanUrl });
+        setCustomPhotoInput('');
+        showNotification(`¡Foto oficial de ${player.name} guardada para toda la liga!`);
       };
 
       const handleCreateLeague = async (e) => {
@@ -1821,6 +2006,7 @@
           createdBy: activeAccount.id,
           creatorName: activeAccount.managerName,
           matchday: 14,
+          settledMatchdays: [],
           marketPlayerIds: shuffledFree.slice(0, 12).map(p => p.id),
           activeAuctions: {},
           marketDateKey: getColombianDateKey(),
@@ -1870,6 +2056,11 @@
 
       const handleConfirmResetLeague = async (targetLeague) => {
         if (!targetLeague) return;
+        if (targetLeague.createdBy !== activeAccount?.id) {
+          showNotification(`🔒 Solo el creador (${targetLeague.creatorName}) puede reiniciar la liga.`, 'error');
+          setLeagueActionModal(null);
+          return;
+        }
         const squadBudgetCap = Number(targetLeague.initialSquadBudget) || 65000000;
         const cashAmount = targetLeague.initialCash !== undefined ? Number(targetLeague.initialCash) : 25000000;
         const targetMembers = members.filter(m => m.leagueId === targetLeague.id);
@@ -1888,7 +2079,7 @@
         const freePool = INITIAL_PLAYERS.filter(p => !takenPlayerIds.includes(p.id));
         const shuffledFree = [...freePool].sort(() => 0.5 - Math.random());
         const nextMarketIds = shuffledFree.slice(0, 12).map(p => p.id);
-        const resetLog = `🔄 Temporada reiniciada en "${targetLeague.name}". Nuevas plantillas sorteadas.`;
+        const resetLog = `🔄 Temporada reiniciada por el creador ${activeAccount.managerName} en "${targetLeague.name}". Nuevas plantillas sorteadas y fechas desbloqueadas.`;
 
         if (cloudServices.isCloud && cloudServices.db && user) {
           const sdk = window.__FPC_FIREBASE_SDK__;
@@ -1896,20 +2087,25 @@
             await sdk.setDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_members', mem.id), mem);
           }
           await sdk.updateDoc(sdk.doc(cloudServices.db, 'artifacts', appId, 'public', 'data', 'fpc_leagues', targetLeague.id), {
-            matchday: 14, marketPlayerIds: nextMarketIds, activeAuctions: {}, customPlayerStats: {}, marketDateKey: getColombianDateKey(), lastLogs: [resetLog]
+            matchday: 14, settledMatchdays: [], marketPlayerIds: nextMarketIds, activeAuctions: {}, customPlayerStats: {}, marketDateKey: getColombianDateKey(), lastLogs: [resetLog]
           });
         } else {
           setMembers(prev => prev.map(m => resetMembersList.find(rm => rm.id === m.id) || m));
           setLeagues(prev => prev.map(l => l.id === targetLeague.id ? {
-            ...l, matchday: 14, marketPlayerIds: nextMarketIds, activeAuctions: {}, customPlayerStats: {}, marketDateKey: getColombianDateKey(), lastLogs: [resetLog]
+            ...l, matchday: 14, settledMatchdays: [], marketPlayerIds: nextMarketIds, activeAuctions: {}, customPlayerStats: {}, marketDateKey: getColombianDateKey(), lastLogs: [resetLog]
           } : l));
         }
         setLeagueActionModal(null);
-        showNotification('¡Liga reiniciada correctamente!');
+        showNotification('¡Liga reiniciada correctamente por el creador!');
       };
 
       const handleConfirmDeleteLeague = async (targetLeague) => {
         if (!targetLeague) return;
+        if (targetLeague.createdBy !== activeAccount?.id) {
+          showNotification(`🔒 Solo el creador (${targetLeague.creatorName}) puede eliminar la liga.`, 'error');
+          setLeagueActionModal(null);
+          return;
+        }
         const targetId = targetLeague.id;
         const targetMembers = members.filter(m => m.leagueId === targetId);
 
@@ -2322,11 +2518,50 @@
                       </div>
 
                       <div className="bw-card border rounded-2xl p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-black bw-text-main">Liquidar Fecha 15 + Pozo ({formatCOP(currentLeague?.matchdayPot || 25000000)})</h3>
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600">Capitán x2 Activo</span>
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div>
+                            <h3 className="text-sm font-black bw-text-main">Liquidación de Jornada ({formatCOP(currentLeague?.matchdayPot || 25000000)})</h3>
+                            <span className="text-[10px] bw-text-muted font-bold block">
+                              👑 Presidente de la Liga: <strong className="text-emerald-600">{currentLeague?.creatorName}</strong>
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600">
+                            1 Sola Liquidación por Fecha
+                          </span>
                         </div>
-                        <p className="text-xs bw-text-muted">Suma los puntos oficiales de tus 11 titulares (el Capitán suma doble) y reparte el pozo inverso para ayudar a los últimos de la fecha.</p>
+
+                        {/* Estado de Liquidación por Jornada */}
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { key: 'f15', label: 'Fecha 15' },
+                            { key: 'f16', label: 'Fecha 16' },
+                            { key: 'f17', label: 'Fecha 17' }
+                          ].map(md => {
+                            const isDone = settledMatchdays.includes(md.key);
+                            const isSelected = selectedSettleMatchdayKey === md.key;
+                            return (
+                              <button
+                                key={md.key}
+                                type="button"
+                                onClick={() => setSelectedSettleMatchdayKey(md.key)}
+                                className={`py-2 px-2 rounded-xl text-xs font-black border transition cursor-pointer flex flex-col items-center ${
+                                  isDone
+                                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600'
+                                    : isSelected
+                                    ? 'bg-amber-500 text-white border-amber-500 shadow'
+                                    : 'bw-subcard bw-text-muted'
+                                }`}
+                              >
+                                <span>{md.label}</span>
+                                <span className="text-[9px] mt-0.5">{isDone ? '✅ Liquidada' : '⏳ Pendiente'}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <p className="text-xs bw-text-muted">
+                          Suma los puntos oficiales de los 11 titulares (Capitán x2) y reparte el pozo inverso. <strong>Cada fecha se bloquea tras liquidarse.</strong>
+                        </p>
                         <div className="flex flex-wrap gap-1.5">
                           {inversePotPreview.map(item => (
                             <span key={item.rank} className="text-[10px] bw-subcard border px-2 py-1 rounded-lg font-semibold">
@@ -2334,9 +2569,26 @@
                             </span>
                           ))}
                         </div>
-                        <button onClick={handleSettleOfficialMatchday15} className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs cursor-pointer shadow-md hover:opacity-95">
-                          ⚽ Calcular Puntos Fecha 15 y Abonar Premios
-                        </button>
+
+                        {isLeagueCreator ? (
+                          settledMatchdays.includes(selectedSettleMatchdayKey) ? (
+                            <div className="w-full py-3 px-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-black text-xs text-center">
+                              ✅ La {selectedSettleMatchdayKey.toUpperCase()} ya fue liquidada (No se puede repetir)
+                            </div>
+                          ) : (
+                            <button
+                              disabled={isSettlingMatchday}
+                              onClick={() => handleSettleOfficialMatchday(selectedSettleMatchdayKey)}
+                              className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xs cursor-pointer shadow-md hover:opacity-95 disabled:opacity-50"
+                            >
+                              ⚽ Liquidar {selectedSettleMatchdayKey.toUpperCase()} Oficial (Única Vez)
+                            </button>
+                          )
+                        ) : (
+                          <div className="w-full py-2.5 px-3 rounded-xl bw-subcard border text-center text-[11px] bw-text-muted font-bold">
+                            🔒 Solo el creador de la liga (<strong className="bw-text-main">{currentLeague?.creatorName}</strong>) puede liquidar las fechas.
+                          </div>
+                        )}
                       </div>
 
                       <div className="bw-card border rounded-2xl p-4">
@@ -2404,9 +2656,15 @@
                           <span className="text-[10px] text-amber-600 font-black uppercase block">Cierra en</span>
                           <span className="text-base font-black font-mono bw-text-main">{countdownText}</span>
                         </div>
-                        <button onClick={() => handleSettleDailyAuctionsAndRotateMarket(false)} className="px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black text-xs cursor-pointer shadow-lg">
-                          ⚡ Simular Cierre 11:59 PM
-                        </button>
+                        {isLeagueCreator ? (
+                          <button onClick={() => handleSettleDailyAuctionsAndRotateMarket(false)} className="px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black text-xs cursor-pointer shadow-lg">
+                            ⚡ Cerrar Subasta (Creador)
+                          </button>
+                        ) : (
+                          <span className="text-[11px] font-bold bw-text-muted px-3 py-2 rounded-xl bw-subcard border">
+                            🔒 Cierre manual solo Creador
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -2498,13 +2756,34 @@
                       <div className="bw-card border rounded-3xl p-5">
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                           <div>
-                            <h2 className="text-xl font-black bw-text-main">{currentLeague?.name}</h2>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h2 className="text-xl font-black bw-text-main">{currentLeague?.name}</h2>
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600">
+                                👑 Creador: {currentLeague?.creatorName}
+                              </span>
+                            </div>
                             <p className="text-xs bw-text-muted">Código de Invitación: <strong className="text-emerald-600 font-mono">#{currentLeague?.code}</strong> • Toca un club para espiar su 11 o pagar cláusulas.</p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             <button onClick={copyInviteLinkForFriends} className="px-3 py-2 rounded-xl bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 text-xs font-black cursor-pointer">📲 Invitar Amigos</button>
-                            <button onClick={() => setLeagueActionModal({ type: 'reset', league: currentLeague })} className="px-3 py-2 rounded-xl bg-amber-500/15 text-amber-600 border border-amber-500/30 text-xs font-black cursor-pointer">🔄 Reiniciar</button>
-                            <button onClick={() => setLeagueActionModal({ type: 'delete', league: currentLeague })} className="px-3 py-2 rounded-xl bg-rose-500/15 text-rose-600 border border-rose-500/30 text-xs font-black cursor-pointer">🗑️</button>
+                            {isLeagueCreator && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setNewLeagueName(currentLeague.name);
+                                    setNewLeagueVisibility(currentLeague.visibility || 'private');
+                                    setNewLeagueMatchdayPot(currentLeague.matchdayPot || 25000000);
+                                    setNewLeagueMaxMembers(currentLeague.maxMembers || 12);
+                                    setShowLeagueSettingsModal(true);
+                                  }}
+                                  className="px-3 py-2 rounded-xl bg-sky-500/15 text-sky-600 border border-sky-500/30 text-xs font-black cursor-pointer"
+                                >
+                                  ⚙️ Ajustes
+                                </button>
+                                <button onClick={() => setLeagueActionModal({ type: 'reset', league: currentLeague })} className="px-3 py-2 rounded-xl bg-amber-500/15 text-amber-600 border border-amber-500/30 text-xs font-black cursor-pointer">🔄 Reiniciar</button>
+                                <button onClick={() => setLeagueActionModal({ type: 'delete', league: currentLeague })} className="px-3 py-2 rounded-xl bg-rose-500/15 text-rose-600 border border-rose-500/30 text-xs font-black cursor-pointer">🗑️</button>
+                              </>
+                            )}
                           </div>
                         </div>
 
@@ -3090,7 +3369,65 @@
                     </button>
                   )}
                 </div>
+
+                {isLeagueCreator && (
+                  <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <label className="block text-[10px] font-black uppercase bw-text-muted mb-1">
+                      👑 Herramienta del Creador: Actualizar URL de Foto de {selectedPlayerModal.name}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={customPhotoInput}
+                        onChange={e => setCustomPhotoInput(e.target.value)}
+                        placeholder="Pegar link de imagen (https://...)"
+                        className="flex-1 bw-input border rounded-xl px-2.5 py-1.5 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveCustomPlayerPhoto(selectedPlayerModal, customPhotoInput)}
+                        className="px-3 py-1.5 rounded-xl bg-sky-600 text-white text-[11px] font-black cursor-pointer"
+                      >
+                        Guardar Foto
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
+            </div>
+          )}
+
+          {showLeagueSettingsModal && isLeagueCreator && (
+            <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+              <form onSubmit={handleUpdateLeagueSettingsByCreator} className="bw-card border rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-black bw-text-main">⚙️ Ajustes de Liga (Solo Creador)</h3>
+                  <button type="button" onClick={() => setShowLeagueSettingsModal(false)} className="bw-text-muted hover:text-rose-500 cursor-pointer font-bold">✕</button>
+                </div>
+                <div>
+                  <label className="block text-xs font-extrabold bw-text-muted mb-1">Nombre de la Liga</label>
+                  <input type="text" required value={newLeagueName} onChange={e => setNewLeagueName(e.target.value)} className="w-full bw-input border rounded-xl px-3 py-2 text-sm font-bold" />
+                </div>
+                <div>
+                  <label className="block text-xs font-extrabold bw-text-muted mb-1">Visibilidad</label>
+                  <select value={newLeagueVisibility} onChange={e => setNewLeagueVisibility(e.target.value)} className="w-full bw-input border rounded-xl px-3 py-2 text-sm font-bold cursor-pointer">
+                    <option value="private">🔒 Privada (Con código)</option>
+                    <option value="public">🌐 Pública</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-extrabold bw-text-muted mb-1">Pozo por Jornada</label>
+                  <select value={newLeagueMatchdayPot} onChange={e => setNewLeagueMatchdayPot(Number(e.target.value))} className="w-full bw-input border rounded-xl px-3 py-2 text-sm font-bold cursor-pointer">
+                    <option value={15000000}>$15M COP</option>
+                    <option value={25000000}>$25M COP</option>
+                    <option value={40000000}>$40M COP</option>
+                  </select>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button type="button" onClick={() => setShowLeagueSettingsModal(false)} className="px-4 py-2 rounded-xl bw-subcard border text-xs font-bold cursor-pointer">Cancelar</button>
+                  <button type="submit" className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black cursor-pointer shadow">Guardar Cambios</button>
+                </div>
+              </form>
             </div>
           )}
 
